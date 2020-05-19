@@ -30,6 +30,8 @@ Rank the top three (derived) features you would select to predict (1) hand score
  - number of cards left in the deck
  - number of hit cards (cards that would fit into a meld)
  - measure of how close the melds in your hand are to being the same size
+ - number of cards that when added would allow you to shuffle your hand and reduce deadwood
+ - number of "combo"-hit cards
 
 
 
