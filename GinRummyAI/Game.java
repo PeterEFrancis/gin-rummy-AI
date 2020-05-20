@@ -34,7 +34,7 @@ public class Game {
 		Game.playVerbose = playVerbose;
 	}
 
-	public ArrayList<StringBuilder> errorFlag = new ArrayList<>();
+	public ArrayList<ArrayList<String>> errorFlag = new ArrayList<>();
 
 	/**
 	 * Create a GinRummyGame with two given players
@@ -43,7 +43,9 @@ public class Game {
 	 */
 	public Game(GinRummyPlayer player0, GinRummyPlayer player1) {
 		players = new GinRummyPlayer[] {player0, player1};
-		errorFlag.add(new StringBuilder("Error -- illegal play"));
+		ArrayList<String> line = new ArrayList<>();
+		line.add("Error -- Illegal Play");
+		errorFlag.add(line);
 	}
 
 
@@ -55,8 +57,8 @@ public class Game {
 	 * @return the winning player number 0 or 1
 	 */
 	@SuppressWarnings("unchecked")
-	public ArrayList<StringBuilder> getPlayData() {
-		ArrayList<StringBuilder> csvOutput = new ArrayList<StringBuilder>();
+	public ArrayList<ArrayList<String>> getPlayData() {
+		ArrayList<ArrayList<String>> csvOutput = new ArrayList<ArrayList<String>>();
 
 
 		int[] scores = new int[2];
@@ -65,16 +67,12 @@ public class Game {
 		hands.add(new ArrayList<Card>());
 		int startingPlayer = RANDOM.nextInt(2);
 
-		// TODO: assuming that we are player 0
-
-
 		while (scores[0] < GinRummyUtil.GOAL_SCORE && scores[1] < GinRummyUtil.GOAL_SCORE) { // while game not over
+
+			ArrayList<String> handData = new ArrayList<String>();
 
 			// hand winner
 			double handWinner = 0.5;
-			// TODO
-			// assuming that we are player 0
-			StringBuilder handSb = new StringBuilder();
 
 
 			int currentPlayer = startingPlayer;
@@ -103,11 +101,14 @@ public class Game {
 			int turnsTaken = 0;
 			ArrayList<ArrayList<Card>> knockMelds = null;
 
-			deck.addAll(hands.get(1));
-			handSb.append(scores[0]+ "," + scores[1] + "," + Utilities.deadwoodCount(hands.get(0)) + "," + Utilities.numOptions(new ArrayList<Card>(deck) , hands.get(0)) + ",");
-			deck.removeAll(hands.get(1));
-
 			while (deck.size() > 2) { // while the deck has more than two cards remaining, play round
+				// DATA
+				deck.addAll(hands.get(opponent));
+				handData.add(currentPlayer +  ","
+								+ scores[currentPlayer]+ "," + scores[opponent] + ","
+								+ Utilities.deadwoodCount(hands.get(currentPlayer)) + ","
+								+ Utilities.numHitCards(new ArrayList<Card>(deck) , hands.get(currentPlayer)) + ",");
+				deck.removeAll(hands.get(opponent));
 
 				// DRAW
 				boolean drawFaceUp = false;
@@ -118,21 +119,29 @@ public class Game {
 					if (playVerbose && !drawFaceUp && faceUpCard == firstFaceUpCard && turnsTaken < 2)
 						System.out.printf("Player %d declines %s.\n", currentPlayer, firstFaceUpCard);
 				}
+
 				if (!(!drawFaceUp && turnsTaken < 2 && faceUpCard == firstFaceUpCard)) { // continue with turn if not initial declined option
 					Card drawCard = drawFaceUp ? discards.pop() : deck.pop();
+
 					for (int i = 0; i < 2; i++)
 						players[i].reportDraw(currentPlayer, (i == currentPlayer || drawFaceUp) ? drawCard : null);
 					if (playVerbose)
 						System.out.printf("Player %d draws %s.\n", currentPlayer, drawCard);
 					hands.get(currentPlayer).add(drawCard);
 
+					// DATA
+					deck.addAll(hands.get(opponent));
+					handData.add(currentPlayer +  ","
+									+ scores[currentPlayer]+ "," + scores[opponent] + ","
+									+ Utilities.deadwoodCount(hands.get(currentPlayer)) + ","
+									+ Utilities.numHitCards(new ArrayList<Card>(deck) , hands.get(currentPlayer)) + ",");
+					deck.removeAll(hands.get(opponent));
+
 					// DISCARD
 					Card discardCard = players[currentPlayer].getDiscard();
 					if (!hands.get(currentPlayer).contains(discardCard) || discardCard == faceUpCard) {
 						if (playVerbose)
 							System.out.printf("Player %d discards %s illegally and forfeits.\n", currentPlayer, discardCard);
-						errorFlag.add(new StringBuilder("DISCARD"));
-						errorFlag.add(new StringBuilder("DISCARD"));
 						return errorFlag;
 					}
 					hands.get(currentPlayer).remove(discardCard);
@@ -156,6 +165,14 @@ public class Game {
 						}
 					}
 
+					// DATA
+					deck.addAll(hands.get(opponent));
+					handData.add(currentPlayer +  ","
+									+ scores[currentPlayer]+ "," + scores[opponent] + ","
+									+ Utilities.deadwoodCount(hands.get(currentPlayer)) + ","
+									+ Utilities.numHitCards(new ArrayList<Card>(deck) , hands.get(currentPlayer)) + ",");
+					deck.removeAll(hands.get(opponent));
+
 					// CHECK FOR KNOCK
 					knockMelds = players[currentPlayer].getFinalMelds();
 					if (knockMelds != null)
@@ -165,7 +182,17 @@ public class Game {
 				turnsTaken++;
 				currentPlayer = (currentPlayer == 0) ? 1 : 0;
 				opponent = (currentPlayer == 0) ? 1 : 0;
+
 			}
+
+			// DATA
+			deck.addAll(hands.get(opponent));
+			handData.add(currentPlayer +  ","
+							+ scores[currentPlayer] + ","
+							+ scores[opponent] + ","
+							+ Utilities.deadwoodCount(hands.get(currentPlayer)) + ","
+							+ Utilities.numHitCards(new ArrayList<Card>(deck), hands.get(currentPlayer)) + ",");
+			deck.removeAll(hands.get(opponent));
 
 
 			if (knockMelds != null) { // round didn't end due to non-knocking and 2 cards remaining in draw pile
@@ -178,7 +205,6 @@ public class Game {
 							|| (meldBitstring & unmelded) != meldBitstring) { // ... or meld not in hand
 						if (playVerbose)
 							System.out.printf("Player %d melds %s illegally and forfeits.\n", currentPlayer, knockMelds);
-						errorFlag.add(new StringBuilder("illegally knocking meld"));
 						return errorFlag;
 					}
 					unmelded &= ~meldBitstring; // remove successfully melded cards from
@@ -188,7 +214,6 @@ public class Game {
 				if (knockingDeadwood > GinRummyUtil.MAX_DEADWOOD) {
 					if (playVerbose)
 						System.out.printf("Player %d melds %s with greater than %d deadwood and forfeits.\n", currentPlayer, knockMelds, knockingDeadwood);
-					errorFlag.add(new StringBuilder("meld with greater than max deadwood"));
 					return errorFlag;
 				}
 
@@ -220,7 +245,6 @@ public class Game {
 							|| (meldBitstring & opponentUnmelded) != meldBitstring) { // ... or meld not in hand
 						if (playVerbose)
 							System.out.printf("Player %d melds %s illegally and forfeits.\n", opponent, opponentMelds);
-						errorFlag.add(new StringBuilder("illegal meld"));
 						return errorFlag;
 					}
 					opponentUnmelded &= ~meldBitstring; // remove successfully melded cards from
@@ -269,19 +293,19 @@ public class Game {
 				// compare deadwood and compute new scores
 				if (knockingDeadwood == 0) { // gin round win
 					scores[currentPlayer] += GinRummyUtil.GIN_BONUS + opponentDeadwood;
-					handWinner = opponent;
+					handWinner = currentPlayer;
 					if (playVerbose)
 						System.out.printf("Player %d scores the gin bonus of %d plus opponent deadwood %d for %d total points.\n", currentPlayer, GinRummyUtil.GIN_BONUS, opponentDeadwood, GinRummyUtil.GIN_BONUS + opponentDeadwood);
 				}
 				else if (knockingDeadwood < opponentDeadwood) { // non-gin round win
 					scores[currentPlayer] += opponentDeadwood - knockingDeadwood;
-					handWinner = opponent;
+					handWinner = currentPlayer;
 					if (playVerbose)
 						System.out.printf("Player %d scores the deadwood difference of %d.\n", currentPlayer, opponentDeadwood - knockingDeadwood);
 				}
 				else { // undercut win for opponent
 					scores[opponent] += GinRummyUtil.UNDERCUT_BONUS + knockingDeadwood - opponentDeadwood;
-					handWinner = currentPlayer;
+					handWinner = opponent;
 					if (playVerbose)
 						System.out.printf("Player %d undercuts and scores the undercut bonus of %d plus deadwood difference of %d for %d total points.\n", opponent, GinRummyUtil.UNDERCUT_BONUS, knockingDeadwood - opponentDeadwood, GinRummyUtil.UNDERCUT_BONUS + knockingDeadwood - opponentDeadwood);
 				}
@@ -292,7 +316,7 @@ public class Game {
 					System.out.println("The draw pile was reduced to two cards without knocking, so the hand is cancelled.");
 			}
 
-			handSb.append("" + handWinner);
+			handData.add("" + handWinner);
 
 			// score reporting
 			if (playVerbose)
@@ -302,16 +326,15 @@ public class Game {
 			}
 
 
-			//handSb.append("" + (scores[0] > scores[1] ? 1 : 0)); //flipped for csv
-			csvOutput.add(handSb);
+			csvOutput.add(handData);
 		}
 
 		if (playVerbose)
 			System.out.printf("Player %s wins.\n", scores[0] > scores[1] ? 0 : 1);
 
-
-		//returning 1 here means that player 0 won
-		csvOutput.add(new StringBuilder("" + (scores[0] >= GinRummyUtil.GOAL_SCORE ? 1 : 0))); // flipped for csv
+		ArrayList<String> gameWinnerLine = new ArrayList<>();
+		gameWinnerLine.add("" + (scores[0] >= GinRummyUtil.GOAL_SCORE ? 0 : 1));
+		csvOutput.add(gameWinnerLine);
 
 		return csvOutput;
 	}
