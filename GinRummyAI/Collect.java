@@ -4,9 +4,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-/*
+/**
  * Collect.java - Collects play data and stores it in a csv files
- */
+ **/
 public class Collect {
 
 	public static String fileName = "alpha-2.csv";

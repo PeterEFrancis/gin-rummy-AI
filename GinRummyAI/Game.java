@@ -144,6 +144,7 @@ public class Game {
 							System.out.printf("Player %d discards %s illegally and forfeits.\n", currentPlayer, discardCard);
 						return errorFlag;
 					}
+
 					hands.get(currentPlayer).remove(discardCard);
 					for (int i = 0; i < 2; i++)
 						players[i].reportDiscard(currentPlayer, discardCard);

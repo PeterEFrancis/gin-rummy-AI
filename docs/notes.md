@@ -60,6 +60,9 @@ Rank the top three (derived) features you would select to predict (1) hand score
 ### Questions
  - How can the player decide what meld to choose if one card is a part of two?
 
+
+
+
 ---
 
 For each state, put into the Hand object:
@@ -72,11 +75,9 @@ After game is over Output:
 
 `current_player_score`, `opponent_score`, `current_player_deadwood`, `current_player_num_hit_cards`, **`is_current_player_hand_winner`**, **`is_current_player_game_winner`**
 
-
-
-
-
 ---
+
+
 
 
 

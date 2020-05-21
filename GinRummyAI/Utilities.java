@@ -39,6 +39,11 @@ public class Utilities {
       testCards[9] = set5suits;
    }
 
+   /**
+   * returns the number of deadwood points in player's hand
+   * @param hand - cards in player's hand
+   * @return number of deadwood points in player's hand
+   **/
    public static int deadwoodCount(ArrayList<Card> hand) {
       ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(hand);
       if (bestMeldSets.isEmpty()) {
@@ -53,7 +58,13 @@ public class Utilities {
       return deadwood;
    }
 
-   // TODO: for now we will pass any cards even if we know the opponent has them
+   // TODO: for now we will pass any cards even if we know the opponent has them (maybe make opponentHand variable?)
+   /**
+   * returns the number of hit cards for the player's hand that can still be acquired
+   * @param possibleCards - all possible cards still available to the player
+   * @param hand - cards in player's hand
+   * @return the number of hit cards
+   **/
    public static int numHitCards(ArrayList<Card> possibleCards, ArrayList<Card> hand) {
       ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(hand);
       if (bestMeldSets.isEmpty()) {
@@ -70,7 +81,13 @@ public class Utilities {
       return hitCount;
    }
 
-   public static boolean isHitCard(Card c, ArrayList<Card> hand, ArrayList<Card> possibleCards) {
+   /**
+   * returns true if the card is a hit card for you the given hand
+   * @param c - card
+   * @param hand - cards in player's handData
+   * @return true if the card is a hit card for you the given hand; false otherwise
+   **/
+   public static boolean isHitCard(Card c, ArrayList<Card> hand) {
       ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(hand);
       if (bestMeldSets.isEmpty()) {
           bestMeldSets.add(new ArrayList<ArrayList<Card>>());
@@ -83,10 +100,24 @@ public class Utilities {
       }
       return false;
    }
+
+   /**
+   * returns true if the card is a hit card for you the given hand (forms meld from combo or adds to existing meld)
+   * @param combos - list of combos in hand
+   * @param melds - list of melds in hand
+   * @param c - card
+   * @return true if the card is a hit card for you the given hand; false otherwise
+   **/
    public static boolean isHitCard(ArrayList<ArrayList<Card>> combos, ArrayList<ArrayList<Card>> melds, Card c) {
       return meldFromCombo(c,combos) || canBeMeldedIn(c,melds);
    }
-   
+
+   /**
+   * returns true if the card adds to a combo to form a meld
+   * @param c - card
+   * @param combos - list of ocmbos in hand
+   * @return true if the card adds to a combo to form a meld
+   **/
    public static boolean meldFromCombo(Card c, ArrayList<ArrayList<Card>> combos) {
       ArrayList<Card> comboCards = new ArrayList<Card>();
       for (ArrayList<Card> combo : combos) {
@@ -102,8 +133,13 @@ public class Utilities {
       return false;
    }
 
-   // given combinations and melds in the hand, and possible cards in the deck
-   // returns the hit count of all combinations and melds
+   /**
+   * returns the hit count of all combinations and melds
+   * @param combos - combos in hand
+   * @param melds - melds in hand
+   * @param possibleCards - possible cards available to player
+   * @return hit count
+   **/
    public static int getHitCount(ArrayList<ArrayList<Card>> combos, ArrayList<ArrayList<Card>> melds, ArrayList<Card> possibleCards) {
 	  int hitCount = 0;
       for (Card c : possibleCards) {
@@ -114,6 +150,12 @@ public class Utilities {
       return hitCount;
    }
 
+   /**
+   * returns true if the card adds to an existing meld
+   * @param c - card
+   * @param melds - melds in hand
+   * @return true if the card adds to an existing meld
+   **/
    public static boolean canBeMeldedIn(Card c, ArrayList<ArrayList<Card>> melds) {
       for (ArrayList<Card> meld : melds) {
          int rank = c.getRank();
@@ -133,13 +175,19 @@ public class Utilities {
       return false;
    }
 
+   /**
+   * returns a list of combos given player's hands
+   * @param melds - melds in hand
+   * @param hand - list of cards in hand
+   * @return a list of combos given player's hands
+   **/
    public static ArrayList<ArrayList<Card>> getCombos(ArrayList<ArrayList<Card>> melds, ArrayList<Card> hand) {
-	  ArrayList<Card> otherCards = cardsNotInSet(melds,hand); //unmelded cards in hand
+	  ArrayList<Card> unmeldedCards = cardsNotInMeld(melds,hand); //unmelded cards in hand
       ArrayList<ArrayList<Card>> combos = new ArrayList<ArrayList<Card>>();
-      while (otherCards.size() > 0) { //iterates through unmelded cards in hand checking for combinations
-         Card c1 = otherCards.get(0);
-         for (int i = 1; i < otherCards.size(); i++) {
-            Card c2 = otherCards.get(i);
+      while (unmeldedCards.size() > 0) { //iterates through unmelded cards in hand checking for combinations
+         Card c1 = unmeldedCards.get(0);
+         for (int i = 1; i < unmeldedCards.size(); i++) {
+            Card c2 = unmeldedCards.get(i);
             if (c1.getRank() == c2.getRank() ||
                   c1.getSuit() == c2.getSuit() && Math.abs(c1.getRank() - c2.getRank()) == 1) {
                ArrayList<Card> combo = new ArrayList<Card>();
@@ -148,32 +196,40 @@ public class Utilities {
                combos.add(combo);
             }
          }
-         otherCards.remove(0);
+         unmeldedCards.remove(0);
       }
       return combos;
    }
 
-   public static ArrayList<Card> cardsNotInSet(ArrayList<ArrayList<Card>> set, ArrayList<Card> hand) {
-      ArrayList<Card> copy = new ArrayList<Card>();
+   /**
+   * returns the list of unmelded cards in given hand
+   * @param melds - list of melds in given hand
+   * @param hand - list of cards in hand
+   * @return the list of unmelded cards in given hand
+   **/
+   public static ArrayList<Card> cardsNotInMeld(ArrayList<ArrayList<Card>> melds, ArrayList<Card> hand) {
+      ArrayList<Card> unmeldedCards = new ArrayList<Card>();
       for (int i = 0; i < hand.size(); i++) {
-         copy.add(hand.get(i));
+         unmeldedCards.add(hand.get(i));
       }
-      for (ArrayList<Card> cards : set) {
+      for (ArrayList<Card> cards : melds) {
          for (Card c : cards) {
-            copy.remove(c);
+            unmeldedCards.remove(c);
          }
       }
-      return copy;
+      return unmeldedCards;
    }
 
-
+   /**
+   * returns the
+   **/
    public static int numOptions(ArrayList<Card> possibleCards, ArrayList<Card> hand) {
       int deadwood = deadwoodCount(hand);
       int opCount = 0;
       for (Card c : possibleCards) {
          hand.add(c);
-         int newdeadwood = deadwoodCount(hand);
-         if ((newdeadwood) < deadwood) {
+         int newDeadwood = deadwoodCount(hand);
+         if ((newDeadwood) < deadwood) {
             opCount++;
          }
          hand.remove(c);
@@ -197,6 +253,14 @@ public class Utilities {
    public static Card transformCard(Card c) {
       return Card.allCards[c.getId()];
    }
+
+   public static ArrayList<Card> getShuffle() {
+      ArrayList<Card> deck = new ArrayList<Card>();
+      for (int i = 0; i < 52; i++)
+         deck.add(Card.allCards[i]);
+         Collections.shuffle(deck);
+         return deck;
+      }
 
    public static void testUtils() {
 
