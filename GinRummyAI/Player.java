@@ -1,18 +1,15 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.Stack;
 
+public class Player implements GinRummyPlayer{
 
-
-public class Player implements GinRummyPlayer {
-	@SuppressWarnings("unused")
-
-	public final int TYPE = BlackBox.LINEAR;
-	public final int VERSION = BlackBox.ALPHA;
+	public int type;
+	public int version;
 
 	public int playerNum;
 	public int startingPlayerNum;
+	public int turn;
 
 	public int[] scores;
 
@@ -35,9 +32,17 @@ public class Player implements GinRummyPlayer {
 
 	int[] discardCases = new int[52];
 
+
+	public Player(int type, int version) {
+		this.type = type;
+		this.version = version;
+	}
+
+
 	@Override
 	public void startGame(int playerNum, int startingPlayerNum, Card[] hand) {
 		scores = new int[2];
+		turn = 0;
 		this.playerNum = playerNum;
 		this.startingPlayerNum = startingPlayerNum;
 		this.hand.clear();
@@ -58,20 +63,21 @@ public class Player implements GinRummyPlayer {
 
 	@Override
 	public boolean willDrawFaceUpCard(Card card) {
-      card = Utilities.transformCard(card);
+		card = OurUtilities.transformCard(card);
+
 		// @SuppressWarnings("unchecked")
 		if (discardedCards.isEmpty()) {
 			discardedCards.push(card);
 		}
 		hand.add(discardedCards.pop()); // draw face up
 
-		double max = 0;
+		double max = -10000000;
 		for (int i = 0; i < 10; i++) {
 			//discard the first card in the hand
 			Card discarded = hand.remove(0);
 			discardedCards.add(discarded);
 
-			double value = BlackBox.regFunction(this, VERSION, TYPE);
+			double value = BlackBox.regFunction(this);
 			if (value > max) {
 				max = value;
 				toDiscard = discarded;
@@ -84,17 +90,17 @@ public class Player implements GinRummyPlayer {
 		double average = 0;
 		for (int i = 0; i < unknownCards.size(); i++) {
 			//draw card
-			Card newCard = unknownCards.remove(i);
+			Card newCard = unknownCards.remove(0);
 			hand.add(newCard);
 
-			double localmax = -1;
+			double localmax = -10000000;
 			Card bestDiscard = null;
 			for (int j = 0; j < 11; j++) {
 				//discard the first card in the hand
 				Card discarded = hand.remove(0);
 				discardedCards.add(discarded);
 
-				double value = BlackBox.regFunction(this, VERSION, TYPE);
+				double value = BlackBox.regFunction(this);
 				if (value >= localmax) {
 					localmax = value;
 					bestDiscard = discarded;
@@ -102,6 +108,7 @@ public class Player implements GinRummyPlayer {
 				//undo the discard
 				hand.add(discardedCards.pop());
 			}
+			// System.out.println(newCard+" best discard: "+bestDiscard);
 			discardCases[newCard.getId()] = bestDiscard.getId();
 			average += localmax;
 
@@ -144,8 +151,8 @@ public class Player implements GinRummyPlayer {
 	@Override
 	public Card getDiscard() {
 		// TODO : Prevent future repeat of draw, discard pair?
-        Card temp = toDiscard;
-        toDiscard = null;
+		Card temp = toDiscard;
+		toDiscard = null;
 		return temp;
 	}
 
@@ -155,6 +162,7 @@ public class Player implements GinRummyPlayer {
 		// Ignore other player discards.  Remove from cards if playerNum is this player.
 		if (playerNum == this.playerNum) {
 			hand.remove(discardedCard);
+			turn++;
 		}
 		else {
 			opponentDiscards.add(discardedCard);
@@ -163,7 +171,7 @@ public class Player implements GinRummyPlayer {
 				unknownCards.remove(discardedCard);
 			}
 		}
-		discardedCards.add(discardedCard);
+		discardedCards.push(discardedCard);
 
 	}
 
@@ -199,24 +207,6 @@ public class Player implements GinRummyPlayer {
 	public void reportFinalHand(int playerNum, ArrayList<Card> hand) {
 		// Ignored by simple player, but could affect strategy of more complex player.
 	}
-
-	public double[] calculateFeatures() {
-
-		double current_player_score = scores[0];
-		double opponent_score = scores[1];
-		double current_player_deadwood = Utilities.deadwoodCount(hand);
-		double current_player_num_hit_cards = Utilities.numHitCards(unknownCards, hand);
-
-
-		return new double[] {current_player_score,
-				opponent_score,
-				current_player_deadwood,
-				current_player_num_hit_cards,
-				1};
-	}
-
-
-
 
 
 

@@ -1,7 +1,7 @@
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Arrays;
 
 public class BlackBox {
 
@@ -38,15 +38,18 @@ public class BlackBox {
 
 
 
-	static public double regFunction(Player player, int version, int type) {
-		if (type == LINEAR) {
-			ArrayList<Double> coefArr = coefficients.get(type).get(version);
-			double[] features = player.calculateFeatures();
+	static public double regFunction(Player player) {
+		if (player.type == LINEAR) {
+			ArrayList<Double> coefArr = coefficients.get(player.type).get(player.version);
+			double[] features = OurUtilities.calculateFeatures(player);
+
+			// System.out.println("features: " + Arrays.toString(features));
+
 			double linear_combination = 0;
-			for (int i = 0; i < features.length; i++) {
+			for (int i = 1; i < coefArr.size(); i++) {
 				linear_combination += coefArr.get(i) * features[i];
 			}
-			return linear_combination;
+			return linear_combination + coefArr.get(0);
 		}
 		else {
 			return -100000;

@@ -39,10 +39,10 @@ public class MaxHitsGinRummyPlayer implements GinRummyPlayer {
 		deck.removeAll(Arrays.asList(cards));
 
 		// //counting the hit cards
-		// this.hitCounts = Utilities.numHitCards(deck, cards);
+		// this.hitCounts = OurUtilities.numHitCards(deck, cards);
 		//
 		// //counting the deadwood points
-		// this.deadwoodPts = Utilities.deadwoodCount(cards);
+		// this.deadwoodPts = OurUtilities.deadwoodCount(cards);
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class MaxHitsGinRummyPlayer implements GinRummyPlayer {
 
 		// Ignore other player draws.  Add to cards if playerNum is this player.
 		if (playerNum == this.playerNum) {
-			drawnCard = Utilities.transformCard(drawnCard);
+			drawnCard = OurUtilities.transformCard(drawnCard);
 			cards.add(drawnCard);
 			this.drawnCard = drawnCard;
 			deck.remove(drawnCard);
@@ -96,7 +96,7 @@ public class MaxHitsGinRummyPlayer implements GinRummyPlayer {
 			remainingCards.remove(card);
 			ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(remainingCards);
 			int deadwood = bestMeldSets.isEmpty() ? GinRummyUtil.getDeadwoodPoints(remainingCards) : GinRummyUtil.getDeadwoodPoints(bestMeldSets.get(0), remainingCards);
-			int hitCount = Utilities.numHitCards(deck, remainingCards);
+			int hitCount = OurUtilities.numHitCards(deck, remainingCards);
 			// boolean meldable = false;
 			// for (ArrayList<ArrayList<Card>> melds : bestMeldSets) {
 			// 	if (GinRummyUtil.canBeMeldedIn(card, melds)) {
@@ -104,7 +104,7 @@ public class MaxHitsGinRummyPlayer implements GinRummyPlayer {
 			// 		break;
 			// 	}
 			// }
-			if (!Utilities.isHitCard(card,remainingCards,deck)) {
+			if (!OurUtilities.isHitCard(card,deck)) {
 				if (hitCount >= maxHitCards && deadwood <= minDeadwood) {
 					if (hitCount > maxHitCards) {
 						maxHitCards = hitCount;

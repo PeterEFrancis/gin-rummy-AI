@@ -298,13 +298,14 @@ public class GinRummyGame {
 	public static void main(String[] args) {
 		// Single verbose demonstration game
 		setPlayVerbose(true);
-		new GinRummyGame(new Player(), new SimpleGinRummyPlayer()).play();
-
+		GinRummyGame game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new SimpleGinRummyPlayer());
+		game.play();
+		
 		// Multiple non-verbose games
 		setPlayVerbose(false);
 		int numGames = 50;
 		int numP1Wins = 0;
-		GinRummyGame game = new GinRummyGame(new Player(), new SimpleGinRummyPlayer());
+		game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new SimpleGinRummyPlayer());
 		long startMs = System.currentTimeMillis();
 		for (int i = 0; i < numGames; i++) {
 			numP1Wins += game.play();

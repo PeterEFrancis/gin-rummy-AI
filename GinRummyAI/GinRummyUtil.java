@@ -34,7 +34,7 @@ Information about the GNU General Public License is available online at:
 To receive a copy of the GNU General Public License, write to the Free
 Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA.
-
+*
  */
 
 @SuppressWarnings("unchecked")
@@ -207,7 +207,7 @@ public class GinRummyUtil {
 		}
 		while (!queue.isEmpty()) {
 			HashSet<Integer> meldIndexSet = queue.poll();
-//			System.out.println(meldSet);
+			// System.out.println(meldSet);
 			if (closed.contains(meldIndexSet))
 				continue;
 			long meldSetBitstring = 0L;
