@@ -274,6 +274,7 @@ public class OurUtilities {
 
 
 	//__objectively__ the best function
+
 	public static ArrayList<ArrayList<ArrayList<Card>>> getBestHandOrganization(ArrayList<Card> hand) {
 		ArrayList<ArrayList<ArrayList<Card>>> meldSets = GinRummyUtil.cardsToBestMeldSets(hand);
 
@@ -346,7 +347,49 @@ public class OurUtilities {
 		return organization;
 	}
 
+	//pass organization[0]
+	public static int numSetMelds(ArrayList<ArrayList<Card>> melds) {
+		int numSets = 0;
+		for (ArrayList<Card> meld : melds) {
+			if (meld.get(0).getRank() == meld.get(1).getRank()) {
+				numSets++;
+			}
+		}
+		return numSets;
+	}
 
+	//pass organization[0]
+	public static int numRunMelds(ArrayList<ArrayList<Card>> melds) {
+		int numRuns = 0;
+		for (ArrayList<Card> meld : melds) {
+			if (meld.get(0).getRank() != meld.get(1).getRank()) {
+				numRuns++;
+			}
+		}
+		return numRuns;
+	}
+
+	//pass organization[1]
+	public static int numSetCombos(ArrayList<ArrayList<Card>> combos) {
+		int numSets = 0;
+		for (ArrayList<Card> combo : combos) {
+			if (combo.get(0).getRank() == combo.get(1).getRank()) {
+				numSets++;
+			}
+		}
+		return numSets;
+	}
+
+	//pass organization[1]
+	public static int numRunCombos(ArrayList<ArrayList<Card>> combos) {
+		int numRuns = 0;
+		for (ArrayList<Card> combo : combos) {
+			if (combo.get(0).getRank() != combo.get(1).getRank()) {
+				numRuns++;
+			}
+		}
+		return numRuns;
+	}
 
 	public static ArrayList<Card> removeCards(ArrayList<ArrayList<Card>> set, ArrayList<Card> cards) {
 		ArrayList<Card> returnCards = new ArrayList<Card>();
@@ -361,7 +404,15 @@ public class OurUtilities {
 		return returnCards;
 	}
 
-
+	public static int getPoints(ArrayList<ArrayList<Card>> set) {
+		int points = 0;
+		for (ArrayList<Card> subset : set) {
+			for (Card c : subset) {
+				points += getFaceValue(c);
+			}
+		}
+		return points;
+	}
 
 	public static void testUtils() {
 
@@ -414,9 +465,9 @@ public class OurUtilities {
 	**/
 	public static double[] calculateFeatures(Player player) {
 
-		double current_player_score = player.scores[0];
+		double current_player_score = player.scores[player.playerNum];
 
-		double opponent_score = player.scores[1];
+		double opponent_score = player.scores[1 - player.playerNum];
 
 		double current_player_deadwood = deadwoodCount(player.hand);
 
@@ -427,35 +478,16 @@ public class OurUtilities {
 		ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(player.hand);
 
 		double num_melds = organization.get(0).size();
-		double point_sum_melds = 0;
-		for (int i = 0; i < num_melds; i++) {
-			for (int j = 0; j < organization.get(0).get(i).size(); j++)
-				point_sum_melds += getFaceValue(organization.get(0).get(i).get(j));
-		}
+		double point_sum_melds = getPoints(organization.get(0));
 
 		double num_combos = organization.get(1).size();
+		double point_sum_combos = getPoints(organization.get(1));
 
-		double point_sum_combos = 0;
-		for (int i = 0; i < num_combos; i++) {
-			for (int j = 0; j < organization.get(1).get(i).size(); j++)
-				point_sum_melds += getFaceValue(organization.get(1).get(i).get(j));
-		}
+		double num_knock_cache = organization.get(2).get(0).size();
+		double point_sum_knock_cache = getPoints(organization.get(2));
 
-		double num_knock_cache = organization.get(2).size();
-
-		double point_sum_knock_cache = 0;
-		for (int i = 0; i < num_knock_cache; i++) {
-			for (int j = 0; j < organization.get(2).get(i).size(); j++)
-				point_sum_melds += getFaceValue(organization.get(2).get(i).get(j));
-		}
-
-		double num_load_cards = organization.get(3).size();
-
-		double point_sum_load_cards = 0;
-		for (int i = 0; i < num_load_cards; i++) {
-			for (int j = 0; j < organization.get(3).get(i).size(); j++)
-				point_sum_melds += getFaceValue(organization.get(3).get(i).get(j));
-		}
+		double num_load_cards = organization.get(3).get(0).size();
+		double point_sum_load_cards = getPoints(organization.get(3));
 
 		return new double[]{
 							current_player_score,

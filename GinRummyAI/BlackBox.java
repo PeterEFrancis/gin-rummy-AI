@@ -6,7 +6,7 @@ import java.util.Arrays;
 public class BlackBox {
 
 	static final String[] FILENAMES = new String[] {"linear_coef.csv", "logistic_coef.csv"};
-	static final int ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3;
+	static final int SIMPLE = -1, ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3;
 	static final int LINEAR = 0, LOGISTIC = 1;
 
 	static final int[] VERSIONS = {ALPHA};
@@ -37,8 +37,15 @@ public class BlackBox {
 	}
 
 
-
+	/**
+	 * returns the probability of winning the game
+	**/
 	static public double regFunction(Player player) {
+
+		if (player.version == SIMPLE) {
+			return OurUtilities.calculateFeatures(player)[2] / -10.0 + 5;
+		}
+
 		if (player.type == LINEAR) {
 			ArrayList<Double> coefArr = coefficients.get(player.type).get(player.version);
 			double[] features = OurUtilities.calculateFeatures(player);
@@ -46,8 +53,11 @@ public class BlackBox {
 			// System.out.println("features: " + Arrays.toString(features));
 
 			double linear_combination = 0;
+//			 System.out.println(coefArr);
+			// System.out.println(Arrays.toString(features));
+
 			for (int i = 1; i < coefArr.size(); i++) {
-				linear_combination += coefArr.get(i) * features[i];
+				linear_combination += coefArr.get(i) * features[i - 1];
 			}
 			return linear_combination + coefArr.get(0);
 		}

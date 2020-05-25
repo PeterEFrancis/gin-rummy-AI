@@ -64,3 +64,11 @@ Made `BlackBox` and `Player` class for data driven function generation developme
 ### Friday 5/21/20
 
 We fixed the alpha player from making most illegal moves. Added 9 features to `OurUtilities.calculateFeatures()` for progress on the Beta Player.
+
+
+
+## Week 2
+
+### Monday 5/25/20
+
+Alpha playing SimpleGinRummyPlayer for 1000 games: alpha (517), simple (483). Debugged data collection ("Debug-Monday").

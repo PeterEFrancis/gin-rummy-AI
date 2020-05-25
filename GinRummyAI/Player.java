@@ -11,7 +11,7 @@ public class Player implements GinRummyPlayer{
 	public int startingPlayerNum;
 	public int turn;
 
-	public int[] scores;
+	public int[] scores = new int[2];
 
 	public boolean opponentKnocked = false;
 
@@ -20,34 +20,46 @@ public class Player implements GinRummyPlayer{
 	public Card drawnCard;
 	public Card toDiscard;
 
-	public ArrayList<Card> hand = new ArrayList<Card>();
-	public ArrayList<Card> unknownCards = new ArrayList<Card>();
-	public ArrayList<Long> drawDiscardBitstrings = new ArrayList<Long>();
-	public ArrayList<Card> opponentDiscards = new ArrayList<Card>();
-	public ArrayList<Card> opponentRejectedCards = new ArrayList<Card>();
-	public ArrayList<Card> opponentAllHand = new ArrayList<Card>();   // opponent picked up cards throughout the startGame
-	public ArrayList<Card> opponentHand = new ArrayList<Card>();      // opponent picked up cards at the moment
+	public ArrayList<Card> hand;
+	public ArrayList<Card> unknownCards;
+	public ArrayList<Long> drawDiscardBitstrings;
+	public ArrayList<Card> opponentDiscards;
+	public ArrayList<Card> opponentRejectedCards;
+	public ArrayList<Card> opponentAllHand;   // opponent picked up cards throughout the startGame
+	public ArrayList<Card> opponentHand;      // opponent picked up cards at the moment
 
-	public Stack<Card> discardedCards = new Stack<Card>();
+	public Stack<Card> discardedCards;
 
 	int[] discardCases = new int[52];
 
 
-	public Player(int type, int version) {
-		this.type = type;
+	public Player(int version, int type) {
 		this.version = version;
+		this.type = type;
 	}
 
 
 	@Override
 	public void startGame(int playerNum, int startingPlayerNum, Card[] hand) {
-		scores = new int[2];
+
+		// Initialize all arrayLists
+		this.hand = new ArrayList<Card>();
+		unknownCards = new ArrayList<Card>();
+		drawDiscardBitstrings = new ArrayList<Long>();
+		opponentDiscards = new ArrayList<Card>();
+		opponentRejectedCards = new ArrayList<Card>();
+		opponentAllHand = new ArrayList<Card>();
+		opponentHand = new ArrayList<Card>();
+		discardedCards = new Stack<Card>();
+
+		drawnCard = null;
+		toDiscard = null;
+
 		turn = 0;
 		this.playerNum = playerNum;
 		this.startingPlayerNum = startingPlayerNum;
 		this.hand.clear();
 		Stack<Card> cards = Card.getShuffle(256);
-		unknownCards = new ArrayList<Card>();
 		unknownCards.addAll(cards);
 
 		for (Card card : hand) {
@@ -209,23 +221,10 @@ public class Player implements GinRummyPlayer{
 	}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	public void resetDiscarded() {
+		discardedCards.clear();
+		discardedCards = new Stack<Card>();
+	}
 
 
 

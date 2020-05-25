@@ -27,6 +27,8 @@ public class Collect {
 	 */
 	private static boolean playVerbose = false;
 
+	private static boolean errorVerbose = true;
+
 	/**
 	 * Two Gin Rummy players numbered according to their array index.
 	 */
@@ -39,6 +41,11 @@ public class Collect {
 	public static void setPlayVerbose(boolean playVerbose) {
 		Collect.playVerbose = playVerbose;
 	}
+
+	public static void setErrorVerbose(boolean errorVerbose) {
+		Collect.errorVerbose = errorVerbose;
+	}
+
 
 	public ArrayList<ArrayList<String>> errorFlag = new ArrayList<>();
 
@@ -111,9 +118,9 @@ public class Collect {
 				// DATA A
 				deck.addAll(hands.get(opponent));
 				double[] features = OurUtilities.calculateFeatures(players[currentPlayer]);
-				StringBuilder sb = new StringBuilder(currentPlayer + ",");
+				StringBuilder sb = new StringBuilder(currentPlayer + "");
 				for (int i = 0; i < features.length; i++)
-					sb.append(features[i] + ",");
+					sb.append("," + features[i]);
 				handData.add(sb.toString());
 				deck.removeAll(hands.get(opponent));
 				// DATA A
@@ -138,20 +145,20 @@ public class Collect {
 						System.out.printf("Player %d draws %s.\n", currentPlayer, drawCard);
 					hands.get(currentPlayer).add(drawCard);
 
-					// DATA B
-					deck.addAll(hands.get(opponent));
-					features = OurUtilities.calculateFeatures(players[currentPlayer]);
-					sb = new StringBuilder(currentPlayer + ",");
-					for (int i = 0; i < features.length; i++)
-						sb.append(features[i] + ",");
-					handData.add(sb.toString());
-					deck.removeAll(hands.get(opponent));
-					// DATA B
+					// // DATA B
+					// deck.addAll(hands.get(opponent));
+					// features = OurUtilities.calculateFeatures(players[currentPlayer]);
+					// sb = new StringBuilder(currentPlayer + "");
+					// for (int i = 0; i < features.length; i++)
+					// 	sb.append("," + features[i]);
+					// handData.add(sb.toString());
+					// deck.removeAll(hands.get(opponent));
+					// // DATA B
 
 					// DISCARD
 					Card discardCard = players[currentPlayer].getDiscard();
 					if (!hands.get(currentPlayer).contains(discardCard) || discardCard == faceUpCard) {
-						if (playVerbose)
+						if (playVerbose || errorVerbose)
 							System.out.printf("Player %d discards %s illegally and forfeits.\n", currentPlayer, discardCard);
 						return errorFlag;
 					}
@@ -177,15 +184,15 @@ public class Collect {
 						}
 					}
 
-					// DATA C
-					deck.addAll(hands.get(opponent));
-					features = OurUtilities.calculateFeatures(players[currentPlayer]);
-					sb = new StringBuilder(currentPlayer + ",");
-					for (int i = 0; i < features.length; i++)
-						sb.append(features[i] + ",");
-					handData.add(sb.toString());
-					deck.removeAll(hands.get(opponent));
-					// DATA C
+					// // DATA C
+					// deck.addAll(hands.get(opponent));
+					// features = OurUtilities.calculateFeatures(players[currentPlayer]);
+					// sb = new StringBuilder(currentPlayer + "");
+					// for (int i = 0; i < features.length; i++)
+					// 	sb.append("," + features[i]);
+					// handData.add(sb.toString());
+					// deck.removeAll(hands.get(opponent));
+					// // DATA C
 
 
 
@@ -204,9 +211,9 @@ public class Collect {
 			// DATA D
 			deck.addAll(hands.get(opponent));
 			double[] features = OurUtilities.calculateFeatures(players[currentPlayer]);
-			StringBuilder sb = new StringBuilder(currentPlayer + ",");
+			StringBuilder sb = new StringBuilder(currentPlayer + "");
 			for (int i = 0; i < features.length; i++)
-				sb.append(features[i] + ",");
+				sb.append("," + features[i]);
 			handData.add(sb.toString());
 			deck.removeAll(hands.get(opponent));
 			// DATA D
@@ -220,7 +227,7 @@ public class Collect {
 					long meldBitstring = GinRummyUtil.cardsToBitstring(meld);
 					if (!GinRummyUtil.getAllMeldBitstrings().contains(meldBitstring) // non-meld ...
 							|| (meldBitstring & unmelded) != meldBitstring) { // ... or meld not in hand
-						if (playVerbose)
+						if (playVerbose || errorVerbose)
 							System.out.printf("Player %d melds %s illegally and forfeits.\n", currentPlayer, knockMelds);
 						return errorFlag;
 					}
@@ -229,7 +236,7 @@ public class Collect {
 				// compute knocking deadwood
 				int knockingDeadwood = GinRummyUtil.getDeadwoodPoints(knockMelds, hands.get(currentPlayer));
 				if (knockingDeadwood > GinRummyUtil.MAX_DEADWOOD) {
-					if (playVerbose)
+					if (playVerbose || errorVerbose)
 						System.out.printf("Player %d melds %s with greater than %d deadwood and forfeits.\n", currentPlayer, knockMelds, knockingDeadwood);
 					return errorFlag;
 				}
@@ -260,7 +267,7 @@ public class Collect {
 					long meldBitstring = GinRummyUtil.cardsToBitstring(meld);
 					if (!GinRummyUtil.getAllMeldBitstrings().contains(meldBitstring) // non-meld ...
 							|| (meldBitstring & opponentUnmelded) != meldBitstring) { // ... or meld not in hand
-						if (playVerbose)
+						if (playVerbose || errorVerbose)
 							System.out.printf("Player %d melds %s illegally and forfeits.\n", opponent, opponentMelds);
 						return errorFlag;
 					}
@@ -359,7 +366,7 @@ public class Collect {
 
 
 
-	public static String fileName = "beta-0.csv";
+	public static String fileName = "beta-1.csv";
 	public static File file = new File(fileName);
 	public static PrintWriter pw;
 	static {
@@ -381,6 +388,7 @@ public class Collect {
 		pw.print("opponent_score,");
 		pw.print("current_player_deadwood,");
 		pw.print("current_player_num_hit_cards,");
+		// Alpha to here
 		pw.print("num_melds,");
 		pw.print("point_sum_melds,");
 		pw.print("num_combos,");
@@ -389,15 +397,16 @@ public class Collect {
 		pw.print("point_sum_knock_cache,");
 		pw.print("num_load_cards,");
 		pw.print("point_sum_load_cards,");
-		pw.print("turns_taken,\n");
+		pw.print("turns_taken\n");
+		// Beta to here
 		// put new features directly above me
 
 
 
-		for (int i = 0; i < 1; i++) {
-			setPlayVerbose(true);
+		for (int i = 0; i < 50; i++) {
+			setPlayVerbose(false);
 
-			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
+			Collect game = new Collect(new Player(BlackBox.SIMPLE, BlackBox.LINEAR), new Player(BlackBox.SIMPLE, BlackBox.LINEAR));
 
 			ArrayList<ArrayList<String>> csvOutput = game.getPlayData();
 
@@ -405,16 +414,19 @@ public class Collect {
 
 			csvOutput.remove(csvOutput.size() - 1);
 
+
 			for (ArrayList<String> handData : csvOutput) {
 				double handWinner = Double.parseDouble(handData.get(handData.size() - 1).toString());
 				handData.remove(handData.size() - 1);
 				for (String data : handData) {
 					double currentPlayer = Double.parseDouble(Arrays.asList(data.split(",")).get(0));
+					String calculatedFeatures = data.substring(2);
 					if (handWinner != 0.5) {
-						pw.println( currentPlayer
+
+						pw.println( currentPlayer + ","
 						 		  + ((currentPlayer == handWinner) ? "1" : "0") + ","
-								  + ((currentPlayer == gameWinner) ? 1 : 0)
-								  + data);
+								  + ((currentPlayer == gameWinner) ? "1" : "0") + ","
+								  + calculatedFeatures); // SOB!
 					}
 
 				}
