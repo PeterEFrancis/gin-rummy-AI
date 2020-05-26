@@ -30,14 +30,49 @@ Rank the top three (derived) features you would select to predict (1) hand score
 - number of cards that when added would allow you to shuffle your hand and reduce deadwood
 - number of "combo"-hit cards
 
+### Alpha Features
+ - **current player score**
+ - **opponent score**
+ - **deadwood**
+ - **number of hit cards**
+
+### Beta Features
+- current player score
+- opponent score
+- deadwood
+- number of hit cards
+- **number of melds**
+- **point sum of melds**
+- **number of combos**
+- **point sum of combos**
+- **size of knock cache**
+- **point sum of knock cache**
+- **number of load cards**
+- **point sum of load cards**
+- **turns taken**
 
 
+### Gamma Features
+-
 
-### Best features
 
-1. number of hit cards
-2. player scores
-3. deadwood points
+### Features not implemented (since beta)
+- face value of intended lay-off card
+- number of hits needed to Gin
+- number of cards left in the stock (slightly different from turn total)
+- usefulness measure of the cards that we know are in the opponent's hand
+- number of cards that the opponent has drawn face up
+- point difference between the two players (already know both scores)
+- for each card:
+    - the number of adjacent cards in the opponent's hand
+    - probability that the card is in the other person's hand
+    - probability that the opponent desires that card
+- net points
+- measure of how close the melds in your hand are to being the same size
+- number of cards that when added would allow you to shuffle your hand and reduce deadwood
+- number of "combo"-hit cards
+- number of set/run melds/combos
+
 
 
 ##### Our Function

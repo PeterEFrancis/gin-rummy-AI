@@ -15,7 +15,8 @@ public class Collect {
 	/**
 	 * Random number generator
 	 */
-	private static final Random RANDOM = new Random();
+	private Random RANDOM;
+	private long seed;
 
 	/**
 	 * Hand size (before and after turn). After draw and before discard there is one extra card.
@@ -42,25 +43,24 @@ public class Collect {
 		Collect.playVerbose = playVerbose;
 	}
 
-	public static void setErrorVerbose(boolean errorVerbose) {
-		Collect.errorVerbose = errorVerbose;
-	}
-
-
-	public ArrayList<ArrayList<String>> errorFlag = new ArrayList<>();
-
 	/**
 	 * Create a GinRummyGame with two given players
 	 * @param player0 Player 0
 	 * @param player1 Player 1
 	 */
+	public Collect(Player player0, Player player1, long seed) {
+		players = new Player[] {player0, player1};
+		ArrayList<String> line = new ArrayList<>();
+		this.seed = seed;
+		RANDOM = new Random(seed);
+	}
+
 	public Collect(Player player0, Player player1) {
 		players = new Player[] {player0, player1};
 		ArrayList<String> line = new ArrayList<>();
-		line.add("Error -- Illegal Play");
-		errorFlag.add(line);
+		this.seed = 0;
+		RANDOM = new Random();
 	}
-
 
 	/**
 	 * Play a game of Gin Rummy and return the winning player number 0 or 1.
@@ -117,11 +117,26 @@ public class Collect {
 
 				// DATA A
 				deck.addAll(hands.get(opponent));
+				// ArrayList<Card> uc = players[currentPlayer].unknownCards;
+				// players[currentPlayer].unknownCards = deck;
+
 				double[] features = OurUtilities.calculateFeatures(players[currentPlayer]);
+				// ArrayList<ArrayList<ArrayList<Card>>> best = OurUtilities.getBestHandOrganization(players[currentPlayer].hand);
+				// System.out.println("melds " + currentPlayer + ": " + best.get(0));
+				// System.out.println("combos " + currentPlayer + ": " + best.get(1));
+				// System.out.println("knockCash " + currentPlayer + ": " + best.get(2));
+				// System.out.println("load Cards " + currentPlayer + ": " + best.get(3));
+				// System.out.println("hand " + currentPlayer + " : " + players[currentPlayer].hand);
+				// System.out.println("to discard: " + players[currentPlayer].toDiscard);
+				// System.out.println("discarded: " + players[currentPlayer].discardedCards);
+				// System.out.println("unknown " + currentPlayer + " : " + players[currentPlayer].unknownCards);
+				// System.out.println("features: " + Arrays.toString(features));
 				StringBuilder sb = new StringBuilder(currentPlayer + "");
 				for (int i = 0; i < features.length; i++)
 					sb.append("," + features[i]);
 				handData.add(sb.toString());
+
+				// players[currentPlayer].unknownCards = uc;
 				deck.removeAll(hands.get(opponent));
 				// DATA A
 
@@ -130,11 +145,40 @@ public class Collect {
 				boolean drawFaceUp = false;
 				Card faceUpCard = discards.peek();
 				// offer draw face-up iff not 3rd turn with first face up card (decline automatically in that case)
-				if (!(turnsTaken == 3 && faceUpCard == firstFaceUpCard)) { // both players declined and 1st player must draw face down
+
+
+
+				// DATA B
+				deck.addAll(hands.get(opponent));
+				features = OurUtilities.calculateFeatures(players[currentPlayer]);
+				best = OurUtilities.getBestHandOrganization(players[currentPlayer].hand);
+				sb = new StringBuilder(currentPlayer + "");
+				for (int i = 0; i < features.length; i++)
+					sb.append("," + features[i]);
+				handData.add(sb.toString());
+				deck.removeAll(hands.get(opponent));
+				// DATA B
+
+
+
+				if (!(turnsTaken == 3 && faceUpCard == firstFaceUpCard && deck.size() == 31)) { // both players declined and 1st player must draw face down
 					drawFaceUp = players[currentPlayer].willDrawFaceUpCard(faceUpCard);
 					if (playVerbose && !drawFaceUp && faceUpCard == firstFaceUpCard && turnsTaken < 2)
 						System.out.printf("Player %d declines %s.\n", currentPlayer, firstFaceUpCard);
 				}
+
+
+				// DATA C
+				deck.addAll(hands.get(opponent));
+				features = OurUtilities.calculateFeatures(players[currentPlayer]);
+				best = OurUtilities.getBestHandOrganization(players[currentPlayer].hand);
+				sb = new StringBuilder(currentPlayer + "");
+				for (int i = 0; i < features.length; i++)
+					sb.append("," + features[i]);
+				handData.add(sb.toString());
+				deck.removeAll(hands.get(opponent));
+				// DATA C
+
 
 				if (!(!drawFaceUp && turnsTaken < 2 && faceUpCard == firstFaceUpCard)) { // continue with turn if not initial declined option
 					Card drawCard = drawFaceUp ? discards.pop() : deck.pop();
@@ -159,8 +203,9 @@ public class Collect {
 					Card discardCard = players[currentPlayer].getDiscard();
 					if (!hands.get(currentPlayer).contains(discardCard) || discardCard == faceUpCard) {
 						if (playVerbose || errorVerbose)
-							System.out.printf("Player %d discards %s illegally and forfeits.\n", currentPlayer, discardCard);
-						return errorFlag;
+							System.err.printf("Player %d discards %s illegally and forfeits.\n", currentPlayer, discardCard);
+							System.err.println("seed: " + seed);
+							return null;
 					}
 
 					hands.get(currentPlayer).remove(discardCard);
@@ -228,8 +273,9 @@ public class Collect {
 					if (!GinRummyUtil.getAllMeldBitstrings().contains(meldBitstring) // non-meld ...
 							|| (meldBitstring & unmelded) != meldBitstring) { // ... or meld not in hand
 						if (playVerbose || errorVerbose)
-							System.out.printf("Player %d melds %s illegally and forfeits.\n", currentPlayer, knockMelds);
-						return errorFlag;
+							System.err.printf("Player %d melds %s illegally and forfeits.\n", currentPlayer, knockMelds);
+							System.err.println("seed: " + seed);
+							return null;
 					}
 					unmelded &= ~meldBitstring; // remove successfully melded cards from
 				}
@@ -237,8 +283,9 @@ public class Collect {
 				int knockingDeadwood = GinRummyUtil.getDeadwoodPoints(knockMelds, hands.get(currentPlayer));
 				if (knockingDeadwood > GinRummyUtil.MAX_DEADWOOD) {
 					if (playVerbose || errorVerbose)
-						System.out.printf("Player %d melds %s with greater than %d deadwood and forfeits.\n", currentPlayer, knockMelds, knockingDeadwood);
-					return errorFlag;
+						System.err.printf("Player %d melds %s with greater than %d deadwood and forfeits.\n", currentPlayer, knockMelds, knockingDeadwood);
+						System.err.println("seed: " + seed);
+						return null;
 				}
 
 				ArrayList<ArrayList<Card>> meldsCopy = new ArrayList<ArrayList<Card>>();
@@ -268,8 +315,9 @@ public class Collect {
 					if (!GinRummyUtil.getAllMeldBitstrings().contains(meldBitstring) // non-meld ...
 							|| (meldBitstring & opponentUnmelded) != meldBitstring) { // ... or meld not in hand
 						if (playVerbose || errorVerbose)
-							System.out.printf("Player %d melds %s illegally and forfeits.\n", opponent, opponentMelds);
-						return errorFlag;
+							System.err.printf("Player %d melds %s illegally and forfeits.\n", opponent, opponentMelds);
+							System.err.println("seed: " + seed);
+							return null;
 					}
 					opponentUnmelded &= ~meldBitstring; // remove successfully melded cards from
 				}
@@ -366,7 +414,7 @@ public class Collect {
 
 
 
-	public static String fileName = "beta-1.csv";
+	public static String fileName = "beta-6.csv";
 	public static File file = new File(fileName);
 	public static PrintWriter pw;
 	static {
@@ -403,10 +451,10 @@ public class Collect {
 
 
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 1; i++) {
 			setPlayVerbose(false);
 
-			Collect game = new Collect(new Player(BlackBox.SIMPLE, BlackBox.LINEAR), new Player(BlackBox.SIMPLE, BlackBox.LINEAR));
+			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR), 0);
 
 			ArrayList<ArrayList<String>> csvOutput = game.getPlayData();
 

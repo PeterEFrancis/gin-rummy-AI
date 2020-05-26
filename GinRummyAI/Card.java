@@ -1,5 +1,6 @@
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Stack;
 
 
@@ -147,9 +148,10 @@ public class Card {
 		Stack<Card> deck = new Stack<Card>();
 		for (int i = 0; i < NUM_CARDS; i++)
 			deck.push(Card.allCards[i]);
-		Collections.shuffle(deck);
+		Collections.shuffle(deck, new Random(seed)); // we added the seed
 		return deck;
 	}
+
 
 	/**
 	 * rank index (zero-based index to rankNames)

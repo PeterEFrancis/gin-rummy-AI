@@ -72,3 +72,16 @@ We fixed the alpha player from making most illegal moves. Added 9 features to `O
 ### Monday 5/25/20
 
 Alpha playing SimpleGinRummyPlayer for 1000 games: alpha (517), simple (483). Debugged data collection ("Debug-Monday").
+
+
+### Tuesday
+
+Debugged ("Debug-Tuesday"). Found 2 errors in provided code, found some errors in our code as well.
+> seed 268 (alpha versus alpha) -- exception to 3 turn first face up rule
+
+> card getShuffle() needs to use the seed
+> SimpleGinRummyPlayer needs seed as well if we are using seeds
+
+Started work on working backwards towards the SimpleGinRummyPlayer so that we could find where in our process we deviated from good data. Calculated distributions and plotted them. Did a lot of comparisons between the Alpha player and the SimpleGinRummyPlayer to determine how we weren't able to replicate our earlier data.
+
+We think that the issue lies in how we had calculated `num_hit_cards` before and after we factored out calculating features to `OurUtilities`.

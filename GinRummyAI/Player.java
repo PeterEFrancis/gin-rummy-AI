@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Stack;
 
@@ -59,8 +60,7 @@ public class Player implements GinRummyPlayer{
 		this.playerNum = playerNum;
 		this.startingPlayerNum = startingPlayerNum;
 		this.hand.clear();
-		Stack<Card> cards = Card.getShuffle(256);
-		unknownCards.addAll(cards);
+		unknownCards.addAll(Arrays.asList(Card.allCards));
 
 		for (Card card : hand) {
 			this.hand.add(card);
@@ -75,11 +75,13 @@ public class Player implements GinRummyPlayer{
 
 	@Override
 	public boolean willDrawFaceUpCard(Card card) {
+		// System.out.println("----------------------------------------------v");
 		card = OurUtilities.transformCard(card);
 
 		// @SuppressWarnings("unchecked")
 		if (discardedCards.isEmpty()) {
 			discardedCards.push(card);
+			unknownCards.remove(card);
 		}
 		hand.add(discardedCards.pop()); // draw face up
 
@@ -94,21 +96,21 @@ public class Player implements GinRummyPlayer{
 				max = value;
 				toDiscard = discarded;
 			}
-			//undo the discard
+			// undo the discard
 			hand.add(discardedCards.pop());
 		}
 		discardedCards.push(hand.remove(0)); //undoes the draw
 
 		double average = 0;
 		for (int i = 0; i < unknownCards.size(); i++) {
-			//draw card
+			// draw card
 			Card newCard = unknownCards.remove(0);
 			hand.add(newCard);
 
 			double localmax = -10000000;
 			Card bestDiscard = null;
 			for (int j = 0; j < 11; j++) {
-				//discard the first card in the hand
+				// discard the first card in the hand
 				Card discarded = hand.remove(0);
 				discardedCards.add(discarded);
 
@@ -117,23 +119,27 @@ public class Player implements GinRummyPlayer{
 					localmax = value;
 					bestDiscard = discarded;
 				}
-				//undo the discard
+				// undo the discard
 				hand.add(discardedCards.pop());
 			}
-			// System.out.println(newCard+" best discard: "+bestDiscard);
+			// System.out.println(newCard + " best discard: " + bestDiscard);
 			discardCases[newCard.getId()] = bestDiscard.getId();
 			average += localmax;
 
-			//undo the draw
+			// undo the draw
 			hand.remove(newCard);
 			unknownCards.add(newCard);
 		}
+		// System.out.println("in willDra...: " + Arrays.toString(discardCases));
 		average /= unknownCards.size();
-
 		if (average >= max) {
 			toDiscard = null;
+			// System.out.println("Doesn't draw face up card");
+			// System.out.println("----------------------------------------------^");
 			return false;
 		}
+		// System.out.println("Draws face up card");
+		// System.out.println("----------------------------------------------^");
 		return true;
 
 	}
@@ -145,13 +151,23 @@ public class Player implements GinRummyPlayer{
 		if (playerNum == this.playerNum) {
 			hand.add(drawnCard);
 			this.drawnCard = drawnCard;
-			if (toDiscard == null)
+			if (toDiscard == null) {
+				// System.out.println("in reportDraw: " + Arrays.toString(discardCases));
 				toDiscard = Card.getCard(discardCases[drawnCard.getId()]);
+				// System.out.println("to discard (from player): " + toDiscard);
+				unknownCards.remove(drawnCard);
+			}
+			else {
+				discardedCards.pop();
+			}
 		}
 		else {
 			if (drawnCard != null) { // picked up face up card (known opponent hand should consist of our discards)
 				opponentAllHand.add(drawnCard);
 				opponentHand.add(drawnCard);
+				if (!discardedCards.isEmpty()) {
+					discardedCards.pop();
+				}
 			}
 			else {
 				opponentRejectedCards.add(discardedCards.peek());

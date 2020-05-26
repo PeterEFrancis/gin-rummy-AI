@@ -110,7 +110,7 @@ public class GinRummyGame {
 				boolean drawFaceUp = false;
 				Card faceUpCard = discards.peek();
 				// offer draw face-up iff not 3rd turn with first face up card (decline automatically in that case)
-				if (!(turnsTaken == 3 && faceUpCard == firstFaceUpCard)) { // both players declined and 1st player must draw face down
+				if (!(turnsTaken == 3 && faceUpCard == firstFaceUpCard && deck.size() == 31)) { // both players declined and 1st player must draw face down
 					drawFaceUp = players[currentPlayer].willDrawFaceUpCard(faceUpCard);
 					if (playVerbose && !drawFaceUp && faceUpCard == firstFaceUpCard && turnsTaken < 2)
 						System.out.printf("Player %d declines %s.\n", currentPlayer, firstFaceUpCard);
@@ -298,21 +298,21 @@ public class GinRummyGame {
 	public static void main(String[] args) {
 		// Single verbose demonstration game
 		setPlayVerbose(true);
-		GinRummyGame game = new GinRummyGame(new Player(BlackBox.BETA, BlackBox.LINEAR), new SimpleGinRummyPlayer());
+		GinRummyGame game = new GinRummyGame(new SimpleGinRummyPlayer(), new SimpleGinRummyPlayer());
 		game.play();
 
 		System.out.println("-----------");
 
 		// Multiple non-verbose games
 		setPlayVerbose(false);
-		int numGames = 50;
+		int numGames = 100;
 		int numP1Wins = 0;
-		game = new GinRummyGame(new Player(BlackBox.BETA, BlackBox.LINEAR), new SimpleGinRummyPlayer());
+		game = new GinRummyGame(new Player(BlackBox.BETA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
 		long startMs = System.currentTimeMillis();
 		for (int i = 0; i < numGames; i++) {
-//			if (i % 10 == 0) {
-//				System.out.printf("Games Won: P0:%d, P1:%d.\n", i + 1 - numP1Wins, numP1Wins);
-//			}
+			if (i % 10 == 0) {
+				System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
+			}
 			numP1Wins += game.play();
 		}
 		long totalMs = System.currentTimeMillis() - startMs;

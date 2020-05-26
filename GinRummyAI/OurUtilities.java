@@ -1,6 +1,10 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Stack;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Stack;
 
 public class OurUtilities {
 
@@ -221,7 +225,7 @@ public class OurUtilities {
 	}
 
 	/**
-	 * returns the
+	 * unfinished; returns - ?
 	 **/
 	public static int numOptions(ArrayList<Card> possibleCards, ArrayList<Card> hand) {
 		int deadwood = deadwoodCount(hand);
@@ -237,6 +241,11 @@ public class OurUtilities {
 		return opCount;
 	}
 
+	/**
+	* converts a card to its corresponding bitstring
+* @param c - card
+	*
+	**/
 	public static long cardToBitstring(Card c) {
 		return 1L << c.getId();
 	}
@@ -441,6 +450,10 @@ public class OurUtilities {
 			System.out.println("\tBest Combos: " + organization.get(1));
 			System.out.println("\tBest KnockCash$: " + organization.get(2));
 			System.out.println("\tBest Loads: " + organization.get(3));
+			//System.out.println("\tNumber of set melds: " + numSetMelds(organization.get(0)));
+			//System.out.println("\tNumber of run melds: " + numRunMelds(organization.get(0)));
+			//System.out.println("\tNumber of set combos: " + numSetCombos(organization.get(1)));
+			//System.out.println("\tNumber of run combos: " + numRunCombos(organization.get(1)));
 
 			ArrayList<Card> deck = new ArrayList<>();
 			for (int i = 0; i < 52; i++) {
@@ -489,7 +502,7 @@ public class OurUtilities {
 		double num_load_cards = organization.get(3).get(0).size();
 		double point_sum_load_cards = getPoints(organization.get(3));
 
-		return new double[]{
+		return new double[] {
 							current_player_score,
 							opponent_score,
 							current_player_deadwood,
@@ -508,36 +521,62 @@ public class OurUtilities {
 
 
 
-
 	public static void main(String[] args) {
 
-		testUtils();
+//		testUtils();
 
-		// Guesses:
-		// taylor - 5 (integer value)
-		// peter  - 6
-		// ryz - 7 (expectation value)
-		// hoang  - 8
+		// find distributions
 
+		int[] deadwoodCounter = new int[98 + 1];
+		int[] hitCardCounter = new int[18 + 1];
+		int[] numMeldCounter = new int[3 + 1];
+		int[] pointSumMeldCounter = new int[100 + 1];
+		int[] numCombosCounter = new int[50 + 1];
+		int[] pointSumCombosCounter = new int[250 + 1];
+		int[] numKnockCacheCounter = new int[5 + 1];
+		int[] pointSumKnockCacheCounter = new int[10 + 1];
+		int[] numLoadCardsCounter = new int[8 + 1];
+		int[] pointSumLoadCardsCounter = new int[100 + 1];
 
-		// find average number of hit cards of a hand
-		int NUMBER_OF_HANDS = 1000;
-		double average = 0;
+		int[][] counts = {deadwoodCounter, hitCardCounter, numMeldCounter,
+			pointSumMeldCounter, numCombosCounter, pointSumCombosCounter,
+			numKnockCacheCounter, pointSumKnockCacheCounter, numLoadCardsCounter,
+			pointSumLoadCardsCounter};
+
+		int NUMBER_OF_HANDS = 100000;
 		for (int i = 0; i < NUMBER_OF_HANDS; i++) {
 			Stack<Card> deck = Card.getShuffle(256);
 			ArrayList<Card> hand = new ArrayList<>();
 			for (int j = 0; j < 10; j++) {
 				hand.add(deck.pop());
 			}
-			int numHitCards = numHitCards(new ArrayList<Card>(deck), hand);
-			average += numHitCards;
+			deadwoodCounter[deadwoodCount(hand)]++;
+			hitCardCounter[numHitCards(new ArrayList<Card>(deck), hand)]++;
+			ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(hand);
+			numMeldCounter[organization.get(0).size()]++;
+			pointSumMeldCounter[getPoints(organization.get(0))]++;
+			numCombosCounter[organization.get(1).size()]++;
+			pointSumCombosCounter[getPoints(organization.get(1))]++;
+			numKnockCacheCounter[organization.get(2).get(0).size()]++;
+			pointSumKnockCacheCounter[getPoints(organization.get(2))]++;
+			numLoadCardsCounter[organization.get(3).get(0).size()]++;
+			pointSumLoadCardsCounter[getPoints(organization.get(3))]++;
+
 		}
-		average /= NUMBER_OF_HANDS;
 
-
-		System.out.println("\n\nAverage number of hit cards per hand: " + average);
-
-
-
+		String fileName = "distributions-0.txt";
+		File file = new File(fileName);
+		PrintWriter pw;
+		try {
+			pw = new PrintWriter(file);
+			for (int[] map : counts) {
+				String mapString = Arrays.toString(map);
+				pw.println(mapString.substring(1, mapString.length() - 1));
+			}
+			pw.close();
+		} catch (FileNotFoundException e) {
+			System.err.println("No file.");
+		}
+		System.out.println("done.");
 	}
 }
