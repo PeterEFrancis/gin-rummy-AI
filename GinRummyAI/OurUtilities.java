@@ -8,41 +8,6 @@ import java.util.Stack;
 
 public class OurUtilities {
 
-	// AC 2C 3C AD 2D 3D AH 2H 3H 2S  (all melded, several optimal meld combinations)
-	public static int[] set1ranks = {0,0,0,1,1,1,1,2,2,2};
-	public static int[] set1suits = {0,1,2,0,1,2,3,0,1,2};
-
-	// 2C 3C 4C 5H 6H 7H 8C 8D 8H KC (2 run, 1 set, 1 deadwood card)
-	public static int[] set2ranks = {1,2,3,4,5,6,7,7,7,12};
-	public static int[] set2suits = {0,0,0,2,2,2,0,1,2,0};
-
-	// AC 2D 3H 4S 6C 6D 6H 7C 10H 10S (triangle shape, 1 combination)
-	public static int[] set3ranks = {0,1,2,3,5,5,5,6,9,9};
-	public static int[] set3suits = {0,1,2,3,0,1,2,0,2,3};
-
-	// AC 2D 3H 4S 5C 6D 7H 8S 9C 10D (no hit cards)
-	public static int[] set4ranks = {0,1,2,3,4,5,6,7,8,9};
-	public static int[] set4suits = {0,1,2,3,0,1,2,3,0,1};
-
-	// 2C 3C 2H 3H 7C 8C 7H 8H KC KH (18 hit cards)
-	public static int[] set5ranks = {1,2,1,2,6,7,6,7,12,12};
-	public static int[] set5suits = {0,0,1,1,0,0,1,1,0,1};
-
-	public static int[][] testCards;
-	static {
-		testCards = new int[10][10];
-		testCards[0] = set1ranks;
-		testCards[1] = set1suits;
-		testCards[2] = set2ranks;
-		testCards[3] = set2suits;
-		testCards[4] = set3ranks;
-		testCards[5] = set3suits;
-		testCards[6] = set4ranks;
-		testCards[7] = set4suits;
-		testCards[8] = set5ranks;
-		testCards[9] = set5suits;
-	}
-
 	/**
 	 * returns the number of deadwood points in player's hand
 	 * @param hand - cards in player's hand
@@ -146,11 +111,14 @@ public class OurUtilities {
 	 **/
 	public static int getHitCount(ArrayList<ArrayList<Card>> combos, ArrayList<ArrayList<Card>> melds, ArrayList<Card> possibleCards) {
 		int hitCount = 0;
+		System.out.print("hit cards: ");
 		for (Card c : possibleCards) {
 			if (isHitCard(combos,melds,c)) {
+				System.out.print(c + " ");
 				hitCount++;
 			}
 		}
+		System.out.println();
 		return hitCount;
 	}
 
@@ -423,6 +391,171 @@ public class OurUtilities {
 		return points;
 	}
 
+
+
+	/**
+	 * calculates all possible features about a player's current state
+	**/
+	public static double[] calculateFeatures(Player player) {
+
+		double current_player_score = player.scores[player.playerNum];
+
+		double opponent_score = player.scores[1 - player.playerNum];
+
+		double current_player_deadwood = deadwoodCount(player.hand);
+
+		double current_player_num_hit_cards = numHitCards(player.unknownCards, player.hand);
+
+		double turns_taken = player.turn;
+
+		ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(player.hand);
+
+		double num_melds = organization.get(0).size();
+		double point_sum_melds = getPoints(organization.get(0));
+
+		double num_combos = organization.get(1).size();
+		double point_sum_combos = getPoints(organization.get(1));
+
+		double num_knock_cache = organization.get(2).get(0).size();
+		double point_sum_knock_cache = getPoints(organization.get(2));
+
+		double num_load_cards = organization.get(3).get(0).size();
+		double point_sum_load_cards = getPoints(organization.get(3));
+
+		return new double[] {
+							current_player_score,
+							opponent_score,
+							current_player_deadwood,
+							current_player_num_hit_cards,
+							num_melds,
+							point_sum_melds,
+							num_combos,
+							point_sum_combos,
+							num_knock_cache,
+							point_sum_knock_cache,
+							num_load_cards,
+							point_sum_load_cards,
+							turns_taken
+		};
+	}
+
+	public static double[] calcSimple2(SimplePlayer player) {
+
+		double current_player_score = player.scores[player.playerNum];
+
+		double opponent_score = player.scores[1 - player.playerNum];
+
+		double current_player_deadwood = deadwoodCount(player.hand);
+
+		double current_player_num_hit_cards = numHitCards(player.unknownCards, player.hand);
+		System.out.println("from calc: " + current_player_num_hit_cards);
+		double turns_taken = player.turn;
+
+		ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(player.hand);
+
+		double num_melds = organization.get(0).size();
+		double point_sum_melds = getPoints(organization.get(0));
+
+		double num_combos = organization.get(1).size();
+		double point_sum_combos = getPoints(organization.get(1));
+
+		double num_knock_cache = organization.get(2).get(0).size();
+		double point_sum_knock_cache = getPoints(organization.get(2));
+
+		double num_load_cards = organization.get(3).get(0).size();
+		double point_sum_load_cards = getPoints(organization.get(3));
+
+		return new double[] {
+							current_player_score,
+							opponent_score,
+							current_player_deadwood,
+							current_player_num_hit_cards,
+							num_melds,
+							point_sum_melds,
+							num_combos,
+							point_sum_combos,
+							num_knock_cache,
+							point_sum_knock_cache,
+							num_load_cards,
+							point_sum_load_cards,
+							turns_taken
+		};
+	}
+
+	public static double[] calculateSimpleFeatures(SimpleGinRummyPlayer player, ArrayList<Card> deck, int[] scores) {
+
+		double current_player_score = scores[player.playerNum];
+
+		double opponent_score = scores[1 - player.playerNum];
+
+		double current_player_deadwood = deadwoodCount(player.cards);
+
+		double current_player_num_hit_cards = numHitCards(deck, player.cards);
+
+		return new double[] {
+							current_player_score,
+							opponent_score,
+							current_player_deadwood,
+							current_player_num_hit_cards
+		};
+	}
+
+	public static void printAsSorted(ArrayList<Card> cards) {
+		for (int i = 0; i < 52; i++) {
+			for (Card c : cards) {
+				if (c.getId() == i) {
+					System.out.print(c+" ");
+				}
+			}
+		}
+	}
+
+
+
+	// AC 2C 3C AD 2D 3D AH 2H 3H 2S  (all melded, several optimal meld combinations)
+	public static int[] set1ranks = {0,0,0,1,1,1,1,2,2,2};
+	public static int[] set1suits = {0,1,2,0,1,2,3,0,1,2};
+
+	// 2C 3C 4C 5H 6H 7H 8C 8D 8H KC (2 run, 1 set, 1 deadwood card)
+	public static int[] set2ranks = {1,2,3,4,5,6,7,7,7,12};
+	public static int[] set2suits = {0,0,0,2,2,2,0,1,2,0};
+
+	// AC 2D 3H 4S 6C 6D 6H 7C 10H 10S (triangle shape, 1 combination)
+	public static int[] set3ranks = {0,1,2,3,5,5,5,6,9,9};
+	public static int[] set3suits = {0,1,2,3,0,1,2,0,2,3};
+
+	// AC 2D 3H 4S 5C 6D 7H 8S 9C 10D (no hit cards)
+	public static int[] set4ranks = {0,1,2,3,4,5,6,7,8,9};
+	public static int[] set4suits = {0,1,2,3,0,1,2,3,0,1};
+
+	// 2C 3C 2H 3H 7C 8C 7H 8H KC KH (18 hit cards)
+	public static int[] set5ranks = {1,2,1,2,6,7,6,7,12,12};
+	public static int[] set5suits = {0,0,1,1,0,0,1,1,0,1};
+
+	// 4C 5C 6C 3S 4S 5S 2H 3H AS 2D
+	public static int[] set6ranks = {3,4,5,2,3,4,1,2,0,1};
+	public static int[] set6suits = {0,0,0,2,2,2,1,1,2,3};
+
+
+	public static int[][] testCards;
+	static {
+		testCards = new int[12][10];
+		testCards[0] = set1ranks;
+		testCards[1] = set1suits;
+		testCards[2] = set2ranks;
+		testCards[3] = set2suits;
+		testCards[4] = set3ranks;
+		testCards[5] = set3suits;
+		testCards[6] = set4ranks;
+		testCards[7] = set4suits;
+		testCards[8] = set5ranks;
+		testCards[9] = set5suits;
+		testCards[10] = set6ranks;
+		testCards[11] = set6suits;
+	}
+
+
+
 	public static void testUtils() {
 
 		Card c = new Card(10,3);
@@ -473,110 +606,65 @@ public class OurUtilities {
 	}
 
 
-	/**
-	 * calculates all possible features about a player's current state
-	**/
-	public static double[] calculateFeatures(Player player) {
-
-		double current_player_score = player.scores[player.playerNum];
-
-		double opponent_score = player.scores[1 - player.playerNum];
-
-		double current_player_deadwood = deadwoodCount(player.hand);
-
-		double current_player_num_hit_cards = numHitCards(player.unknownCards, player.hand);
-
-		double turns_taken = player.turn;
-
-		ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(player.hand);
-
-		double num_melds = organization.get(0).size();
-		double point_sum_melds = getPoints(organization.get(0));
-
-		double num_combos = organization.get(1).size();
-		double point_sum_combos = getPoints(organization.get(1));
-
-		double num_knock_cache = organization.get(2).get(0).size();
-		double point_sum_knock_cache = getPoints(organization.get(2));
-
-		double num_load_cards = organization.get(3).get(0).size();
-		double point_sum_load_cards = getPoints(organization.get(3));
-
-		return new double[] {
-							current_player_score,
-							opponent_score,
-							current_player_deadwood,
-							current_player_num_hit_cards,
-							num_melds,
-							point_sum_melds,
-							num_combos,
-							point_sum_combos,
-							num_knock_cache,
-							point_sum_knock_cache,
-							num_load_cards,
-							point_sum_load_cards,
-							turns_taken
-		};
-	}
 
 
 
 	public static void main(String[] args) {
 
-//		testUtils();
+		testUtils();
 
 		// find distributions
 
-		int[] deadwoodCounter = new int[98 + 1];
-		int[] hitCardCounter = new int[18 + 1];
-		int[] numMeldCounter = new int[3 + 1];
-		int[] pointSumMeldCounter = new int[100 + 1];
-		int[] numCombosCounter = new int[50 + 1];
-		int[] pointSumCombosCounter = new int[250 + 1];
-		int[] numKnockCacheCounter = new int[5 + 1];
-		int[] pointSumKnockCacheCounter = new int[10 + 1];
-		int[] numLoadCardsCounter = new int[8 + 1];
-		int[] pointSumLoadCardsCounter = new int[100 + 1];
-
-		int[][] counts = {deadwoodCounter, hitCardCounter, numMeldCounter,
-			pointSumMeldCounter, numCombosCounter, pointSumCombosCounter,
-			numKnockCacheCounter, pointSumKnockCacheCounter, numLoadCardsCounter,
-			pointSumLoadCardsCounter};
-
-		int NUMBER_OF_HANDS = 100000;
-		for (int i = 0; i < NUMBER_OF_HANDS; i++) {
-			Stack<Card> deck = Card.getShuffle(256);
-			ArrayList<Card> hand = new ArrayList<>();
-			for (int j = 0; j < 10; j++) {
-				hand.add(deck.pop());
-			}
-			deadwoodCounter[deadwoodCount(hand)]++;
-			hitCardCounter[numHitCards(new ArrayList<Card>(deck), hand)]++;
-			ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(hand);
-			numMeldCounter[organization.get(0).size()]++;
-			pointSumMeldCounter[getPoints(organization.get(0))]++;
-			numCombosCounter[organization.get(1).size()]++;
-			pointSumCombosCounter[getPoints(organization.get(1))]++;
-			numKnockCacheCounter[organization.get(2).get(0).size()]++;
-			pointSumKnockCacheCounter[getPoints(organization.get(2))]++;
-			numLoadCardsCounter[organization.get(3).get(0).size()]++;
-			pointSumLoadCardsCounter[getPoints(organization.get(3))]++;
-
-		}
-
-		String fileName = "distributions-0.txt";
-		File file = new File(fileName);
-		PrintWriter pw;
-		try {
-			pw = new PrintWriter(file);
-			for (int[] map : counts) {
-				String mapString = Arrays.toString(map);
-				pw.println(mapString.substring(1, mapString.length() - 1));
-			}
-			pw.close();
-		} catch (FileNotFoundException e) {
-			System.err.println("No file.");
-		}
-		System.out.println("done.");
+		// int[] deadwoodCounter = new int[98 + 1];
+		// int[] hitCardCounter = new int[18 + 1];
+		// int[] numMeldCounter = new int[3 + 1];
+		// int[] pointSumMeldCounter = new int[100 + 1];
+		// int[] numCombosCounter = new int[50 + 1];
+		// int[] pointSumCombosCounter = new int[250 + 1];
+		// int[] numKnockCacheCounter = new int[5 + 1];
+		// int[] pointSumKnockCacheCounter = new int[10 + 1];
+		// int[] numLoadCardsCounter = new int[8 + 1];
+		// int[] pointSumLoadCardsCounter = new int[100 + 1];
+		//
+		// int[][] counts = {deadwoodCounter, hitCardCounter, numMeldCounter,
+		// 	pointSumMeldCounter, numCombosCounter, pointSumCombosCounter,
+		// 	numKnockCacheCounter, pointSumKnockCacheCounter, numLoadCardsCounter,
+		// 	pointSumLoadCardsCounter};
+		//
+		// int NUMBER_OF_HANDS = 100000;
+		// for (int i = 0; i < NUMBER_OF_HANDS; i++) {
+		// 	Stack<Card> deck = Card.getShuffle(256);
+		// 	ArrayList<Card> hand = new ArrayList<>();
+		// 	for (int j = 0; j < 10; j++) {
+		// 		hand.add(deck.pop());
+		// 	}
+		// 	deadwoodCounter[deadwoodCount(hand)]++;
+		// 	hitCardCounter[numHitCards(new ArrayList<Card>(deck), hand)]++;
+		// 	ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(hand);
+		// 	numMeldCounter[organization.get(0).size()]++;
+		// 	pointSumMeldCounter[getPoints(organization.get(0))]++;
+		// 	numCombosCounter[organization.get(1).size()]++;
+		// 	pointSumCombosCounter[getPoints(organization.get(1))]++;
+		// 	numKnockCacheCounter[organization.get(2).get(0).size()]++;
+		// 	pointSumKnockCacheCounter[getPoints(organization.get(2))]++;
+		// 	numLoadCardsCounter[organization.get(3).get(0).size()]++;
+		// 	pointSumLoadCardsCounter[getPoints(organization.get(3))]++;
+		//
+		// }
+		//
+		// String fileName = "distributions-0.txt";
+		// File file = new File(fileName);
+		// PrintWriter pw;
+		// try {
+		// 	pw = new PrintWriter(file);
+		// 	for (int[] map : counts) {
+		// 		String mapString = Arrays.toString(map);
+		// 		pw.println(mapString.substring(1, mapString.length() - 1));
+		// 	}
+		// 	pw.close();
+		// } catch (FileNotFoundException e) {
+		// 	System.err.println("No file.");
+		// }
+		// System.out.println("done.");
 	}
 }

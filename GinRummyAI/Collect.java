@@ -33,7 +33,7 @@ public class Collect {
 	/**
 	 * Two Gin Rummy players numbered according to their array index.
 	 */
-	private Player[] players;
+	private GinRummyPlayer[] players;
 
 	/**
 	 * Set whether or not there is to be printed output during gameplay.
@@ -48,16 +48,14 @@ public class Collect {
 	 * @param player0 Player 0
 	 * @param player1 Player 1
 	 */
-	public Collect(Player player0, Player player1, long seed) {
-		players = new Player[] {player0, player1};
-		ArrayList<String> line = new ArrayList<>();
+	public Collect(GinRummyPlayer player0, GinRummyPlayer player1, long seed) {
+		players = new GinRummyPlayer[] {player0, player1};
 		this.seed = seed;
 		RANDOM = new Random(seed);
 	}
 
-	public Collect(Player player0, Player player1) {
-		players = new Player[] {player0, player1};
-		ArrayList<String> line = new ArrayList<>();
+	public Collect(GinRummyPlayer player0, GinRummyPlayer player1) {
+		players = new GinRummyPlayer[] {player0, player1};
 		this.seed = 0;
 		RANDOM = new Random();
 	}
@@ -68,6 +66,9 @@ public class Collect {
 	 */
 	@SuppressWarnings("unchecked")
 	public ArrayList<ArrayList<String>> getPlayData() {
+
+		int line_number = 2;
+
 		ArrayList<ArrayList<String>> csvOutput = new ArrayList<ArrayList<String>>();
 
 
@@ -115,12 +116,37 @@ public class Collect {
 
 
 
-				// DATA A
+// -------------------- DATA A -------------------------------------------------------------↓
+				System.out.println("---------------------------------------------------------------------- line number: " + line_number++);
 				deck.addAll(hands.get(opponent));
 				// ArrayList<Card> uc = players[currentPlayer].unknownCards;
 				// players[currentPlayer].unknownCards = deck;
+				double[] features = null;
+				if (players[currentPlayer] instanceof SimpleGinRummyPlayer) {
+					ArrayList<Card> deckArray = new ArrayList<Card>();
+					deckArray.addAll(deck);
+					features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
+				} else if (players[currentPlayer] instanceof Player) {
+					// ArrayList<Card> deckArray = new ArrayList<Card>();
+					// deckArray.addAll(deck);
+					// System.out.println();
+					//
+					// System.out.print("A - Unknown Cards: ");
+					// OurUtilities.printAsSorted(((Player) players[currentPlayer]).unknownCards);
+					// System.out.println();
+					//
+					// System.out.print("A - Stock + hand : ");
+					// OurUtilities.printAsSorted(deckArray);
+					// System.out.println();
 
-				double[] features = OurUtilities.calculateFeatures(players[currentPlayer]);
+					features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
+				} else if (players[currentPlayer] instanceof SimplePlayer) {
+					System.out.println("a-hand: " + ((SimplePlayer) players[currentPlayer]).hand );
+					System.out.println("a-unknown hit cards: " + OurUtilities.numHitCards( ((SimplePlayer) players[currentPlayer]).unknownCards ,((SimplePlayer) players[currentPlayer]).hand ));
+					features = OurUtilities.calcSimple2((SimplePlayer) players[currentPlayer]);
+				} else {
+					System.err.println("You can only collect data on SimpleGinRummyPlayer or Player.");
+				}
 				// ArrayList<ArrayList<ArrayList<Card>>> best = OurUtilities.getBestHandOrganization(players[currentPlayer].hand);
 				// System.out.println("melds " + currentPlayer + ": " + best.get(0));
 				// System.out.println("combos " + currentPlayer + ": " + best.get(1));
@@ -129,16 +155,18 @@ public class Collect {
 				// System.out.println("hand " + currentPlayer + " : " + players[currentPlayer].hand);
 				// System.out.println("to discard: " + players[currentPlayer].toDiscard);
 				// System.out.println("discarded: " + players[currentPlayer].discardedCards);
-				// System.out.println("unknown " + currentPlayer + " : " + players[currentPlayer].unknownCards);
+				 System.out.println("unknown " + currentPlayer + " : " + ((SimplePlayer) players[currentPlayer]).unknownCards);
+
 				// System.out.println("features: " + Arrays.toString(features));
 				StringBuilder sb = new StringBuilder(currentPlayer + "");
 				for (int i = 0; i < features.length; i++)
 					sb.append("," + features[i]);
 				handData.add(sb.toString());
-
 				// players[currentPlayer].unknownCards = uc;
 				deck.removeAll(hands.get(opponent));
-				// DATA A
+// -------------------- DATA A -------------------------------------------------------------↑
+
+
 
 
 				// DRAW
@@ -146,18 +174,6 @@ public class Collect {
 				Card faceUpCard = discards.peek();
 				// offer draw face-up iff not 3rd turn with first face up card (decline automatically in that case)
 
-
-
-				// DATA B
-				deck.addAll(hands.get(opponent));
-				features = OurUtilities.calculateFeatures(players[currentPlayer]);
-				best = OurUtilities.getBestHandOrganization(players[currentPlayer].hand);
-				sb = new StringBuilder(currentPlayer + "");
-				for (int i = 0; i < features.length; i++)
-					sb.append("," + features[i]);
-				handData.add(sb.toString());
-				deck.removeAll(hands.get(opponent));
-				// DATA B
 
 
 
@@ -168,16 +184,6 @@ public class Collect {
 				}
 
 
-				// DATA C
-				deck.addAll(hands.get(opponent));
-				features = OurUtilities.calculateFeatures(players[currentPlayer]);
-				best = OurUtilities.getBestHandOrganization(players[currentPlayer].hand);
-				sb = new StringBuilder(currentPlayer + "");
-				for (int i = 0; i < features.length; i++)
-					sb.append("," + features[i]);
-				handData.add(sb.toString());
-				deck.removeAll(hands.get(opponent));
-				// DATA C
 
 
 				if (!(!drawFaceUp && turnsTaken < 2 && faceUpCard == firstFaceUpCard)) { // continue with turn if not initial declined option
@@ -189,15 +195,50 @@ public class Collect {
 						System.out.printf("Player %d draws %s.\n", currentPlayer, drawCard);
 					hands.get(currentPlayer).add(drawCard);
 
-					// // DATA B
-					// deck.addAll(hands.get(opponent));
-					// features = OurUtilities.calculateFeatures(players[currentPlayer]);
-					// sb = new StringBuilder(currentPlayer + "");
-					// for (int i = 0; i < features.length; i++)
-					// 	sb.append("," + features[i]);
-					// handData.add(sb.toString());
-					// deck.removeAll(hands.get(opponent));
-					// // DATA B
+
+
+// -------------------- DATA B -------------------------------------------------------------↓
+					System.out.println("---------------------------------------------------------------------- line number: " + line_number++);
+					deck.addAll(hands.get(opponent));
+					// ArrayList<Card> uc = players[currentPlayer].unknownCards;
+					// players[currentPlayer].unknownCards = deck;
+					if (players[currentPlayer] instanceof SimpleGinRummyPlayer) {
+						ArrayList<Card> deckArray = new ArrayList<Card>();
+						deckArray.addAll(deck);
+						features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
+					} else if (players[currentPlayer] instanceof Player) {
+						// ArrayList<Card> deckArray = new ArrayList<Card>();
+						// deckArray.addAll(deck);
+						// System.out.println();
+						//
+						// System.out.print("B - Unknown Cards: ");
+						// OurUtilities.printAsSorted(((Player) players[currentPlayer]).unknownCards);
+						// System.out.println();
+						//
+						// System.out.print("B - Stock + hand : ");
+						// OurUtilities.printAsSorted(deckArray);
+						// System.out.println();
+
+						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
+					} else if (players[currentPlayer] instanceof SimplePlayer) {
+						System.out.println("b-hand: "+ ((SimplePlayer) players[currentPlayer]).hand );
+						System.out.println("b-hit count:" + OurUtilities.numHitCards( ((SimplePlayer) players[currentPlayer]).unknownCards,((SimplePlayer) players[currentPlayer]).hand ));
+						System.out.println("unknown " + currentPlayer + " : " + ((SimplePlayer) players[currentPlayer]).unknownCards);
+						features = OurUtilities.calcSimple2((SimplePlayer) players[currentPlayer]);
+						System.out.println("unknown " + currentPlayer + " : " + ((SimplePlayer) players[currentPlayer]).unknownCards);
+					} else {
+						System.err.println("You can only collect data on SimpleGinRummyPlayer or Player.");
+					}
+					sb = new StringBuilder(currentPlayer + "");
+					for (int i = 0; i < features.length; i++)
+						sb.append("," + features[i]);
+					handData.add(sb.toString());
+					// players[currentPlayer].unknownCards = uc;
+					deck.removeAll(hands.get(opponent));
+// -------------------- DATA B -------------------------------------------------------------↑
+
+
+
 
 					// DISCARD
 					Card discardCard = players[currentPlayer].getDiscard();
@@ -229,15 +270,48 @@ public class Collect {
 						}
 					}
 
-					// // DATA C
-					// deck.addAll(hands.get(opponent));
-					// features = OurUtilities.calculateFeatures(players[currentPlayer]);
-					// sb = new StringBuilder(currentPlayer + "");
-					// for (int i = 0; i < features.length; i++)
-					// 	sb.append("," + features[i]);
-					// handData.add(sb.toString());
-					// deck.removeAll(hands.get(opponent));
-					// // DATA C
+
+
+
+
+
+// -------------------- DATA C -------------------------------------------------------------↓
+					System.out.println("---------------------------------------------------------------------- line number: " + line_number++);
+					deck.addAll(hands.get(opponent));
+					// ArrayList<Card> uc = players[currentPlayer].unknownCards;
+					// players[currentPlayer].unknownCards = deck;
+					if (players[currentPlayer] instanceof SimpleGinRummyPlayer) {
+						ArrayList<Card> deckArray = new ArrayList<Card>();
+						deckArray.addAll(deck);
+						features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
+					} else if (players[currentPlayer] instanceof Player) {
+						// ArrayList<Card> deckArray = new ArrayList<Card>();
+						// deckArray.addAll(deck);
+						// System.out.println();
+						//
+						// System.out.print("C - Unknown Cards: ");
+						// OurUtilities.printAsSorted(((Player) players[currentPlayer]).unknownCards);
+						// System.out.println();
+						// System.out.print("C - Stock + hand : ");
+						// OurUtilities.printAsSorted(deckArray);
+						// System.out.println();
+						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
+					} else if (players[currentPlayer] instanceof SimplePlayer) {
+						System.out.println("c-hand: "+ ((SimplePlayer) players[currentPlayer]).hand );
+						System.out.println("c-hit count:" + OurUtilities.numHitCards( ((SimplePlayer) players[currentPlayer]).unknownCards,((SimplePlayer) players[currentPlayer]).hand ));
+
+						features = OurUtilities.calcSimple2((SimplePlayer) players[currentPlayer]);
+					} else {
+						System.err.println("You can only collect data on SimpleGinRummyPlayer or Player.");
+					}
+					sb = new StringBuilder(currentPlayer + "");
+					for (int i = 0; i < features.length; i++)
+						sb.append("," + features[i]);
+					handData.add(sb.toString());
+					// players[currentPlayer].unknownCards = uc;
+					deck.removeAll(hands.get(opponent));
+// -------------------- DATA C -------------------------------------------------------------↑
+
 
 
 
@@ -253,15 +327,33 @@ public class Collect {
 
 			}
 
-			// DATA D
-			deck.addAll(hands.get(opponent));
-			double[] features = OurUtilities.calculateFeatures(players[currentPlayer]);
-			StringBuilder sb = new StringBuilder(currentPlayer + "");
-			for (int i = 0; i < features.length; i++)
-				sb.append("," + features[i]);
-			handData.add(sb.toString());
-			deck.removeAll(hands.get(opponent));
-			// DATA D
+
+
+// -------------------- DATA D -------------------------------------------------------------↓
+					System.out.println("---------------------------------------------------------------------- line number: " + line_number++);
+					deck.addAll(hands.get(opponent));
+					// ArrayList<Card> uc = players[currentPlayer].unknownCards;
+					// players[currentPlayer].unknownCards = deck;
+					double[] features = null;
+					if (players[currentPlayer] instanceof SimpleGinRummyPlayer) {
+						ArrayList<Card> deckArray = new ArrayList<Card>();
+						deckArray.addAll(deck);
+						features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
+					} else if (players[currentPlayer] instanceof Player) {
+						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
+					} else if (players[currentPlayer] instanceof SimplePlayer) {
+						features = OurUtilities.calcSimple2((SimplePlayer) players[currentPlayer]);
+					} else {
+						System.err.println("You can only collect data on SimpleGinRummyPlayer or Player.");
+					}
+					StringBuilder sb = new StringBuilder(currentPlayer + "");
+					for (int i = 0; i < features.length; i++)
+						sb.append("," + features[i]);
+					handData.add(sb.toString());
+					// players[currentPlayer].unknownCards = uc;
+					deck.removeAll(hands.get(opponent));
+// -------------------- DATA D -------------------------------------------------------------↑
+
 
 
 			if (knockMelds != null) { // round didn't end due to non-knocking and 2 cards remaining in draw pile
@@ -414,7 +506,7 @@ public class Collect {
 
 
 
-	public static String fileName = "beta-6.csv";
+	public static String fileName = "alpha-12.csv";
 	public static File file = new File(fileName);
 	public static PrintWriter pw;
 	static {
@@ -452,9 +544,9 @@ public class Collect {
 
 
 		for (int i = 0; i < 1; i++) {
-			setPlayVerbose(false);
+			setPlayVerbose(true);
 
-			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR), 0);
+			Collect game = new Collect(new SimplePlayer(), new SimplePlayer(), 0);
 
 			ArrayList<ArrayList<String>> csvOutput = game.getPlayData();
 
@@ -480,7 +572,9 @@ public class Collect {
 				}
 
 			}
-
+			if (i % 10 == 0) {
+				System.out.println(i);
+			}
 		}
 
 		pw.close();

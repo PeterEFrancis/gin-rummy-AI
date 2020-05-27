@@ -298,7 +298,8 @@ public class GinRummyGame {
 	public static void main(String[] args) {
 		// Single verbose demonstration game
 		setPlayVerbose(true);
-		GinRummyGame game = new GinRummyGame(new SimpleGinRummyPlayer(), new SimpleGinRummyPlayer());
+		GinRummyGame game = new GinRummyGame(new Player(BlackBox.BETA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
+
 		game.play();
 
 		System.out.println("-----------");

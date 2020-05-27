@@ -32,10 +32,10 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 
  */
 public class SimpleGinRummyPlayer implements GinRummyPlayer {
-	private int playerNum;
+	public int playerNum;
 	@SuppressWarnings("unused")
 	private int startingPlayerNum;
-	private ArrayList<Card> cards = new ArrayList<Card>();
+	public ArrayList<Card> cards = new ArrayList<Card>();
 	private Random random = new Random();
 	private boolean opponentKnocked = false;
 	Card faceUpCard, drawnCard;

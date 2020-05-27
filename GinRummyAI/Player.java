@@ -99,6 +99,8 @@ public class Player implements GinRummyPlayer{
 			// undo the discard
 			hand.add(discardedCards.pop());
 		}
+		// System.out.println("faceup value: " + max);
+
 		discardedCards.push(hand.remove(0)); //undoes the draw
 
 		double average = 0;
@@ -122,16 +124,17 @@ public class Player implements GinRummyPlayer{
 				// undo the discard
 				hand.add(discardedCards.pop());
 			}
+			// System.out.println("local max: " + localmax);
 			// System.out.println(newCard + " best discard: " + bestDiscard);
 			discardCases[newCard.getId()] = bestDiscard.getId();
 			average += localmax;
-
 			// undo the draw
 			hand.remove(newCard);
 			unknownCards.add(newCard);
 		}
 		// System.out.println("in willDra...: " + Arrays.toString(discardCases));
 		average /= unknownCards.size();
+		// System.out.println("average facedown value: " + average);
 		if (average >= max) {
 			toDiscard = null;
 			// System.out.println("Doesn't draw face up card");
@@ -168,6 +171,9 @@ public class Player implements GinRummyPlayer{
 				if (!discardedCards.isEmpty()) {
 					discardedCards.pop();
 				}
+
+				//REMOVE ONCE WE ARE DONE TESTING
+				unknownCards.remove(drawnCard);
 			}
 			else {
 				opponentRejectedCards.add(discardedCards.peek());
@@ -237,10 +243,6 @@ public class Player implements GinRummyPlayer{
 	}
 
 
-	public void resetDiscarded() {
-		discardedCards.clear();
-		discardedCards = new Stack<Card>();
-	}
 
 
 
