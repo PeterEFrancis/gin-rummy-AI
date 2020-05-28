@@ -111,14 +111,14 @@ public class OurUtilities {
 	 **/
 	public static int getHitCount(ArrayList<ArrayList<Card>> combos, ArrayList<ArrayList<Card>> melds, ArrayList<Card> possibleCards) {
 		int hitCount = 0;
-		System.out.print("hit cards: ");
+		// System.out.print("hit cards: ");
 		for (Card c : possibleCards) {
 			if (isHitCard(combos,melds,c)) {
-				System.out.print(c + " ");
+				// System.out.print(c + " ");
 				hitCount++;
 			}
 		}
-		System.out.println();
+		// System.out.println();
 		return hitCount;
 	}
 
@@ -391,6 +391,39 @@ public class OurUtilities {
 		return points;
 	}
 
+	public static ArrayList<Card> nearbyCards(ArrayList<Card> cards) {
+		ArrayList<Card> nearby = new ArrayList<Card>();
+		for (Card c : cards) {
+			int rank = c.getRank();
+			int suit = c.getSuit();
+			int id = c.getId();
+			for (int i = 0; i < 4; i++) { // adds all cards of same rank
+				Card toAdd = Card.allCards[id+(i-suit)*13];
+				if (!cards.contains(toAdd)) {
+					nearby.add(toAdd);
+				}
+			}
+			if (rank != 0) { // adds card lower in rank
+				Card toAdd = Card.allCards[id-1];
+				if (!cards.contains(toAdd)) {
+					nearby.add(toAdd);
+				}
+			}
+			if (rank != 12) { //adds card highr in rank
+				Card toAdd = Card.allCards[id+1];
+				if (!cards.contains(toAdd)) {
+					nearby.add(toAdd);
+				}
+			}
+		}
+		return nearby;
+	}
+
+
+
+	public static int numNearbyCards(ArrayList<Card> cards) {
+		return cards.size();
+	}
 
 
 	/**
@@ -404,7 +437,7 @@ public class OurUtilities {
 
 		double current_player_deadwood = deadwoodCount(player.hand);
 
-		double current_player_num_hit_cards = numHitCards(player.unknownCards, player.hand);
+		double current_player_num_hit_cards = numHitCards(player.possibleCards, player.hand);
 
 		double turns_taken = player.turn;
 
@@ -421,6 +454,10 @@ public class OurUtilities {
 
 		double num_load_cards = organization.get(3).get(0).size();
 		double point_sum_load_cards = getPoints(organization.get(3));
+
+		//list of possible features to add
+		// num_drawn, op_num_drawn   (face up drawn cards for both players)
+		// num_
 
 		return new double[] {
 							current_player_score,
@@ -448,7 +485,7 @@ public class OurUtilities {
 		double current_player_deadwood = deadwoodCount(player.hand);
 
 		double current_player_num_hit_cards = numHitCards(player.unknownCards, player.hand);
-		System.out.println("from calc: " + current_player_num_hit_cards);
+
 		double turns_taken = player.turn;
 
 		ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(player.hand);
@@ -597,7 +634,6 @@ public class OurUtilities {
 			deck = GinRummyUtil.bitstringToCards(deckbits);
 
 			deck.removeAll(hand);
-
 
 			System.out.println("Hit Count: " + numHitCards(deck, hand));
 			// System.out.println("Number of options: " + numOptions(deck, hand));

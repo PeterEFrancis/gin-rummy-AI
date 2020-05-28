@@ -23,6 +23,7 @@ public class Player implements GinRummyPlayer{
 
 	public ArrayList<Card> hand;
 	public ArrayList<Card> unknownCards;
+	public ArrayList<Card> possibleCards;
 	public ArrayList<Long> drawDiscardBitstrings;
 	public ArrayList<Card> opponentDiscards;
 	public ArrayList<Card> opponentRejectedCards;
@@ -46,6 +47,7 @@ public class Player implements GinRummyPlayer{
 		// Initialize all arrayLists
 		this.hand = new ArrayList<Card>();
 		unknownCards = new ArrayList<Card>();
+		possibleCards = new ArrayList<Card>();
 		drawDiscardBitstrings = new ArrayList<Long>();
 		opponentDiscards = new ArrayList<Card>();
 		opponentRejectedCards = new ArrayList<Card>();
@@ -61,10 +63,12 @@ public class Player implements GinRummyPlayer{
 		this.startingPlayerNum = startingPlayerNum;
 		this.hand.clear();
 		unknownCards.addAll(Arrays.asList(Card.allCards));
+		possibleCards.addAll(Arrays.asList(Card.allCards));
 
 		for (Card card : hand) {
 			this.hand.add(card);
 			unknownCards.remove(card);
+			possibleCards.remove(card);
 		}
 		opponentKnocked = false;
 		drawDiscardBitstrings.clear();
@@ -82,6 +86,7 @@ public class Player implements GinRummyPlayer{
 		if (discardedCards.isEmpty()) {
 			discardedCards.push(card);
 			unknownCards.remove(card);
+			possibleCards.remove(card);
 		}
 		hand.add(discardedCards.pop()); // draw face up
 
@@ -104,9 +109,11 @@ public class Player implements GinRummyPlayer{
 		discardedCards.push(hand.remove(0)); //undoes the draw
 
 		double average = 0;
-		for (int i = 0; i < unknownCards.size(); i++) {
+		for (int i = 0; i < possibleCards.size(); i++) {
 			// draw card
-			Card newCard = unknownCards.remove(0);
+			Card newCard = possibleCards.remove(0);
+			unknownCards.remove(newCard);
+
 			hand.add(newCard);
 
 			double localmax = -10000000;
@@ -131,9 +138,10 @@ public class Player implements GinRummyPlayer{
 			// undo the draw
 			hand.remove(newCard);
 			unknownCards.add(newCard);
+			possibleCards.add(newCard);
 		}
 		// System.out.println("in willDra...: " + Arrays.toString(discardCases));
-		average /= unknownCards.size();
+		average /= possibleCards.size();
 		// System.out.println("average facedown value: " + average);
 		if (average >= max) {
 			toDiscard = null;
@@ -149,18 +157,55 @@ public class Player implements GinRummyPlayer{
 
 
 	@Override
+	// public void reportDraw(int playerNum, Card drawnCard) {
+	// 	// Ignore other player draws.  Add to cards if playerNum is this player.
+	// 	if (playerNum == this.playerNum) {
+	// 		hand.add(drawnCard);
+	// 		this.drawnCard = drawnCard;
+	// 		if (toDiscard == null) {
+	// 			// System.out.println("in reportDraw: " + Arrays.toString(discardCases));
+	// 			toDiscard = Card.getCard(discardCases[drawnCard.getId()]);
+	// 			// System.out.println("to discard (from player): " + toDiscard);
+	// 			unknownCards.remove(drawnCard);
+	// 		}
+	// 		else {
+	// 			discardedCards.pop();
+	// 		}
+	// 	}
+	// 	else {
+	// 		if (drawnCard != null) { // picked up face up card (known opponent hand should consist of our discards)
+	// 			opponentAllHand.add(drawnCard);
+	// 			opponentHand.add(drawnCard);
+	// 			if (!discardedCards.isEmpty()) {
+	// 				discardedCards.pop();
+	// 			}
+	//
+	// 			//REMOVE ONCE WE ARE DONE TESTING
+	// 			unknownCards.remove(drawnCard);
+	// 		}
+	// 		else {
+	// 			opponentRejectedCards.add(discardedCards.peek());
+	// 		}
+	// 	}
+	// }
 	public void reportDraw(int playerNum, Card drawnCard) {
 		// Ignore other player draws.  Add to cards if playerNum is this player.
 		if (playerNum == this.playerNum) {
 			hand.add(drawnCard);
 			this.drawnCard = drawnCard;
-			if (toDiscard == null) {
+			if (toDiscard == null) { //picked up facedown card
 				// System.out.println("in reportDraw: " + Arrays.toString(discardCases));
 				toDiscard = Card.getCard(discardCases[drawnCard.getId()]);
 				// System.out.println("to discard (from player): " + toDiscard);
-				unknownCards.remove(drawnCard);
+				if (unknownCards.contains(drawnCard)) {
+					unknownCards.remove(drawnCard);
+				}
+				if (possibleCards.contains(drawnCard)) {
+					possibleCards.remove(drawnCard);
+				}
 			}
-			else {
+			else { // we picked up faceup card
+
 				discardedCards.pop();
 			}
 		}
@@ -172,15 +217,14 @@ public class Player implements GinRummyPlayer{
 					discardedCards.pop();
 				}
 
-				//REMOVE ONCE WE ARE DONE TESTING
-				unknownCards.remove(drawnCard);
+				//possible cards
+				possibleCards.add(drawnCard);
 			}
 			else {
 				opponentRejectedCards.add(discardedCards.peek());
 			}
 		}
 	}
-
 
 	@Override
 	public Card getDiscard() {
@@ -196,19 +240,21 @@ public class Player implements GinRummyPlayer{
 		// Ignore other player discards.  Remove from cards if playerNum is this player.
 		if (playerNum == this.playerNum) {
 			hand.remove(discardedCard);
-			turn++;
 		}
-		else {
+		else { //opponent discard
 			opponentDiscards.add(discardedCard);
 			opponentHand.remove(discardedCard);
 			if (unknownCards.contains(discardedCard)){
 				unknownCards.remove(discardedCard);
 			}
+			if (possibleCards.contains(discardedCard)) {
+				possibleCards.remove(discardedCard);
+			}
+
 		}
 		discardedCards.push(discardedCard);
-
+		turn++;
 	}
-
 
 	@Override
 	public ArrayList<ArrayList<Card>> getFinalMelds() {

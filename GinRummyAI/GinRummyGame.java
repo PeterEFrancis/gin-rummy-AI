@@ -298,7 +298,7 @@ public class GinRummyGame {
 	public static void main(String[] args) {
 		// Single verbose demonstration game
 		setPlayVerbose(true);
-		GinRummyGame game = new GinRummyGame(new Player(BlackBox.BETA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
+		GinRummyGame game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.BETA, BlackBox.QUADRATIC));
 
 		game.play();
 
@@ -308,7 +308,7 @@ public class GinRummyGame {
 		setPlayVerbose(false);
 		int numGames = 100;
 		int numP1Wins = 0;
-		game = new GinRummyGame(new Player(BlackBox.BETA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
+		game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.BETA, BlackBox.QUADRATIC));
 		long startMs = System.currentTimeMillis();
 		for (int i = 0; i < numGames; i++) {
 			if (i % 10 == 0) {

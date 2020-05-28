@@ -90,3 +90,9 @@ We think that the issue lies in how we had calculated `num_hit_cards` before and
 ### Wednesday 5/27/20
 
 Debug Wednesday -- why the new data collection is different from the original system (specifically number of hit cards is off). Somewhat fixed this issue and reduced the number of discrepancies in one game with seed 0 to five. We need to heavily clean the `Player` class. Specifically, `unknownCards` needs to be fixed.
+
+
+### Thursday 5/28/20
+
+Debug Thursday. Had Brown Bag lunch with other X-SIG participants. Fixed the `Player` class. Good Stuff!
+Added the Quadratic model Player Type by multiplying every two possible features.

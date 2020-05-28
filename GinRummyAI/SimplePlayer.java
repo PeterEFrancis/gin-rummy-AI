@@ -5,7 +5,7 @@ import java.util.Stack;
 
 public class SimplePlayer implements GinRummyPlayer{
 
-   public Random random = new Random(0);
+   public Random random = new Random();
 	public int type;
 	public int version;
 
@@ -116,7 +116,7 @@ public class SimplePlayer implements GinRummyPlayer{
 				}
 
 				//REMOVE ONCE WE ARE DONE TESTING
-				unknownCards.add(drawnCard);
+				// unknownCards.add(drawnCard);
 			}
 			else {
 				opponentRejectedCards.add(discardedCards.peek());

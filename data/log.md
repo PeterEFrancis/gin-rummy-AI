@@ -13,6 +13,8 @@
 10. 500 games between `SimpleGinRummyPlayer` and itself, collecting CD
 11. 500 games between `SimpleGinRummyPlayer` and itself, collecting BD
 12. 500 games between `SimplePlayer` and itself, collecting ABCD
+13. 500 games between `SimplePlayer` and itself, collecting ABCD, seed i
+14. 500 games between `SimplePlayer` and itself, collecting ABCD, seed i, without adding opponent drawn face-up card to unknown cards
 
 
 ### Beta
@@ -24,3 +26,5 @@
 6.
 7. 500 games between linear Alpha and itself, collecting ABCD
 8. 50 games between linear Simple and itself, collecting ABCD
+9. 500 games between linear alpha and itself, collecting ABCD, seed i
+10. 100 games between linear alpha and itself, collecting ABCD, seed i
