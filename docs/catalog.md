@@ -96,3 +96,14 @@ Debug Wednesday -- why the new data collection is different from the original sy
 
 Debug Thursday. Had Brown Bag lunch with other X-SIG participants. Fixed the `Player` class. Good Stuff!
 Added the Quadratic model Player Type by multiplying every two possible features.
+
+
+### Friday 5/29/20
+
+Added new feature "num_nearby_opponent_cards" to new player GAMMA. Started development of neural network.
+Collecting points at ABCD beats players at AD and CD (by a lot). Confused to why data collection at non-decision making states improves win rate than data collected just at decision making states.
+Added feature 'num_vis_cards_to_opponent' to the new player DELTA.
+
+nearbyCards() works as follows: find with multiplicity the adjacent cards to each card in the ArrayList provided.
+
+Tried acquiring regression coefficients from neural networks, based on the features that were working.

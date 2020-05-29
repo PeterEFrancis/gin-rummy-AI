@@ -29,6 +29,7 @@ public class Player implements GinRummyPlayer{
 	public ArrayList<Card> opponentRejectedCards;
 	public ArrayList<Card> opponentAllHand;   // opponent picked up cards throughout the startGame
 	public ArrayList<Card> opponentHand;      // opponent picked up cards at the moment
+	public ArrayList<Card> visibleCards;
 
 	public Stack<Card> discardedCards;
 
@@ -54,6 +55,7 @@ public class Player implements GinRummyPlayer{
 		opponentAllHand = new ArrayList<Card>();
 		opponentHand = new ArrayList<Card>();
 		discardedCards = new Stack<Card>();
+		visibleCards = new ArrayList<Card>();
 
 		drawnCard = null;
 		toDiscard = null;
@@ -205,7 +207,7 @@ public class Player implements GinRummyPlayer{
 				}
 			}
 			else { // we picked up faceup card
-
+				visibleCards.add(drawnCard);
 				discardedCards.pop();
 			}
 		}
@@ -240,6 +242,9 @@ public class Player implements GinRummyPlayer{
 		// Ignore other player discards.  Remove from cards if playerNum is this player.
 		if (playerNum == this.playerNum) {
 			hand.remove(discardedCard);
+			if (visibleCards.contains(discardedCard)) {
+				visibleCards.remove(discardedCard);
+			}
 		}
 		else { //opponent discard
 			opponentDiscards.add(discardedCard);

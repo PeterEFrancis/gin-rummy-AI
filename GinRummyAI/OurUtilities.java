@@ -211,13 +211,18 @@ public class OurUtilities {
 
 	/**
 	* converts a card to its corresponding bitstring
-* @param c - card
-	*
+	* @param c - card
+	* @return bitstring
 	**/
 	public static long cardToBitstring(Card c) {
 		return 1L << c.getId();
 	}
 
+	/**
+	* converts a bitstring to its corresponding card
+	* @param cardBits - bitstring
+	* @return card
+	**/
 	public static Card bitstringToCard(long cardBits) {
 		int id = 0;
 		while (cardBits != 1) {
@@ -227,12 +232,18 @@ public class OurUtilities {
 		return Card.allCards[id];
 	}
 
+	/**
+	* gets the actual card object from the Card class, based on the given card's ID
+	* @param c - card
+	* @return card object from the Card class
+	**/
 	public static Card transformCard(Card c) {
 		return Card.allCards[c.getId()];
 	}
 
 	/**
 	 * returns an ArrayList of 52 shuffled cards
+	 * @return an ArrayList of 52 shuffled cards
 	 **/
 	public static ArrayList<Card> getShuffle() {
 		ArrayList<Card> deck = new ArrayList<Card>();
@@ -242,6 +253,11 @@ public class OurUtilities {
 		return deck;
 	}
 
+	/**
+	* gets the face (point) value of the given card. All face cards are worth 10 points
+	* @param c - current card
+	* @return the face (point) value of the given card
+	**/
 	public static int getFaceValue(Card c) {
 		int rank = c.getRank();
 		if (rank >= 10)
@@ -251,7 +267,15 @@ public class OurUtilities {
 
 
 	//__objectively__ the best function
-
+	/**
+	* returns the best orgnanization of a given hand
+	* 		index 0 - list of all best melds
+	* 		index 1 - list of all possible combos
+	* 		index 2 - list of all load cards
+	* 		index 3 - list of cards in the largest knock cash
+	* @param hand - cards in the hand
+	* @return the best hand organization
+	**/
 	public static ArrayList<ArrayList<ArrayList<Card>>> getBestHandOrganization(ArrayList<Card> hand) {
 		ArrayList<ArrayList<ArrayList<Card>>> meldSets = GinRummyUtil.cardsToBestMeldSets(hand);
 
@@ -259,7 +283,7 @@ public class OurUtilities {
 		ArrayList<ArrayList<Card>> bestMelds = new ArrayList<ArrayList<Card>>();
 		ArrayList<ArrayList<Card>> bestCombos = new ArrayList<ArrayList<Card>>();
 		ArrayList<ArrayList<Card>> bestKnockCache = new ArrayList<ArrayList<Card>>();
-		ArrayList<ArrayList<Card>> bestLoadCards = new ArrayList<ArrayList<Card>>(); // actually just an arraylist<Card>
+		ArrayList<ArrayList<Card>> bestLoadCards = new ArrayList<ArrayList<Card>>(); // actually just an ArrayList<Card>
 
 		if (meldSets.isEmpty()){
 			meldSets.add(new ArrayList<ArrayList<Card>>());
@@ -324,7 +348,11 @@ public class OurUtilities {
 		return organization;
 	}
 
-	//pass organization[0]
+	/**
+	* returns the number of melds that are comprised of cards of the same rank
+	* @param melds - list of best melds in the player's hand
+	* @return the number of melds that are comprised of cards of the same rank
+	**/
 	public static int numSetMelds(ArrayList<ArrayList<Card>> melds) {
 		int numSets = 0;
 		for (ArrayList<Card> meld : melds) {
@@ -335,7 +363,11 @@ public class OurUtilities {
 		return numSets;
 	}
 
-	//pass organization[0]
+	/**
+	* returns the number of melds that are comprised of cards of the same suit
+	* @param melds - list of best melds in the player's hand
+	* @return the number of melds that are comprised of cards of the same suit
+	**/
 	public static int numRunMelds(ArrayList<ArrayList<Card>> melds) {
 		int numRuns = 0;
 		for (ArrayList<Card> meld : melds) {
@@ -346,7 +378,11 @@ public class OurUtilities {
 		return numRuns;
 	}
 
-	//pass organization[1]
+	/**
+	* returns the number of combos that are comprised of cards of the same rank
+	* @param combos - list of best combos in the player's hand
+	* @return the number of combos that are comprised of cards of the same rank
+	**/
 	public static int numSetCombos(ArrayList<ArrayList<Card>> combos) {
 		int numSets = 0;
 		for (ArrayList<Card> combo : combos) {
@@ -357,7 +393,11 @@ public class OurUtilities {
 		return numSets;
 	}
 
-	//pass organization[1]
+	/**
+	* returns the number of combos that are comprised of cards of the same suit
+	* @param combos - list of best combos in the player's hand
+	* @return the number of combos that are comprised of cards of the same suit
+	**/
 	public static int numRunCombos(ArrayList<ArrayList<Card>> combos) {
 		int numRuns = 0;
 		for (ArrayList<Card> combo : combos) {
@@ -368,6 +408,9 @@ public class OurUtilities {
 		return numRuns;
 	}
 
+	/**
+	*
+	**/
 	public static ArrayList<Card> removeCards(ArrayList<ArrayList<Card>> set, ArrayList<Card> cards) {
 		ArrayList<Card> returnCards = new ArrayList<Card>();
 		for (Card c : cards) {
@@ -391,7 +434,7 @@ public class OurUtilities {
 		return points;
 	}
 
-	public static ArrayList<Card> nearbyCards(ArrayList<Card> cards) {
+	public static ArrayList<Card> nearbyCards(ArrayList<Card> cards) { // counting multiplicity
 		ArrayList<Card> nearby = new ArrayList<Card>();
 		for (Card c : cards) {
 			int rank = c.getRank();
@@ -419,11 +462,26 @@ public class OurUtilities {
 		return nearby;
 	}
 
-
-
-	public static int numNearbyCards(ArrayList<Card> cards) {
-		return cards.size();
+	public static ArrayList<Card> nearbyCards(Card c) {
+		ArrayList<Card> nearby = new ArrayList<Card>();
+		int rank = c.getRank();
+		int suit = c.getSuit();
+		int id = c.getId();
+		for (int i = 0; i < 4; i++) { // adds all cards of same rank
+			nearby.add(Card.allCards[id+(i-suit)*13]);
+		}
+		if (rank != 0) { // adds card lower in rank
+			nearby.add(Card.allCards[id-1]);
+		}
+		if (rank != 12) { //adds card highr in rank
+			nearby.add(Card.allCards[id+1]);
+		}
+		return nearby;
 	}
+
+
+	//   AS   (2S)   3S
+	//  [AD]   2D    3D
 
 
 	/**
@@ -455,6 +513,16 @@ public class OurUtilities {
 		double num_load_cards = organization.get(3).get(0).size();
 		double point_sum_load_cards = getPoints(organization.get(3));
 
+		ArrayList<Card> nearby = nearbyCards(player.opponentHand);
+		double num_nearby_opponent_cards = nearby.size();
+
+		double num_vis_cards_to_opponent = player.visibleCards.size();
+
+		//double num_set_melds = numSetMelds(organization.get(0));
+		//double num_run_melds = numRunMelds(organization.get(0));
+		//double num_set_combos = numSetCombos(organization.get(1));
+		//double num_run_combos = numRunCombos(organization.get(1));
+
 		//list of possible features to add
 		// num_drawn, op_num_drawn   (face up drawn cards for both players)
 		// num_
@@ -472,52 +540,58 @@ public class OurUtilities {
 							point_sum_knock_cache,
 							num_load_cards,
 							point_sum_load_cards,
-							turns_taken
+							turns_taken,
+							num_nearby_opponent_cards,
+							num_vis_cards_to_opponent,
+							//num_set_melds
+							//num_run_melds
+							//num_set_combos
+							//num_run_combos
 		};
 	}
 
-	public static double[] calcSimple2(SimplePlayer player) {
-
-		double current_player_score = player.scores[player.playerNum];
-
-		double opponent_score = player.scores[1 - player.playerNum];
-
-		double current_player_deadwood = deadwoodCount(player.hand);
-
-		double current_player_num_hit_cards = numHitCards(player.unknownCards, player.hand);
-
-		double turns_taken = player.turn;
-
-		ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(player.hand);
-
-		double num_melds = organization.get(0).size();
-		double point_sum_melds = getPoints(organization.get(0));
-
-		double num_combos = organization.get(1).size();
-		double point_sum_combos = getPoints(organization.get(1));
-
-		double num_knock_cache = organization.get(2).get(0).size();
-		double point_sum_knock_cache = getPoints(organization.get(2));
-
-		double num_load_cards = organization.get(3).get(0).size();
-		double point_sum_load_cards = getPoints(organization.get(3));
-
-		return new double[] {
-							current_player_score,
-							opponent_score,
-							current_player_deadwood,
-							current_player_num_hit_cards,
-							num_melds,
-							point_sum_melds,
-							num_combos,
-							point_sum_combos,
-							num_knock_cache,
-							point_sum_knock_cache,
-							num_load_cards,
-							point_sum_load_cards,
-							turns_taken
-		};
-	}
+	// public static double[] calcSimple2(SimplePlayer player) {
+	//
+	// 	double current_player_score = player.scores[player.playerNum];
+	//
+	// 	double opponent_score = player.scores[1 - player.playerNum];
+	//
+	// 	double current_player_deadwood = deadwoodCount(player.hand);
+	//
+	// 	double current_player_num_hit_cards = numHitCards(player.unknownCards, player.hand);
+	//
+	// 	double turns_taken = player.turn;
+	//
+	// 	ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(player.hand);
+	//
+	// 	double num_melds = organization.get(0).size();
+	// 	double point_sum_melds = getPoints(organization.get(0));
+	//
+	// 	double num_combos = organization.get(1).size();
+	// 	double point_sum_combos = getPoints(organization.get(1));
+	//
+	// 	double num_knock_cache = organization.get(2).get(0).size();
+	// 	double point_sum_knock_cache = getPoints(organization.get(2));
+	//
+	// 	double num_load_cards = organization.get(3).get(0).size();
+	// 	double point_sum_load_cards = getPoints(organization.get(3));
+	//
+	// 	return new double[] {
+	// 						current_player_score,
+	// 						opponent_score,
+	// 						current_player_deadwood,
+	// 						current_player_num_hit_cards,
+	// 						num_melds,
+	// 						point_sum_melds,
+	// 						num_combos,
+	// 						point_sum_combos,
+	// 						num_knock_cache,
+	// 						point_sum_knock_cache,
+	// 						num_load_cards,
+	// 						point_sum_load_cards,
+	// 						turns_taken,
+	// 	};
+	// }
 
 	public static double[] calculateSimpleFeatures(SimpleGinRummyPlayer player, ArrayList<Card> deck, int[] scores) {
 
@@ -547,36 +621,35 @@ public class OurUtilities {
 		}
 	}
 
-
-
+	// C=0, H=1, S=2, D=3
 	// AC 2C 3C AD 2D 3D AH 2H 3H 2S  (all melded, several optimal meld combinations)
 	public static int[] set1ranks = {0,0,0,1,1,1,1,2,2,2};
-	public static int[] set1suits = {0,1,2,0,1,2,3,0,1,2};
+	public static int[] set1suits = {0,0,0,3,2,3,1,1,1,2};
 
 	// 2C 3C 4C 5H 6H 7H 8C 8D 8H KC (2 run, 1 set, 1 deadwood card)
 	public static int[] set2ranks = {1,2,3,4,5,6,7,7,7,12};
-	public static int[] set2suits = {0,0,0,2,2,2,0,1,2,0};
+	public static int[] set2suits = {0,0,0,1,1,1,0,3,1,0};
 
 	// AC 2D 3H 4S 6C 6D 6H 7C 10H 10S (triangle shape, 1 combination)
 	public static int[] set3ranks = {0,1,2,3,5,5,5,6,9,9};
-	public static int[] set3suits = {0,1,2,3,0,1,2,0,2,3};
+	public static int[] set3suits = {0,3,1,2,0,3,1,0,1,2};
 
 	// AC 2D 3H 4S 5C 6D 7H 8S 9C 10D (no hit cards)
 	public static int[] set4ranks = {0,1,2,3,4,5,6,7,8,9};
-	public static int[] set4suits = {0,1,2,3,0,1,2,3,0,1};
+	public static int[] set4suits = {0,3,1,2,0,1,1,2,0,3};
 
 	// 2C 3C 2H 3H 7C 8C 7H 8H KC KH (18 hit cards)
 	public static int[] set5ranks = {1,2,1,2,6,7,6,7,12,12};
 	public static int[] set5suits = {0,0,1,1,0,0,1,1,0,1};
 
 	// 4C 5C 6C 3S 4S 5S 2H 3H AS 2D
-	public static int[] set6ranks = {3,4,5,2,3,4,1,2,0,1};
-	public static int[] set6suits = {0,0,0,2,2,2,1,1,2,3};
-
+	// 1C 8C KC
+	public static int[] set6ranks = {0,7,12};
+	public static int[] set6suits = {0,0,0};
 
 	public static int[][] testCards;
 	static {
-		testCards = new int[12][10];
+		testCards = new int[14][10];
 		testCards[0] = set1ranks;
 		testCards[1] = set1suits;
 		testCards[2] = set2ranks;
@@ -590,8 +663,6 @@ public class OurUtilities {
 		testCards[10] = set6ranks;
 		testCards[11] = set6suits;
 	}
-
-
 
 	public static void testUtils() {
 
@@ -620,10 +691,15 @@ public class OurUtilities {
 			System.out.println("\tBest Combos: " + organization.get(1));
 			System.out.println("\tBest KnockCash$: " + organization.get(2));
 			System.out.println("\tBest Loads: " + organization.get(3));
-			//System.out.println("\tNumber of set melds: " + numSetMelds(organization.get(0)));
-			//System.out.println("\tNumber of run melds: " + numRunMelds(organization.get(0)));
-			//System.out.println("\tNumber of set combos: " + numSetCombos(organization.get(1)));
-			//System.out.println("\tNumber of run combos: " + numRunCombos(organization.get(1)));
+
+			ArrayList<Card> nearby = nearbyCards(hand);
+			System.out.println("\tNearby Cards: " + nearby);
+			System.out.println("\tNum nearby Cards: " + nearby.size());
+
+			System.out.println("\tNumber of set melds: " + numSetMelds(organization.get(0)));
+			System.out.println("\tNumber of run melds: " + numRunMelds(organization.get(0)));
+			System.out.println("\tNumber of set combos: " + numSetCombos(organization.get(1)));
+			System.out.println("\tNumber of run combos: " + numRunCombos(organization.get(1)));
 
 			ArrayList<Card> deck = new ArrayList<>();
 			for (int i = 0; i < 52; i++) {
@@ -636,8 +712,10 @@ public class OurUtilities {
 			deck.removeAll(hand);
 
 			System.out.println("Hit Count: " + numHitCards(deck, hand));
+			System.out.println("Alpha was playing solitaire, but Gamma... Gamma is playing Gin Rummy.");
 			// System.out.println("Number of options: " + numOptions(deck, hand));
 		}
+
 
 	}
 
@@ -667,7 +745,7 @@ public class OurUtilities {
 		// 	numKnockCacheCounter, pointSumKnockCacheCounter, numLoadCardsCounter,
 		// 	pointSumLoadCardsCounter};
 		//
-		// int NUMBER_OF_HANDS = 100000;
+		// int NUMBER_OF_HANDS = 10000000;
 		// for (int i = 0; i < NUMBER_OF_HANDS; i++) {
 		// 	Stack<Card> deck = Card.getShuffle(256);
 		// 	ArrayList<Card> hand = new ArrayList<>();
@@ -688,7 +766,7 @@ public class OurUtilities {
 		//
 		// }
 		//
-		// String fileName = "distributions-0.txt";
+		// String fileName = "distributions-10000000.txt";
 		// File file = new File(fileName);
 		// PrintWriter pw;
 		// try {

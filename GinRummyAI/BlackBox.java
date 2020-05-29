@@ -5,12 +5,12 @@ import java.util.Arrays;
 
 public class BlackBox {
 
-	static final String[] FILENAMES = new String[] {"linear_coef.csv", "quadratic_coef.csv", "logistic_coef.csv"};
+	static final String[] FILENAMES = new String[] {"linear_coef.csv", "quadratic_coef.csv", "logistic_coef.csv", "network_coef.csv"};
 	static final int SIMPLE = -1, ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3;
-	static final int LINEAR = 0, QUADRATIC = 1, LOGISTIC = 2;
+	static final int LINEAR = 0, QUADRATIC = 1, LOGISTIC = 2, NETWORK = 3;
 
-	static final int[] VERSIONS = {ALPHA, BETA};
-	static final int[] TYPES = {LINEAR, QUADRATIC, LOGISTIC};
+	static final int[] VERSIONS = {ALPHA, BETA, GAMMA, DELTA};
+	static final int[] TYPES = {LINEAR, QUADRATIC, LOGISTIC, NETWORK};
 
 	static ArrayList<ArrayList<ArrayList<Double>>> coefficients = new ArrayList<ArrayList<ArrayList<Double>>>();
 
@@ -69,6 +69,13 @@ public class BlackBox {
 					k++;
 				}
 			}
+
+			if(player.type == NETWORK) {
+
+
+				double[] features = OurUtilities.calculateFeatures(player);
+			}
+
 			double linear_combination = 0;
 			// System.out.println("features len: " + quadratic_features.length);
 			// System.out.println("Coeef size: " + coefArr.size());

@@ -53,7 +53,7 @@ Rank the top three (derived) features you would select to predict (1) hand score
 
 
 ### Gamma Features
--
+- **num_nearby_opponent_cards**
 
 
 ### Features not implemented (since beta)
