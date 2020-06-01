@@ -1,24 +1,27 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Arrays;
 
 public class BlackBox {
 
-	static final String[] FILENAMES = new String[] {"linear_coef.csv", "quadratic_coef.csv", "logistic_coef.csv", "network_coef.csv"};
+	static final String[] FILENAMES = new String[] {"linear_coef.csv", "quadratic_coef.csv", "logistic_coef.csv"};
 	static final int SIMPLE = -1, ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3;
 	static final int LINEAR = 0, QUADRATIC = 1, LOGISTIC = 2, NETWORK = 3;
 
 	static final int[] VERSIONS = {ALPHA, BETA, GAMMA, DELTA};
-	static final int[] TYPES = {LINEAR, QUADRATIC, LOGISTIC, NETWORK};
+	static final String[] STRING_VERSIONS = {"alpha", "beta", "gamma", "delta"};
+	static final int[] COEFFICIENT_TYPES = {LINEAR, QUADRATIC, LOGISTIC};
+	static String base_post_url = "http://127.0.0.1:4201/";
 
 	static ArrayList<ArrayList<ArrayList<Double>>> coefficients = new ArrayList<ArrayList<ArrayList<Double>>>();
 
 	static {
 		try {
-			for (int type : TYPES) {
+			for (int type : COEFFICIENT_TYPES) {
 				ArrayList<ArrayList<Double>> typeAL = new ArrayList<ArrayList<Double>>();
-				String fileName = FILENAMES[type];
+				String fileName = "regression_models/" + FILENAMES[type];
 				Scanner fileIn = new Scanner(new File(fileName));
 				while (fileIn.hasNext()) {
 					String line[] = fileIn.nextLine().split(",");
@@ -36,10 +39,14 @@ public class BlackBox {
 		}
 	}
 
+
 	/**
 	 * returns the probability of winning the game
+	 * @throws IOException
+	 * @throws UnsupportedKerasConfigurationException
+	 * @throws InvalidKerasConfigurationException
 	**/
-	static public double regFunction(Player player) {
+	public static double regFunction(Player player) {
 
 		if (player.version == SIMPLE) {
 			return OurUtilities.calculateFeatures(player)[2] / -10.0 + 5;
@@ -70,29 +77,45 @@ public class BlackBox {
 				}
 			}
 
-			if(player.type == NETWORK) {
-
-
-				double[] features = OurUtilities.calculateFeatures(player);
-			}
-
 			double linear_combination = 0;
-			// System.out.println("features len: " + quadratic_features.length);
-			// System.out.println("Coeef size: " + coefArr.size());
 			for (int i = 1; i < coefArr.size(); i++) {
-				// System.out.println("i: " + i);
-				// System.out.println("Coeef: " + coefArr.get(i));
-				// System.out.println("Quad: " + quadratic_features[i - 1]);
-				// System.out.println("---------------------------------------------------");
 				linear_combination += coefArr.get(i) * quadratic_features[i - 1];
 			}
 			return linear_combination + coefArr.get(0);
+
 		}
 
-		else {
-			return -100000;
+		if (player.type == NETWORK) {
+
+			double[] features = OurUtilities.calculateFeatures(player);
+			features = new double[] {features[0], features[1], features[2], features[3], features[13]};
+			String featuresStr1 = Arrays.toString(features);
+			String featuresStr = featuresStr1.substring(1,featuresStr1.length() -1);
+
+			Request request = new Request(base_post_url + "calculate_network/version=" + player.version);
+
+			try {
+				return request.sendFeatures(featuresStr);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
 		}
+
+		return -1000000;
 	}
 
+
+	public static void main(String[] args) throws IOException {
+
+		long start = System.currentTimeMillis();
+
+		Request request = new Request("http://127.0.0.1:4201/" + "calculate_network/version=" + GAMMA);
+
+		System.out.println(request.sendFeatures("0,0,69,6,1"));
+
+		System.out.println("elapsed: " + (System.currentTimeMillis() - start));
+
+	}
 
 }

@@ -297,28 +297,29 @@ public class GinRummyGame {
 	 */
 	public static void main(String[] args) {
 		// Single verbose demonstration game
+		
 		setPlayVerbose(true);
-		GinRummyGame game = new GinRummyGame(new Player(BlackBox.DELTA, BlackBox.LINEAR), new Player(BlackBox.GAMMA, BlackBox.LINEAR));
+		GinRummyGame game = new GinRummyGame(new SimpleGinRummyPlayer(), new Player(BlackBox.GAMMA, BlackBox.NETWORK));
 
 		game.play();
 
-		System.out.println("-----------");
-
-		// Multiple non-verbose games
-		setPlayVerbose(false);
-		int numGames = 300;
-		int numP1Wins = 0;
-		game = new GinRummyGame(new Player(BlackBox.DELTA, BlackBox.LINEAR), new Player(BlackBox.GAMMA, BlackBox.LINEAR));
-		long startMs = System.currentTimeMillis();
-		for (int i = 0; i < numGames; i++) {
-			if (i % 10 == 0) {
-				System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
-			}
-			numP1Wins += game.play();
-		}
-		long totalMs = System.currentTimeMillis() - startMs;
-		System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
-		System.out.printf("Games Won: P0:%d, P1:%d.\n", numGames - numP1Wins, numP1Wins);
+//		System.out.println("-----------");
+//
+//		// Multiple non-verbose games
+//		setPlayVerbose(false);
+//		int numGames = 300;
+//		int numP1Wins = 0;
+//		game = new GinRummyGame(new Player(BlackBox.DELTA, BlackBox.LINEAR), new Player(BlackBox.GAMMA, BlackBox.LINEAR));
+//		long startMs = System.currentTimeMillis();
+//		for (int i = 0; i < numGames; i++) {
+//			if (i % 10 == 0) {
+//				System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
+//			}
+//			numP1Wins += game.play();
+//		}
+//		long totalMs = System.currentTimeMillis() - startMs;
+//		System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
+//		System.out.printf("Games Won: P0:%d, P1:%d.\n", numGames - numP1Wins, numP1Wins);
 	}
 
 }

@@ -107,3 +107,11 @@ Added feature 'num_vis_cards_to_opponent' to the new player DELTA.
 nearbyCards() works as follows: find with multiplicity the adjacent cards to each card in the ArrayList provided.
 
 Tried acquiring regression coefficients from neural networks, based on the features that were working.
+
+
+## Week 3
+
+### Monday 6/1/20
+
+
+Made `Request` class and python server, to communicate with more complex python models. It takes 24ms round trip so it is a little too slow. 
