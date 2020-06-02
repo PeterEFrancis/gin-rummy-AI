@@ -537,7 +537,7 @@ public class OurUtilities {
 							point_sum_load_cards,
 							turns_taken,
 							num_nearby_opponent_cards,
-							num_vis_cards_to_opponent,
+							// num_vis_cards_to_opponent,
 							//num_set_melds
 							//num_run_melds
 							//num_set_combos

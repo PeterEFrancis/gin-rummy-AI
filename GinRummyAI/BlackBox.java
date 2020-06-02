@@ -8,7 +8,7 @@ public class BlackBox {
 
 	static final String[] FILENAMES = new String[] {"linear_coef.csv", "quadratic_coef.csv", "logistic_coef.csv"};
 	static final int SIMPLE = -1, ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3;
-	static final int LINEAR = 0, QUADRATIC = 1, LOGISTIC = 2, NETWORK = 3;
+	static final int LINEAR = 0, QUADRATIC = 1, LOGISTIC = 2, NETWORK = 3, XGBOOST = 4;
 
 	static final int[] VERSIONS = {ALPHA, BETA, GAMMA, DELTA};
 	static final String[] STRING_VERSIONS = {"alpha", "beta", "gamma", "delta"};
@@ -87,34 +87,39 @@ public class BlackBox {
 
 		if (player.type == NETWORK) {
 
-			double[] features = OurUtilities.calculateFeatures(player);
-			features = new double[] {features[0], features[1], features[2], features[3], features[13]};
-			String featuresStr1 = Arrays.toString(features);
-			String featuresStr = featuresStr1.substring(1,featuresStr1.length() -1);
-
-			Request request = new Request(base_post_url + "calculate_network/version=" + player.version);
-
-			try {
-				return request.sendFeatures(featuresStr);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			// double[] features = OurUtilities.calculateFeatures(player);
+			// features = new double[] {features[0], features[1], features[2], features[3], features[13]};
+			// String featuresStr1 = Arrays.toString(features);
+			// String featuresStr = featuresStr1.substring(1,featuresStr1.length() -1);
+			//
+			// Request request = new Request(base_post_url + "calculate_network/version=" + player.version);
+			//
+			// try {
+			// 	return request.sendFeatures(featuresStr);
+			// } catch (IOException e) {
+			// 	e.printStackTrace();
+			// }
 
 		}
+
+		if (player.type == XGBOOST) {
+
+			double[] features = OurUtilities.calculateFeatures(player);
+
+			xgboost_087630fb_4f1c_4de4_b265_932fcf311387 xgb = new xgboost_087630fb_4f1c_4de4_b265_932fcf311387();
+			double[] val = xgb.score0(features, new double[1]);
+			// System.out.println(Arrays.toString(val));
+			return val[0];
+
+		}
+
+
 
 		return -1000000;
 	}
 
 
 	public static void main(String[] args) throws IOException {
-
-		long start = System.currentTimeMillis();
-
-		Request request = new Request("http://127.0.0.1:4201/" + "calculate_network/version=" + GAMMA);
-
-		System.out.println(request.sendFeatures("0,0,69,6,1"));
-
-		System.out.println("elapsed: " + (System.currentTimeMillis() - start));
 
 	}
 

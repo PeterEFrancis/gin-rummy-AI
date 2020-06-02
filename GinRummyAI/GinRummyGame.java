@@ -298,11 +298,15 @@ public class GinRummyGame {
 	public static void main(String[] args) {
 		// Single verbose demonstration game
 		
+//		long start = System.currentTimeMillis();
+		
 		setPlayVerbose(true);
-		GinRummyGame game = new GinRummyGame(new SimpleGinRummyPlayer(), new Player(BlackBox.GAMMA, BlackBox.NETWORK));
+		GinRummyGame game = new GinRummyGame(new SimpleGinRummyPlayer(), new Player(BlackBox.GAMMA, BlackBox.XGBOOST));
 
 		game.play();
-
+		
+//		System.out.println(System.currentTimeMillis() - start);
+		
 //		System.out.println("-----------");
 //
 //		// Multiple non-verbose games

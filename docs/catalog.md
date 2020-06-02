@@ -114,4 +114,9 @@ Tried acquiring regression coefficients from neural networks, based on the featu
 ### Monday 6/1/20
 
 
-Made `Request` class and python server, to communicate with more complex python models. It takes 24ms round trip so it is a little too slow. 
+Made `Request` class and python server, to communicate with more complex python models. It takes 24ms round trip so it is a little too slow.
+
+
+### Tuesday 6/2/20
+
+Got H2O model development and exportation to `GinRummyAI` functional. Researched Gradient Boosted Decision trees. Need to rework `Player` and `BlackBox` for efficiency and clarity.
