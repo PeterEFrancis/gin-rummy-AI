@@ -17,6 +17,7 @@
 14. 500 games between `SimplePlayer` and itself, collecting ABCD, seed i, without adding opponent drawn face-up card to unknown cards
 15. 1000 games between `SimpleGinRummyPlayer` and itself, collecting ABCD, seed i
 16. 3000 games between `SimpleGinRummyPlayer` and itself, collecting CD, seed i
+17. 246100 games between `SimpleGinRummyPlayer` and itself, collecting CD
 
 
 ### Beta

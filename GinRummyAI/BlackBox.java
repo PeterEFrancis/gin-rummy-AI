@@ -2,17 +2,24 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import hex.genmodel.easy.EasyPredictModelWrapper;
+import hex.genmodel.easy.RowData;
+import hex.genmodel.easy.exception.PredictException;
+import hex.genmodel.easy.prediction.BinomialModelPrediction;
+
 import java.util.Arrays;
 
 public class BlackBox {
 
-	static final String[] FILENAMES = new String[] {"linear_coef.csv", "quadratic_coef.csv", "logistic_coef.csv"};
-	static final int SIMPLE = -1, ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3;
-	static final int LINEAR = 0, QUADRATIC = 1, LOGISTIC = 2, NETWORK = 3, XGBOOST = 4;
+	static final String GBMName = "xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88";
+	static final String[] FILENAMES = new String[] {"linear_coef.csv", "quadratic_coef.csv"};
+	static final int ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3;
+	static final int LINEAR = 0, QUADRATIC = 1, NETWORK = 2, XGBOOST = 3;
 
 	static final int[] VERSIONS = {ALPHA, BETA, GAMMA, DELTA};
 	static final String[] STRING_VERSIONS = {"alpha", "beta", "gamma", "delta"};
-	static final int[] COEFFICIENT_TYPES = {LINEAR, QUADRATIC, LOGISTIC};
+	static final int[] COEFFICIENT_TYPES = {LINEAR, QUADRATIC};
 	static String base_post_url = "http://127.0.0.1:4201/";
 
 	static ArrayList<ArrayList<ArrayList<Double>>> coefficients = new ArrayList<ArrayList<ArrayList<Double>>>();
@@ -47,10 +54,6 @@ public class BlackBox {
 	 * @throws InvalidKerasConfigurationException
 	**/
 	public static double regFunction(Player player) {
-
-		if (player.version == SIMPLE) {
-			return OurUtilities.calculateFeatures(player)[2] / -10.0 + 5;
-		}
 
 		if (player.type == LINEAR) {
 			ArrayList<Double> coefArr = coefficients.get(player.type).get(player.version);
@@ -105,15 +108,61 @@ public class BlackBox {
 		if (player.type == XGBOOST) {
 
 			double[] features = OurUtilities.calculateFeatures(player);
+			//System.out.println(Arrays.toString(features));
 
-			xgboost_087630fb_4f1c_4de4_b265_932fcf311387 xgb = new xgboost_087630fb_4f1c_4de4_b265_932fcf311387();
+			xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88 xgb = new xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88();
 			double[] val = xgb.score0(features, new double[1]);
-			// System.out.println(Arrays.toString(val));
+			// System.out.println("val= " + val[0]);
 			return val[0];
 
+			// String modelClassName = "xgboost_0373d649_c119_4ca5_a67d_c22d2c258b81"; //insert class name here
+			// hex.genmodel.GenModel rawModel;
+   		// try {
+			// rawModel = (hex.genmodel.GenModel) Class.forName(modelClassName).newInstance();
+			//
+			// EasyPredictModelWrapper model = new EasyPredictModelWrapper(rawModel);
+			//
+			// String[] feature_names = {"current_player_score",
+			// 													"opponent_score",
+			// 													"current_player_deadwood",
+			// 													"current_player_num_hit_cards",
+			// 													"num_melds",
+			// 													"point_sum_melds",
+			// 													"num_combos",
+			// 													"point_sum_combos",
+			// 													"num_knock_cache",
+			// 													"point_sum_knock_cache",
+			// 													"num_load_cards",
+			// 													"point_sum_load_cards",
+			// 													"turns_taken",
+			// 													"num_nearby_opponent_cards"};
+			//
+			//
+    	// 	RowData row = new RowData();
+	 		// for (int i = 0; i < features.length; i++) {
+		 	// 	row.put(feature_names[i],features[i]);
+	 		// }
+    	// 	BinomialModelPrediction p = model.predictBinomial(row);
+    	// 	// System.out.println("Label (aka prediction) is_current_player_game_winner: " + p.label);
+    	// 	// System.out.print("Class probabilities: ");
+    	// 	// for (int i = 0; i < p.classProbabilities.length; i++) {
+      // 	// 	if (i > 0) {
+      //   	// 		System.out.print(",");
+      // 	// 	}
+      // 	// 	System.out.print(p.classProbabilities[i]);
+    	// 	// }
+    	// 	// System.out.println("");
+			//
+			// System.out.println("taylor's thing: " + p.classProbabilities[0]);
+			//
+			// return p.classProbabilities[0];
+
+
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		// System.out.println(1/0);
 		}
-
-
 
 		return -1000000;
 	}

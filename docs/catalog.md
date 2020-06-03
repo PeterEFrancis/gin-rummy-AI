@@ -120,3 +120,7 @@ Made `Request` class and python server, to communicate with more complex python 
 ### Tuesday 6/2/20
 
 Got H2O model development and exportation to `GinRummyAI` functional. Researched Gradient Boosted Decision trees. Need to rework `Player` and `BlackBox` for efficiency and clarity.
+
+### Wednesday 6/3/20
+
+Used XGBoost and debugged the regression model. We are somehow processing data incorrectly on our side.

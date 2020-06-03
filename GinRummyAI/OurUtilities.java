@@ -1,5 +1,12 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Scanner;
+
+import hex.genmodel.easy.EasyPredictModelWrapper;
+import hex.genmodel.easy.RowData;
+import hex.genmodel.easy.prediction.BinomialModelPrediction;
+import hex.genmodel.easy.prediction.RegressionModelPrediction;
 
 public class OurUtilities {
 
@@ -205,19 +212,19 @@ public class OurUtilities {
 	}
 
 	/**
-	* converts a card to its corresponding bitstring
-	* @param c - card
-	* @return bitstring
-	**/
+	 * converts a card to its corresponding bitstring
+	 * @param c - card
+	 * @return bitstring
+	 **/
 	public static long cardToBitstring(Card c) {
 		return 1L << c.getId();
 	}
 
 	/**
-	* converts a bitstring to its corresponding card
-	* @param cardBits - bitstring
-	* @return card
-	**/
+	 * converts a bitstring to its corresponding card
+	 * @param cardBits - bitstring
+	 * @return card
+	 **/
 	public static Card bitstringToCard(long cardBits) {
 		int id = 0;
 		while (cardBits != 1) {
@@ -228,10 +235,10 @@ public class OurUtilities {
 	}
 
 	/**
-	* gets the actual card object from the Card class, based on the given card's ID
-	* @param c - card
-	* @return card object from the Card class
-	**/
+	 * gets the actual card object from the Card class, based on the given card's ID
+	 * @param c - card
+	 * @return card object from the Card class
+	 **/
 	public static Card transformCard(Card c) {
 		return Card.allCards[c.getId()];
 	}
@@ -249,10 +256,10 @@ public class OurUtilities {
 	}
 
 	/**
-	* gets the face (point) value of the given card. All face cards are worth 10 points
-	* @param c - current card
-	* @return the face (point) value of the given card
-	**/
+	 * gets the face (point) value of the given card. All face cards are worth 10 points
+	 * @param c - current card
+	 * @return the face (point) value of the given card
+	 **/
 	public static int getFaceValue(Card c) {
 		int rank = c.getRank();
 		if (rank >= 10)
@@ -263,14 +270,14 @@ public class OurUtilities {
 
 	//__objectively__ the best function
 	/**
-	* returns the best orgnanization of a given hand
-	* 		index 0 - list of all best melds
-	* 		index 1 - list of all possible combos
-	* 		index 2 - list of all load cards
-	* 		index 3 - list of cards in the largest knock cash
-	* @param hand - cards in the hand
-	* @return the best hand organization
-	**/
+	 * returns the best orgnanization of a given hand
+	 * 		index 0 - list of all best melds
+	 * 		index 1 - list of all possible combos
+	 * 		index 2 - list of all load cards
+	 * 		index 3 - list of cards in the largest knock cash
+	 * @param hand - cards in the hand
+	 * @return the best hand organization
+	 **/
 	public static ArrayList<ArrayList<ArrayList<Card>>> getBestHandOrganization(ArrayList<Card> hand) {
 		ArrayList<ArrayList<ArrayList<Card>>> meldSets = GinRummyUtil.cardsToBestMeldSets(hand);
 
@@ -344,10 +351,10 @@ public class OurUtilities {
 	}
 
 	/**
-	* returns the number of melds that are comprised of cards of the same rank
-	* @param melds - list of best melds in the player's hand
-	* @return the number of melds that are comprised of cards of the same rank
-	**/
+	 * returns the number of melds that are comprised of cards of the same rank
+	 * @param melds - list of best melds in the player's hand
+	 * @return the number of melds that are comprised of cards of the same rank
+	 **/
 	public static int numSetMelds(ArrayList<ArrayList<Card>> melds) {
 		int numSets = 0;
 		for (ArrayList<Card> meld : melds) {
@@ -359,10 +366,10 @@ public class OurUtilities {
 	}
 
 	/**
-	* returns the number of melds that are comprised of cards of the same suit
-	* @param melds - list of best melds in the player's hand
-	* @return the number of melds that are comprised of cards of the same suit
-	**/
+	 * returns the number of melds that are comprised of cards of the same suit
+	 * @param melds - list of best melds in the player's hand
+	 * @return the number of melds that are comprised of cards of the same suit
+	 **/
 	public static int numRunMelds(ArrayList<ArrayList<Card>> melds) {
 		int numRuns = 0;
 		for (ArrayList<Card> meld : melds) {
@@ -374,10 +381,10 @@ public class OurUtilities {
 	}
 
 	/**
-	* returns the number of combos that are comprised of cards of the same rank
-	* @param combos - list of best combos in the player's hand
-	* @return the number of combos that are comprised of cards of the same rank
-	**/
+	 * returns the number of combos that are comprised of cards of the same rank
+	 * @param combos - list of best combos in the player's hand
+	 * @return the number of combos that are comprised of cards of the same rank
+	 **/
 	public static int numSetCombos(ArrayList<ArrayList<Card>> combos) {
 		int numSets = 0;
 		for (ArrayList<Card> combo : combos) {
@@ -389,10 +396,10 @@ public class OurUtilities {
 	}
 
 	/**
-	* returns the number of combos that are comprised of cards of the same suit
-	* @param combos - list of best combos in the player's hand
-	* @return the number of combos that are comprised of cards of the same suit
-	**/
+	 * returns the number of combos that are comprised of cards of the same suit
+	 * @param combos - list of best combos in the player's hand
+	 * @return the number of combos that are comprised of cards of the same suit
+	 **/
 	public static int numRunCombos(ArrayList<ArrayList<Card>> combos) {
 		int numRuns = 0;
 		for (ArrayList<Card> combo : combos) {
@@ -404,8 +411,8 @@ public class OurUtilities {
 	}
 
 	/**
-	*
-	**/
+	 *
+	 **/
 	public static ArrayList<Card> removeCards(ArrayList<ArrayList<Card>> set, ArrayList<Card> cards) {
 		ArrayList<Card> returnCards = new ArrayList<Card>();
 		for (Card c : cards) {
@@ -481,7 +488,7 @@ public class OurUtilities {
 
 	/**
 	 * calculates all possible features about a player's current state
-	**/
+	 **/
 	public static double[] calculateFeatures(Player player) {
 
 		double current_player_score = player.scores[player.playerNum];
@@ -511,7 +518,7 @@ public class OurUtilities {
 		ArrayList<Card> nearby = nearbyCards(player.opponentHand);
 		double num_nearby_opponent_cards = nearby.size();
 
-		double num_vis_cards_to_opponent = player.visibleCards.size();
+		// double num_vis_cards_to_opponent = player.visibleCards.size();
 
 		//double num_set_melds = numSetMelds(organization.get(0));
 		//double num_run_melds = numRunMelds(organization.get(0));
@@ -523,25 +530,25 @@ public class OurUtilities {
 		// num_
 
 		return new double[] {
-							current_player_score,
-							opponent_score,
-							current_player_deadwood,
-							current_player_num_hit_cards,
-							num_melds,
-							point_sum_melds,
-							num_combos,
-							point_sum_combos,
-							num_knock_cache,
-							point_sum_knock_cache,
-							num_load_cards,
-							point_sum_load_cards,
-							turns_taken,
-							num_nearby_opponent_cards,
-							// num_vis_cards_to_opponent,
-							//num_set_melds
-							//num_run_melds
-							//num_set_combos
-							//num_run_combos
+				current_player_score,
+				opponent_score,
+				current_player_deadwood,
+				current_player_num_hit_cards,
+				num_melds,
+				point_sum_melds,
+				num_combos,
+				point_sum_combos,
+				num_knock_cache,
+				point_sum_knock_cache,
+				num_load_cards,
+				point_sum_load_cards,
+				turns_taken,
+				num_nearby_opponent_cards,
+				// num_vis_cards_to_opponent,
+				//num_set_melds
+				//num_run_melds
+				//num_set_combos
+				//num_run_combos
 		};
 	}
 
@@ -599,10 +606,10 @@ public class OurUtilities {
 		double current_player_num_hit_cards = numHitCards(deck, player.cards);
 
 		return new double[] {
-							current_player_score,
-							opponent_score,
-							current_player_deadwood,
-							current_player_num_hit_cards
+				current_player_score,
+				opponent_score,
+				current_player_deadwood,
+				current_player_num_hit_cards
 		};
 	}
 
@@ -614,6 +621,27 @@ public class OurUtilities {
 				}
 			}
 		}
+	}
+
+	// no whitespace at end of line
+	public static ArrayList<Card> stringToHand(String hand) {
+		ArrayList<Card> newHand = new ArrayList<Card>();
+		String[] cards = hand.split(" ");
+		for (String card : cards) {
+			int rank = getIndex(Card.rankNames,card.substring(0,1));
+			int suit = getIndex(Card.suitNames,card.substring(1));
+			newHand.add(Card.allCards[Card.getId(rank,suit)]);
+		}
+		return newHand;
+	}
+
+	public static int getIndex(String[] array, String s) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i].equals(s)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	// C=0, H=1, S=2, D=3
@@ -642,6 +670,13 @@ public class OurUtilities {
 	public static int[] set6ranks = {0,7,12};
 	public static int[] set6suits = {0,0,0};
 
+	// ArrayList of generated player states bunched in groups of two. The first state should be
+	//   better than the second state by an amount substantial enough to superceed bias
+	// Things that need to be added to each Player (used in calculateFeatures):
+	// 	-
+	// pair 1:
+	public static ArrayList<Player> testPlayers = new ArrayList<Player>();
+
 	public static int[][] testCards;
 	static {
 		testCards = new int[14][10];
@@ -657,6 +692,165 @@ public class OurUtilities {
 		testCards[9] = set5suits;
 		testCards[10] = set6ranks;
 		testCards[11] = set6suits;
+
+		int testVersion = BlackBox.ALPHA;
+		int testType = BlackBox.LINEAR;
+
+		Player p1 = new Player(testVersion, testType);
+		p1.hand = stringToHand("AC 2C 3C 4H 5S 6D 8C 8H 9S TD");
+		setupGenericPlayer(p1);
+
+		Player p2 = new Player(testVersion, testType);
+		p2.hand = stringToHand("AC 2C 3C 4H 5S 6D 7C 8H 9S TD");
+		setupGenericPlayer(p2);
+
+		//p1 state better because +1 combo +1 deadwood
+		testPlayers.add(p1);
+		testPlayers.add(p2);
+
+
+		Player p3 = new Player(testVersion, testType);
+		p3.hand = stringToHand("AC 2H 3S 4D 5C 6H TS 8D 9C TH");
+		setupGenericPlayer(p3);
+
+		Player p4 = new Player(testVersion, testType);
+		setupGenericPlayer(p4);
+
+		// p3 hand is probably better? p3 hand has +1 combo +3 deadwood
+		testPlayers.add(p3);
+		testPlayers.add(p4);
+
+
+
+		Player p5 = new Player(testVersion, testType);
+		p5.hand = stringToHand("AC AH AD 4C 6H 6S 8C 8D KC 4D");
+		setupGenericPlayer(p5);
+
+		Player p6 = new Player(testVersion, testType);
+		p6.hand = stringToHand("AC AH AD 4C 6H 6S 8C 8D KC KD");
+		setupGenericPlayer(p6);
+
+		// p5 hand better than p6 because p5 has -6 deadwood
+		testPlayers.add(p5);
+		testPlayers.add(p6);
+
+
+	}
+
+	public static void setupGenericPlayer(Player p) {
+		if (p.hand == null)
+			p.hand = stringToHand("AC 2H 3S 4D 5C 6H 7S 8D 9C TH"); // trash hand
+		p.playerNum = 0;
+		p.scores = new int[]{10,10}; // a few hands in
+		if (p.opponentHand == null)
+			p.opponentHand = new ArrayList<Card>();
+		ArrayList<Card> possible = new ArrayList<Card>();
+		for (Card c : Card.allCards) {
+			possible.add(c);
+		}
+		possible.removeAll(p.hand);
+		possible.removeAll(p.opponentHand);
+		p.possibleCards = possible;
+		p.visibleCards = new ArrayList<Card>();
+		p.turn = 3; // a few turns in
+	}
+
+	public static void testRegressionFit() {
+		String data = "alpha-81.csv";
+		int numFeatures = 4;
+
+
+		File f = new File(data);
+		ArrayList<String> dataLines = new ArrayList<String>();
+
+		try {
+			Scanner s = new Scanner(f);
+
+			s.nextLine();
+			while (s.hasNext()) {
+				String str = s.nextLine();
+				if (Math.random() < .1) {
+					dataLines.add(str);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		double linCounter = 0;
+		double gbmCounter = 0;
+		double halfCounter = 0;
+		for (int i = 0; i < dataLines.size(); i++) {
+			String[] pieces = dataLines.get(i).split(",");
+			// System.out.println(pieces.length);
+			double[] dataline = new double[pieces.length];
+			// System.out.println(dataline.length);
+			for (int j = 0; j < pieces.length; j++) {
+				dataline[j] = Double.parseDouble(pieces[j]);
+			}
+
+			double[] features = new double[dataline.length-3];
+			for (int j = 0; j < features.length; j++) {
+				features[j] = dataline[j+3];
+			}
+
+			//----------------------------------------------------------------------------------------------------------------------------------
+			xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88 xgb = new xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88();
+			double[] val = xgb.score0(features, new double[3]);
+			// System.out.println("val= " + val[0]);
+
+			double gbmPred = val[0];
+
+
+			//--------------------------------------------------------------------------------------------------------------------------------
+			ArrayList<Double> coefArr = BlackBox.coefficients.get(BlackBox.LINEAR).get(BlackBox.GAMMA);
+			double linear_combination = 0;
+			// System.out.println(features.length);
+			for (int j = 1; j < numFeatures+1; j++) {
+				linear_combination += coefArr.get(j) * features[j - 1];
+			}
+			double linPred = linear_combination + coefArr.get(0);
+
+			double actualValue = dataline[2];
+
+			double half = .5;
+
+			halfCounter += Math.abs(half - actualValue) * Math.abs(half - actualValue);
+			linCounter += Math.abs(linPred - actualValue) * Math.abs(linPred - actualValue);
+			gbmCounter += Math.abs(gbmPred - actualValue) * Math.abs(gbmPred - actualValue);
+			// if (Math.abs(linPred - actualValue) > Math.abs(gbmPred - actualValue)) {
+			// 	linCounter++;
+			// }
+			// else {
+			// 	gbmCounter++;
+			// }
+
+		}
+		double n = dataLines.size();
+		double gbm = Math.sqrt(gbmCounter)/n;
+		double lin = Math.sqrt(linCounter)/n;
+		double halfVal = Math.sqrt(halfCounter)/n;
+		System.out.println("   GBM: " + gbm);
+		System.out.println("LINEAR: " + lin);
+		System.out.println("    .5: " + halfVal);
+
+
+
+
+	}
+
+
+
+	public static void testDecisions() {
+		for (int i = 0; i < testPlayers.size(); i+=2) {
+			double reg1 = BlackBox.regFunction(testPlayers.get(i));
+			double reg2 = BlackBox.regFunction(testPlayers.get(i+1));
+			System.out.println("reg1: "+reg1);
+			System.out.println("reg2: "+reg2);
+			System.out.println("reg1 > reg2: "+(reg1 > reg2));
+			System.out.println();
+
+		}
 	}
 
 	public static void testUtils() {
@@ -720,7 +914,9 @@ public class OurUtilities {
 
 	public static void main(String[] args) {
 
-		testUtils();
+		testRegressionFit();
+		// testDecisions();
+		// testUtils();
 
 		// find distributions
 

@@ -41,11 +41,9 @@ public class Player implements GinRummyPlayer{
 		this.type = type;
 	}
 
-
 	@Override
 	public void startGame(int playerNum, int startingPlayerNum, Card[] hand) {
 
-		// Initialize all arrayLists
 		this.hand = new ArrayList<Card>();
 		unknownCards = new ArrayList<Card>();
 		possibleCards = new ArrayList<Card>();
@@ -81,22 +79,22 @@ public class Player implements GinRummyPlayer{
 
 	@Override
 	public boolean willDrawFaceUpCard(Card card) {
-		// System.out.println("----------------------------------------------v");
 		card = OurUtilities.transformCard(card);
 
-		// @SuppressWarnings("unchecked")
+		// first turn
 		if (discardedCards.isEmpty()) {
 			discardedCards.push(card);
 			unknownCards.remove(card);
 			possibleCards.remove(card);
 		}
+
 		hand.add(discardedCards.pop()); // draw face up
 
 		double max = -10000000;
 		for (int i = 0; i < 10; i++) {
 			//discard the first card in the hand
 			Card discarded = hand.remove(0);
-			discardedCards.add(discarded);
+			discardedCards.push(discarded);
 
 			double value = BlackBox.regFunction(this);
 			if (value > max) {
@@ -148,11 +146,9 @@ public class Player implements GinRummyPlayer{
 		if (average >= max) {
 			toDiscard = null;
 			// System.out.println("Doesn't draw face up card");
-			// System.out.println("----------------------------------------------^");
 			return false;
 		}
 		// System.out.println("Draws face up card");
-		// System.out.println("----------------------------------------------^");
 		return true;
 
 	}
@@ -292,10 +288,6 @@ public class Player implements GinRummyPlayer{
 	public void reportFinalHand(int playerNum, ArrayList<Card> hand) {
 		// Ignored by simple player, but could affect strategy of more complex player.
 	}
-
-
-
-
 
 
 
