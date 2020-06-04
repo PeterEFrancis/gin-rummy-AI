@@ -177,7 +177,7 @@ public class Collect {
 
 
 
-				if (!(turnsTaken == 3 && faceUpCard == firstFaceUpCard && deck.size() == 31)) { // both players declined and 1st player must draw face down
+				if (!(turnsTaken == 2 && faceUpCard == firstFaceUpCard)) { // both players declined and 1st player must draw face down
 					drawFaceUp = players[currentPlayer].willDrawFaceUpCard(faceUpCard);
 					if (playVerbose && !drawFaceUp && faceUpCard == firstFaceUpCard && turnsTaken < 2)
 						System.out.printf("Player %d declines %s.\n", currentPlayer, firstFaceUpCard);
@@ -554,10 +554,11 @@ public class Collect {
 		// put new features directly above me
 
 
-		for (int i = 0; i < 10000000; i++) {
-			setPlayVerbose(false);
+		for (int i = 0; i < 1; i++) {
+			setPlayVerbose(true);
 
-			Collect game = new Collect(new SimpleGinRummyPlayer(), new SimpleGinRummyPlayer());
+			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR), 268);
+
 
 			ArrayList<ArrayList<String>> csvOutput = game.getPlayData();
 

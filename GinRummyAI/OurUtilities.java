@@ -518,7 +518,7 @@ public class OurUtilities {
 		ArrayList<Card> nearby = nearbyCards(player.opponentHand);
 		double num_nearby_opponent_cards = nearby.size();
 
-		// double num_vis_cards_to_opponent = player.visibleCards.size();
+		double num_vis_cards_to_opponent = player.visibleCards.size();
 
 		//double num_set_melds = numSetMelds(organization.get(0));
 		//double num_run_melds = numRunMelds(organization.get(0));
@@ -544,7 +544,7 @@ public class OurUtilities {
 				point_sum_load_cards,
 				turns_taken,
 				num_nearby_opponent_cards,
-				// num_vis_cards_to_opponent,
+				num_vis_cards_to_opponent,
 				//num_set_melds
 				//num_run_melds
 				//num_set_combos

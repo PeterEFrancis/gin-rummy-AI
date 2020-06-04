@@ -110,7 +110,7 @@ public class GinRummyGame {
 				boolean drawFaceUp = false;
 				Card faceUpCard = discards.peek();
 				// offer draw face-up iff not 3rd turn with first face up card (decline automatically in that case)
-				if (!(turnsTaken == 3 && faceUpCard == firstFaceUpCard && deck.size() == 31)) { // both players declined and 1st player must draw face down
+				if (!(turnsTaken == 2 && faceUpCard == firstFaceUpCard)) { // both players declined and 1st player must draw face down
 					drawFaceUp = players[currentPlayer].willDrawFaceUpCard(faceUpCard);
 					if (playVerbose && !drawFaceUp && faceUpCard == firstFaceUpCard && turnsTaken < 2)
 						System.out.printf("Player %d declines %s.\n", currentPlayer, firstFaceUpCard);
@@ -297,33 +297,33 @@ public class GinRummyGame {
 	 */
 	public static void main(String[] args) {
 		// Single verbose demonstration game
-		
+
 //		long start = System.currentTimeMillis();
-		
+
 		setPlayVerbose(true);
-		GinRummyGame game = new GinRummyGame(new Player(BlackBox.GAMMA, BlackBox.LINEAR), new Player(BlackBox.GAMMA, BlackBox.XGBOOST));
+		GinRummyGame game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
 
 		game.play();
-		
+
 //		System.out.println(System.currentTimeMillis() - start);
-		
+
 //		System.out.println("-----------");
 //
 		// Multiple non-verbose games
-		setPlayVerbose(false);
-		int numGames = 300;
-		int numP1Wins = 0;
-		game = new GinRummyGame(new Player(BlackBox.GAMMA, BlackBox.LINEAR), new Player(BlackBox.GAMMA, BlackBox.XGBOOST));
-		long startMs = System.currentTimeMillis();
-		for (int i = 0; i < numGames; i++) {
-			if (i % 10 == 0) {
-				System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
-			}
-			numP1Wins += game.play();
-		}
-		long totalMs = System.currentTimeMillis() - startMs;
-		System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
-		System.out.printf("Games Won: P0:%d, P1:%d.\n", numGames - numP1Wins, numP1Wins);
+//		setPlayVerbose(false);
+//		int numGames = 10;
+//		int numP1Wins = 0;
+//		game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
+//		long startMs = System.currentTimeMillis();
+//		for (int i = 0; i < numGames; i++) {
+//			if (i % 10 == 0) {
+//				System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
+//			}
+//			numP1Wins += game.play();
+//		}
+//		long totalMs = System.currentTimeMillis() - startMs;
+//		System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
+//		System.out.printf("Games Won: P0:%d, P1:%d.\n", numGames - numP1Wins, numP1Wins);
 	}
 
 }
