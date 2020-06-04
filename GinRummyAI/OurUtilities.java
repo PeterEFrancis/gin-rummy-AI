@@ -96,7 +96,7 @@ public class OurUtilities {
 		}
 		//count hits for combination
 		comboCards.add(c);
-		ArrayList<Long> bitStrings = GinRummyUtil.cardsToAllMeldBitstrings(comboCards);
+		ArrayList<Long> bitStrings = GinRummyUtil.cardsToAllMeldBitstrings(comboCards); // doesn't this have duplicates
 		comboCards.remove(c);
 		if (bitStrings.size() > 0) {
 			return true;

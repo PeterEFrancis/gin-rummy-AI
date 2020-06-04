@@ -124,3 +124,12 @@ Got H2O model development and exportation to `GinRummyAI` functional. Researched
 ### Wednesday 6/3/20
 
 Used XGBoost and debugged the regression model. We are somehow processing data incorrectly on our side.
+
+
+### Thursday 5/4/20
+
+Developed and simplified python version more. Tested Tournament software and got "could not cast" error. Deadwood points plot on alpha 18:
+
+![](img/6-4-20_a-18.png)
+
+![](img/6-4-20_a-18_jitter.png)
