@@ -311,7 +311,7 @@ public class GinRummyGame {
 //
 		// Multiple non-verbose games
 		setPlayVerbose(false);
-		int numGames = 100;
+		int numGames = 10;
 		int numP1Wins = 0;
 		game = new GinRummyGame(new SimpleGinRummyPlayer(), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
 		long startMs = System.currentTimeMillis();

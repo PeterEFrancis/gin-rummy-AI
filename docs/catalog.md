@@ -133,3 +133,8 @@ Developed and simplified python version more. Tested Tournament software and got
 ![](img/6-4-20_a-18.png)
 
 ![](img/6-4-20_a-18_jitter.png)
+
+
+### Friday 5/24/20
+
+Finished structural development on Python version and completed the aleph cycle. Performs 1/2 of simple player. TODO: don't add opponent's hand to possible cards during data collection. Also, make sure that we quantify aggression, do gradient boosting, and testing collect locations.
