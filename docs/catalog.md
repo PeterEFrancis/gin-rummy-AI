@@ -137,4 +137,11 @@ Developed and simplified python version more. Tested Tournament software and got
 
 ### Friday 5/24/20
 
-Finished structural development on Python version and completed the aleph cycle. Performs 1/2 of simple player. TODO: don't add opponent's hand to possible cards during data collection. Also, make sure that we quantify aggression, do gradient boosting, and testing collect locations.
+Finished structural development on Python version and completed the aleph cycle. Performs 1/2 of simple player. TODO: don't add opponent's hand to possible cards during data collection. Also, make sure that we quantify aggression, do gradient boosting, and test collect locations.
+
+
+## Week 4
+
+### Monday 6/8/20
+
+Tried using python version to generate XGBoost models. Began hand estimation.

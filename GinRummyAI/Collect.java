@@ -554,10 +554,10 @@ public class Collect {
 		// put new features directly above me
 
 
-		for (int i = 0; i < 1; i++) {
-			setPlayVerbose(true);
+		for (int i = 0; i < 1000; i++) {
+			setPlayVerbose(false);
 
-			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR), 268);
+			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
 
 
 			ArrayList<ArrayList<String>> csvOutput = game.getPlayData();

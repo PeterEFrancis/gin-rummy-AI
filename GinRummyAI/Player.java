@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.Stack;
 
@@ -7,255 +8,243 @@ public class Player implements GinRummyPlayer{
 
 	public int type;
 	public int version;
-
 	public int playerNum;
 	public int startingPlayerNum;
 	public int turn;
-
-	public int[] scores = new int[2];
-
-	public boolean opponentKnocked = false;
-
-	public Random random = new Random();
-
+	public int[] scores;
+	public boolean opponentKnocked;
+	public Random random;
 	public Card drawnCard;
-	public Card toDiscard;
-
 	public ArrayList<Card> hand;
 	public ArrayList<Card> unknownCards;
-	public ArrayList<Card> possibleCards;
-	public ArrayList<Long> drawDiscardBitstrings;
-	public ArrayList<Card> opponentDiscards;
-	public ArrayList<Card> opponentRejectedCards;
-	public ArrayList<Card> opponentAllHand;   // opponent picked up cards throughout the startGame
-	public ArrayList<Card> opponentHand;      // opponent picked up cards at the moment
-	public ArrayList<Card> visibleCards;
-
+	public ArrayList<Card> opponentDiscardedCards;
+	public ArrayList<Card> opponentPassedCards;
+	public ArrayList<Card> opponentAllTimeHand;   // opponent picked up cards throughout the startGame
+	public ArrayList<Card> opponentHand;          // opponent picked up cards at the moment
 	public Stack<Card> discardedCards;
+	public boolean drewFaceUp;
+	public double[] discardProbabilities;
 
-	int[] discardCases = new int[52];
-
+//	for hand estimation
+	Card faceUpCard;
+	public HandEstimator estimator = new HandEstimator();
+	private int totalDiscarded = 0;
+	ArrayList<Double> ratios = new ArrayList<Double>();
 
 	public Player(int version, int type) {
+		reset();
 		this.version = version;
 		this.type = type;
 	}
 
+	public Player(int version, int type, long seed) {
+		reset();
+		this.version = version;
+		this.type = type;
+		random.setSeed(seed);
+	}
+
+	public void reset() {
+		opponentDiscardedCards = new ArrayList<Card>();
+		opponentPassedCards = new ArrayList<Card>();
+		opponentAllTimeHand = new ArrayList<Card>();
+		opponentHand = new ArrayList<Card>();
+		drawnCard = null;
+		playerNum = -1;
+		startingPlayerNum = -1;
+		turn = 0;
+		opponentKnocked = false;
+		drewFaceUp = false;
+		hand = new ArrayList<Card>();
+		unknownCards = new ArrayList<Card>();
+		discardedCards = new Stack<Card>();
+		scores = new int[2];
+		discardProbabilities = new double[52];
+		random = new Random();
+	}
+
 	@Override
 	public void startGame(int playerNum, int startingPlayerNum, Card[] hand) {
+		reset();
+		ArrayList<Card> alHand = new ArrayList<>();
+		alHand.addAll(Arrays.asList(hand));
 
-		this.hand = new ArrayList<Card>();
-		unknownCards = new ArrayList<Card>();
-		possibleCards = new ArrayList<Card>();
-		drawDiscardBitstrings = new ArrayList<Long>();
-		opponentDiscards = new ArrayList<Card>();
-		opponentRejectedCards = new ArrayList<Card>();
-		opponentAllHand = new ArrayList<Card>();
-		opponentHand = new ArrayList<Card>();
-		discardedCards = new Stack<Card>();
-		visibleCards = new ArrayList<Card>();
+		for (Card card : Card.allCards) {
+			if (alHand.contains(card)) {
+				this.hand.add(card);
+			} else {
+				unknownCards.add(card);
+			}
+		}
 
-		drawnCard = null;
-		toDiscard = null;
-
-		turn = 0;
 		this.playerNum = playerNum;
 		this.startingPlayerNum = startingPlayerNum;
-		this.hand.clear();
-		unknownCards.addAll(Arrays.asList(Card.allCards));
-		possibleCards.addAll(Arrays.asList(Card.allCards));
 
-		for (Card card : hand) {
-			this.hand.add(card);
-			unknownCards.remove(card);
-			possibleCards.remove(card);
-		}
-		opponentKnocked = false;
-		drawDiscardBitstrings.clear();
+		 estimator.init();
+		 ArrayList<Card> handAL = new ArrayList<Card>();
+		 for (Card c : cards)
+		 	handAL.add(c);
+		 estimator.setKnown(handAL, false);
+		 estimator.print();
+		 totalDiscarded = 0;
 	}
 
 
+	/**
+	 * Sets the discard probabilities and returns the card object corresponding
+	 * to the discard with highest winning probability.
+	**/
+	// TODO: change datastructure to better remove and add?
+	public Card setDiscardProbabilities(Card faceUpCard) {
+		LinkedList<Card> possibleDiscards = new LinkedList<Card>();
+		possibleDiscards.addAll(hand);
+		if (faceUpCard != null) {
+			possibleDiscards.remove(faceUpCard);
+		}
+		Card bestDiscard = null;
+		double bestProbOfWinning = Double.MIN_VALUE;
+		for (Card possDiscard : possibleDiscards) {
+			hand.remove(possDiscard);
+			discardedCards.add(possDiscard);
+			double probOfWinning = BlackBox.regFunction(this);
+			discardProbabilities[possDiscard.getId()] = probOfWinning;
+			if (probOfWinning > bestProbOfWinning) {
+				bestProbOfWinning = probOfWinning;
+				bestDiscard = possDiscard;
+			}
+			discardedCards.remove(possDiscard);
+			hand.add(possDiscard);
+		}
+		return bestDiscard;
+	}
 
 
 	@Override
-	public boolean willDrawFaceUpCard(Card card) {
-		card = OurUtilities.transformCard(card);
+	public boolean willDrawFaceUpCard(Card faceUpCard) {
+		faceUpCard = OurUtilities.transformCard(faceUpCard);
 
-		// first turn
+		 estimator.setKnown(card, false);
+		 this.faceUpCard = card;
+
+		// first turn -- this... this is how we find out what the initial face up card is.
 		if (discardedCards.isEmpty()) {
-			discardedCards.push(card);
-			unknownCards.remove(card);
-			possibleCards.remove(card);
+			discardedCards.push(faceUpCard);
+			unknownCards.remove(faceUpCard);
 		}
 
-		hand.add(discardedCards.pop()); // draw face up
+		discardProbabilities = new double[52];
 
-		double max = -10000000;
-		for (int i = 0; i < 10; i++) {
-			//discard the first card in the hand
-			Card discarded = hand.remove(0);
-			discardedCards.push(discarded);
+		// find probability of winning if draw face up
+		hand.add(discardedCards.pop());
+		Card bestDiscard = setDiscardProbabilities(faceUpCard);
+		double drawFaceUpCardWinProb = discardProbabilities[bestDiscard.getId()];
+		hand.remove(faceUpCard);
+		discardedCards.push(faceUpCard);
 
-			double value = BlackBox.regFunction(this);
-			if (value > max) {
-				max = value;
-				toDiscard = discarded;
-			}
-			// undo the discard
-			hand.add(discardedCards.pop());
+		// find average probability of winning if you draw from face down card
+		double drawFaceDownWinProbAvg = 0;
+		for (int i = 0; i < unknownCards.size(); i++) {
+			Card card = unknownCards.remove(0);
+			hand.add(card);
+			Card bestDiscard1 = setDiscardProbabilities(null);
+			drawFaceDownWinProbAvg += discardProbabilities[bestDiscard1.getId()];
+			hand.remove(card);
+			unknownCards.add(card);
 		}
-		// System.out.println("faceup value: " + max);
+		drawFaceDownWinProbAvg /= unknownCards.size();
 
-		discardedCards.push(hand.remove(0)); //undoes the draw
-
-		double average = 0;
-		for (int i = 0; i < possibleCards.size(); i++) {
-			// draw card
-			Card newCard = possibleCards.remove(0);
-			unknownCards.remove(newCard);
-
-			hand.add(newCard);
-
-			double localmax = -10000000;
-			Card bestDiscard = null;
-			for (int j = 0; j < 11; j++) {
-				// discard the first card in the hand
-				Card discarded = hand.remove(0);
-				discardedCards.add(discarded);
-
-				double value = BlackBox.regFunction(this);
-				if (value >= localmax) {
-					localmax = value;
-					bestDiscard = discarded;
-				}
-				// undo the discard
-				hand.add(discardedCards.pop());
-			}
-			// System.out.println("local max: " + localmax);
-			// System.out.println(newCard + " best discard: " + bestDiscard);
-			discardCases[newCard.getId()] = bestDiscard.getId();
-			average += localmax;
-			// undo the draw
-			hand.remove(newCard);
-			unknownCards.add(newCard);
-			possibleCards.add(newCard);
+		if (drawFaceDownWinProbAvg < drawFaceUpCardWinProb){
+			return true;
 		}
-		// System.out.println("in willDra...: " + Arrays.toString(discardCases));
-		average /= possibleCards.size();
-		// System.out.println("average facedown value: " + average);
-		if (average >= max) {
-			toDiscard = null;
-			// System.out.println("Doesn't draw face up card");
-			return false;
-		}
-		// System.out.println("Draws face up card");
-		return true;
-
+		return false;
 	}
 
 
 	@Override
-	// public void reportDraw(int playerNum, Card drawnCard) {
-	// 	// Ignore other player draws.  Add to cards if playerNum is this player.
-	// 	if (playerNum == this.playerNum) {
-	// 		hand.add(drawnCard);
-	// 		this.drawnCard = drawnCard;
-	// 		if (toDiscard == null) {
-	// 			// System.out.println("in reportDraw: " + Arrays.toString(discardCases));
-	// 			toDiscard = Card.getCard(discardCases[drawnCard.getId()]);
-	// 			// System.out.println("to discard (from player): " + toDiscard);
-	// 			unknownCards.remove(drawnCard);
-	// 		}
-	// 		else {
-	// 			discardedCards.pop();
-	// 		}
-	// 	}
-	// 	else {
-	// 		if (drawnCard != null) { // picked up face up card (known opponent hand should consist of our discards)
-	// 			opponentAllHand.add(drawnCard);
-	// 			opponentHand.add(drawnCard);
-	// 			if (!discardedCards.isEmpty()) {
-	// 				discardedCards.pop();
-	// 			}
-	//
-	// 			//REMOVE ONCE WE ARE DONE TESTING
-	// 			unknownCards.remove(drawnCard);
-	// 		}
-	// 		else {
-	// 			opponentRejectedCards.add(discardedCards.peek());
-	// 		}
-	// 	}
-	// }
 	public void reportDraw(int playerNum, Card drawnCard) {
-		// Ignore other player draws.  Add to cards if playerNum is this player.
+		try {
+			drawnCard = OurUtilities.transformCard(drawnCard);
+		} catch (Exception e) {
+			// lol. Yeah, we really need a Card class, don't we?
+			// this sure is making EVERYONE's lives easier.       (@)/(@)
+		}
+		
+		// our draw
 		if (playerNum == this.playerNum) {
 			hand.add(drawnCard);
 			this.drawnCard = drawnCard;
-			if (toDiscard == null) { //picked up facedown card
-				// System.out.println("in reportDraw: " + Arrays.toString(discardCases));
-				toDiscard = Card.getCard(discardCases[drawnCard.getId()]);
-				// System.out.println("to discard (from player): " + toDiscard);
-				if (unknownCards.contains(drawnCard)) {
-					unknownCards.remove(drawnCard);
-				}
-				if (possibleCards.contains(drawnCard)) {
-					possibleCards.remove(drawnCard);
-				}
+			// we draw face-up card
+			if (drawnCard.getId() == discardedCards.peek().getId()) {
+				discardedCards.remove(drawnCard);
+				drewFaceUp = true;
 			}
-			else { // we picked up faceup card
-				visibleCards.add(drawnCard);
-				discardedCards.pop();
-			}
-		}
-		else {
-			if (drawnCard != null) { // picked up face up card (known opponent hand should consist of our discards)
-				opponentAllHand.add(drawnCard);
-				opponentHand.add(drawnCard);
-				if (!discardedCards.isEmpty()) {
-					discardedCards.pop();
-				}
-
-				//possible cards
-				possibleCards.add(drawnCard);
-			}
+			// we draw face down card
 			else {
-				opponentRejectedCards.add(discardedCards.peek());
+				drewFaceUp = false;
+				unknownCards.remove(drawnCard);
 			}
 		}
+		// opponent draw
+		else {
+
+			// first turn -- this... this is how we find out what the initial face up card is.
+			if (discardedCards.isEmpty()) {
+				discardedCards.push(drawnCard);
+				unknownCards.remove(drawnCard);
+			}
+
+			// opponent draws face up card
+			Card faceUpCard = discardedCards.peek();
+			if (drawnCard != null){
+				opponentHand.add(discardedCards.pop());
+				opponentAllTimeHand.add(faceUpCard);
+			}
+			// opponent draws face down card
+			else {
+				opponentPassedCards.add(faceUpCard);
+			}
+		}
+
 	}
+
 
 	@Override
 	public Card getDiscard() {
 		// TODO : Prevent future repeat of draw, discard pair?
-		Card temp = toDiscard;
-		toDiscard = null;
-		return temp;
+		Card bestDiscard = null;
+		double bestProb = Double.MIN_VALUE;
+		for (int i = 0; i < hand.size(); i++) {
+			Card currCard = hand.get(i);
+			double discardProb = discardProbabilities[currCard.getId()];
+			if (discardProb > bestProb) {
+				bestProb = discardProb;
+				bestDiscard = currCard;
+			}
+		}
+		return bestDiscard;
 	}
 
 
 	@Override
 	public void reportDiscard(int playerNum, Card discardedCard) {
-		// Ignore other player discards.  Remove from cards if playerNum is this player.
+		discardedCard = OurUtilities.transformCard(discardedCard);
+
+		discardedCards.push(discardedCard);
+
+		// our discard
 		if (playerNum == this.playerNum) {
 			hand.remove(discardedCard);
-			if (visibleCards.contains(discardedCard)) {
-				visibleCards.remove(discardedCard);
-			}
 		}
-		else { //opponent discard
-			opponentDiscards.add(discardedCard);
+		// opponent discard
+		else {
 			opponentHand.remove(discardedCard);
-			if (unknownCards.contains(discardedCard)){
-				unknownCards.remove(discardedCard);
-			}
-			if (possibleCards.contains(discardedCard)) {
-				possibleCards.remove(discardedCard);
-			}
-
+			opponentDiscardedCards.add(discardedCard);
+			unknownCards.remove(discardedCard);
 		}
-		discardedCards.push(discardedCard);
+
 		turn++;
 	}
+
 
 	@Override
 	public ArrayList<ArrayList<Card>> getFinalMelds() {
@@ -276,7 +265,6 @@ public class Player implements GinRummyPlayer{
 	@Override
 	public void reportScores(int[] scores) {
 		this.scores = scores.clone();
-		// Ignored by simple player, but could affect strategy of more complex player.
 	}
 
 	@Override

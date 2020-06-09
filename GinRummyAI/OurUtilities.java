@@ -436,33 +436,34 @@ public class OurUtilities {
 		return points;
 	}
 
-	public static ArrayList<Card> nearbyCards(ArrayList<Card> cards) { // counting multiplicity
+	public static ArrayList<Card> nearbyCards(ArrayList<Card> cards, ArrayList<Card> possibleCards) { // counting multiplicity, also our hand would be passed in for possibleCards if we want a feature blocking their play
 		ArrayList<Card> nearby = new ArrayList<Card>();
-		for (Card c : cards) {
+		for (Card c : possibleCards) {
 			int rank = c.getRank();
 			int suit = c.getSuit();
 			int id = c.getId();
 			for (int i = 0; i < 4; i++) { // adds all cards of same rank
 				Card toAdd = Card.allCards[id+(i-suit)*13];
-				if (!cards.contains(toAdd)) {
+				if (!cards.contains(toAdd)) {// this if shouldn't need to be here but just in case
 					nearby.add(toAdd);
 				}
 			}
 			if (rank != 0) { // adds card lower in rank
 				Card toAdd = Card.allCards[id-1];
-				if (!cards.contains(toAdd)) {
+				if (!cards.contains(toAdd)) {// this if shouldn't need to be here but just in case
 					nearby.add(toAdd);
 				}
 			}
 			if (rank != 12) { //adds card highr in rank
 				Card toAdd = Card.allCards[id+1];
-				if (!cards.contains(toAdd)) {
+				if (!cards.contains(toAdd)) {// this if shouldn't need to be here but just in case
 					nearby.add(toAdd);
 				}
 			}
 		}
 		return nearby;
 	}
+
 
 	public static ArrayList<Card> nearbyCards(Card c) {
 		ArrayList<Card> nearby = new ArrayList<Card>();
@@ -496,8 +497,10 @@ public class OurUtilities {
 		double opponent_score = player.scores[1 - player.playerNum];
 
 		double current_player_deadwood = deadwoodCount(player.hand);
-
-		double current_player_num_hit_cards = numHitCards(player.possibleCards, player.hand);
+		
+		ArrayList<Card> possibleCards = new ArrayList<>(player.unknownCards);
+		possibleCards.addAll(player.opponentHand);
+		double current_player_num_hit_cards = numHitCards(possibleCards, player.hand);
 
 		double turns_taken = player.turn;
 
@@ -515,11 +518,10 @@ public class OurUtilities {
 		double num_load_cards = organization.get(3).get(0).size();
 		double point_sum_load_cards = getPoints(organization.get(3));
 
-		ArrayList<Card> nearby = nearbyCards(player.opponentHand);
+		ArrayList<Card> nearby = nearbyCards(player.opponentHand, player.hand);
 		double num_nearby_opponent_cards = nearby.size();
 
-		double num_vis_cards_to_opponent = player.visibleCards.size();
-
+//		double pleaseputagoodnamehere =
 		//double num_set_melds = numSetMelds(organization.get(0));
 		//double num_run_melds = numRunMelds(organization.get(0));
 		//double num_set_combos = numSetCombos(organization.get(1));
@@ -544,7 +546,6 @@ public class OurUtilities {
 				point_sum_load_cards,
 				turns_taken,
 				num_nearby_opponent_cards,
-				num_vis_cards_to_opponent,
 				//num_set_melds
 				//num_run_melds
 				//num_set_combos
@@ -744,101 +745,93 @@ public class OurUtilities {
 		p.scores = new int[]{10,10}; // a few hands in
 		if (p.opponentHand == null)
 			p.opponentHand = new ArrayList<Card>();
-		ArrayList<Card> possible = new ArrayList<Card>();
-		for (Card c : Card.allCards) {
-			possible.add(c);
-		}
-		possible.removeAll(p.hand);
-		possible.removeAll(p.opponentHand);
-		p.possibleCards = possible;
-		p.visibleCards = new ArrayList<Card>();
 		p.turn = 3; // a few turns in
 	}
 
-	public static void testRegressionFit() {
-		String data = "alpha-81.csv";
-		int numFeatures = 4;
-
-
-		File f = new File(data);
-		ArrayList<String> dataLines = new ArrayList<String>();
-
-		try {
-			Scanner s = new Scanner(f);
-
-			s.nextLine();
-			while (s.hasNext()) {
-				String str = s.nextLine();
-				if (Math.random() < .1) {
-					dataLines.add(str);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		double linCounter = 0;
-		double gbmCounter = 0;
-		double halfCounter = 0;
-		for (int i = 0; i < dataLines.size(); i++) {
-			String[] pieces = dataLines.get(i).split(",");
-			// System.out.println(pieces.length);
-			double[] dataline = new double[pieces.length];
-			// System.out.println(dataline.length);
-			for (int j = 0; j < pieces.length; j++) {
-				dataline[j] = Double.parseDouble(pieces[j]);
-			}
-
-			double[] features = new double[dataline.length-3];
-			for (int j = 0; j < features.length; j++) {
-				features[j] = dataline[j+3];
-			}
-
-			//----------------------------------------------------------------------------------------------------------------------------------
-			xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88 xgb = new xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88();
-			double[] val = xgb.score0(features, new double[3]);
-			// System.out.println("val= " + val[0]);
-
-			double gbmPred = val[0];
-
-
-			//--------------------------------------------------------------------------------------------------------------------------------
-			ArrayList<Double> coefArr = BlackBox.coefficients.get(BlackBox.LINEAR).get(BlackBox.GAMMA);
-			double linear_combination = 0;
-			// System.out.println(features.length);
-			for (int j = 1; j < numFeatures+1; j++) {
-				linear_combination += coefArr.get(j) * features[j - 1];
-			}
-			double linPred = linear_combination + coefArr.get(0);
-
-			double actualValue = dataline[2];
-
-			double half = .5;
-
-			halfCounter += Math.abs(half - actualValue) * Math.abs(half - actualValue);
-			linCounter += Math.abs(linPred - actualValue) * Math.abs(linPred - actualValue);
-			gbmCounter += Math.abs(gbmPred - actualValue) * Math.abs(gbmPred - actualValue);
-			// if (Math.abs(linPred - actualValue) > Math.abs(gbmPred - actualValue)) {
-			// 	linCounter++;
-			// }
-			// else {
-			// 	gbmCounter++;
-			// }
-
-		}
-		double n = dataLines.size();
-		double gbm = Math.sqrt(gbmCounter)/n;
-		double lin = Math.sqrt(linCounter)/n;
-		double halfVal = Math.sqrt(halfCounter)/n;
-		System.out.println("   GBM: " + gbm);
-		System.out.println("LINEAR: " + lin);
-		System.out.println("    .5: " + halfVal);
-
-
-
-
-	}
-
+//	public static void testRegressionFit() {
+//		String data = "alpha-81.csv";
+//		int numFeatures = 4;
+//
+//
+//		File f = new File(data);
+//		ArrayList<String> dataLines = new ArrayList<String>();
+//
+//		try {
+//			Scanner s = new Scanner(f);
+//
+//			s.nextLine();
+//			while (s.hasNext()) {
+//				String str = s.nextLine();
+//				if (Math.random() < .1) {
+//					dataLines.add(str);
+//				}
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		double linCounter = 0;
+//		double gbmCounter = 0;
+//		double halfCounter = 0;
+//		for (int i = 0; i < dataLines.size(); i++) {
+//			String[] pieces = dataLines.get(i).split(",");
+//			// System.out.println(pieces.length);
+//			double[] dataline = new double[pieces.length];
+//			// System.out.println(dataline.length);
+//			for (int j = 0; j < pieces.length; j++) {
+//				dataline[j] = Double.parseDouble(pieces[j]);
+//			}
+//
+//			double[] features = new double[dataline.length-3];
+//			for (int j = 0; j < features.length; j++) {
+//				features[j] = dataline[j+3];
+//			}
+//
+//			//----------------------------------------------------------------------------------------------------------------------------------
+//			xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88 xgb = new xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88();
+//			double[] val = xgb.score0(features, new double[3]);
+//			// System.out.println("val= " + val[0]);
+//
+//			double gbmPred = val[0];
+//
+//
+//			//--------------------------------------------------------------------------------------------------------------------------------
+//			ArrayList<Double> coefArr = BlackBox.coefficients.get(BlackBox.LINEAR).get(BlackBox.GAMMA);
+//			double linear_combination = 0;
+//			// System.out.println(features.length);
+//			for (int j = 1; j < numFeatures+1; j++) {
+//				linear_combination += coefArr.get(j) * features[j - 1];
+//			}
+//			double linPred = linear_combination + coefArr.get(0);
+//
+//			double actualValue = dataline[2];
+//
+//			double half = .5;
+//
+//			halfCounter += Math.abs(half - actualValue) * Math.abs(half - actualValue);
+//			linCounter += Math.abs(linPred - actualValue) * Math.abs(linPred - actualValue);
+//			gbmCounter += Math.abs(gbmPred - actualValue) * Math.abs(gbmPred - actualValue);
+//			// if (Math.abs(linPred - actualValue) > Math.abs(gbmPred - actualValue)) {
+//			// 	linCounter++;
+//			// }
+//			// else {
+//			// 	gbmCounter++;
+//			// }
+//
+//		}
+//		double n = dataLines.size();
+//		double gbm = Math.sqrt(gbmCounter)/n;
+//		double lin = Math.sqrt(linCounter)/n;
+//		double halfVal = Math.sqrt(halfCounter)/n;
+//		System.out.println("   GBM: " + gbm);
+//		System.out.println("LINEAR: " + lin);
+//		System.out.println("    .5: " + halfVal);
+//
+//
+//
+//
+//	}
+//
 
 
 	public static void testDecisions() {
@@ -881,9 +874,9 @@ public class OurUtilities {
 			System.out.println("\tBest KnockCash$: " + organization.get(2));
 			System.out.println("\tBest Loads: " + organization.get(3));
 
-			ArrayList<Card> nearby = nearbyCards(hand);
-			System.out.println("\tNearby Cards: " + nearby);
-			System.out.println("\tNum nearby Cards: " + nearby.size());
+			// ArrayList<Card> nearby = nearbyCards(hand);
+			// System.out.println("\tNearby Cards: " + nearby);
+			// System.out.println("\tNum nearby Cards: " + nearby.size());
 
 			System.out.println("\tNumber of set melds: " + numSetMelds(organization.get(0)));
 			System.out.println("\tNumber of run melds: " + numRunMelds(organization.get(0)));
@@ -914,7 +907,7 @@ public class OurUtilities {
 
 	public static void main(String[] args) {
 
-		testRegressionFit();
+//		testRegressionFit();
 		// testDecisions();
 		// testUtils();
 

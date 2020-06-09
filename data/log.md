@@ -35,7 +35,8 @@
 
 
 # Gamma
-0. 100 games between alpha 8 linear and itself, collecting ABCD **BEST G**
+0. 100 games between alpha 8 linear and itself, collecting ABCD
+1. 100 gmaes between alpha 8 linear and itself, collecting ABCD **BEST G**
 
 
 # Delta

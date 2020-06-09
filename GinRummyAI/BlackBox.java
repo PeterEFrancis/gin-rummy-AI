@@ -106,14 +106,14 @@ public class BlackBox {
 		}
 
 		if (player.type == XGBOOST) {
-
-			double[] features = OurUtilities.calculateFeatures(player);
-			//System.out.println(Arrays.toString(features));
-
-			xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88 xgb = new xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88();
-			double[] val = xgb.score0(features, new double[1]);
-			// System.out.println("val= " + val[0]);
-			return val[0];
+//
+//			double[] features = OurUtilities.calculateFeatures(player);
+//			//System.out.println(Arrays.toString(features));
+//
+////			xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88 xgb = new xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88();
+////			double[] val = xgb.score0(features, new double[1]);
+//			// System.out.println("val= " + val[0]);
+//			return val[0];
 
 			// String modelClassName = "xgboost_0373d649_c119_4ca5_a67d_c22d2c258b81"; //insert class name here
 			// hex.genmodel.GenModel rawModel;
