@@ -276,8 +276,7 @@ public class Collect {
 
 
 // -------------------- DATA C -------------------------------------------------------------↓
-					// System.out.println("---------------------------------------------------------------------- line number: " + line_number++);
-					deck.addAll(hands.get(opponent));
+					// deck.addAll(hands.get(opponent));
 					// ArrayList<Card> uc = players[currentPlayer].unknownCards;
 					// players[currentPlayer].unknownCards = deck;
 					double[] features = null;
@@ -285,23 +284,9 @@ public class Collect {
 						ArrayList<Card> deckArray = new ArrayList<Card>();
 						deckArray.addAll(deck);
 						features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
-					} else if (players[currentPlayer] instanceof Player) {
-						// ArrayList<Card> deckArray = new ArrayList<Card>();
-						// deckArray.addAll(deck);
-						// System.out.println();
-						//
-						// System.out.print("C - Unknown Cards: ");
-						// OurUtilities.printAsSorted(((Player) players[currentPlayer]).unknownCards);
-						// System.out.println();
-						// System.out.print("C - Stock + hand : ");
-						// OurUtilities.printAsSorted(deckArray);
-						// System.out.println();
-						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
-					} else if (players[currentPlayer] instanceof SimplePlayer) {
-						// System.out.println("c-hand: "+ ((SimplePlayer) players[currentPlayer]).hand );
-						// System.out.println("c-hit count:" + OurUtilities.numHitCards( ((SimplePlayer) players[currentPlayer]).unknownCards,((SimplePlayer) players[currentPlayer]).hand ));
 
-//						features = OurUtilities.calcSimple2((SimplePlayer) players[currentPlayer]);
+					} else if (players[currentPlayer] instanceof Player) {
+						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
 					} else {
 						System.err.println("You can only collect data on SimpleGinRummyPlayer or Player.");
 					}
@@ -309,9 +294,10 @@ public class Collect {
 					for (int i = 0; i < features.length; i++)
 						sb.append("," + features[i]);
 					handData.add(sb.toString());
-					// players[currentPlayer].unknownCards = uc;
 					deck.removeAll(hands.get(opponent));
 // -------------------- DATA C -------------------------------------------------------------↑
+
+
 
 
 					if (line_number > 6) {
@@ -334,27 +320,27 @@ public class Collect {
 
 // -------------------- DATA D -------------------------------------------------------------↓
 					// System.out.println("---------------------------------------------------------------------- line number: " + line_number++);
-					deck.addAll(hands.get(opponent));
-					// ArrayList<Card> uc = players[currentPlayer].unknownCards;
-					// players[currentPlayer].unknownCards = deck;
-					double[] features = null;
-					if (players[currentPlayer] instanceof SimpleGinRummyPlayer) {
-						ArrayList<Card> deckArray = new ArrayList<Card>();
-						deckArray.addAll(deck);
-						features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
-					} else if (players[currentPlayer] instanceof Player) {
-						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
-					} else if (players[currentPlayer] instanceof SimplePlayer) {
-//						features = OurUtilities.calcSimple2((SimplePlayer) players[currentPlayer]);
-					} else {
-						System.err.println("You can only collect data on SimpleGinRummyPlayer or Player.");
-					}
-					StringBuilder sb = new StringBuilder(currentPlayer + "");
-					for (int i = 0; i < features.length; i++)
-						sb.append("," + features[i]);
-					handData.add(sb.toString());
-					// players[currentPlayer].unknownCards = uc;
-					deck.removeAll(hands.get(opponent));
+// 					deck.addAll(hands.get(opponent));
+// 					// ArrayList<Card> uc = players[currentPlayer].unknownCards;
+// 					// players[currentPlayer].unknownCards = deck;
+// 					double[] features = null;
+// 					if (players[currentPlayer] instanceof SimpleGinRummyPlayer) {
+// 						ArrayList<Card> deckArray = new ArrayList<Card>();
+// 						deckArray.addAll(deck);
+// 						features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
+// 					} else if (players[currentPlayer] instanceof Player) {
+// 						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
+// 					} else if (players[currentPlayer] instanceof SimplePlayer) {
+// //						features = OurUtilities.calcSimple2((SimplePlayer) players[currentPlayer]);
+// 					} else {
+// 						System.err.println("You can only collect data on SimpleGinRummyPlayer or Player.");
+// 					}
+// 					StringBuilder sb = new StringBuilder(currentPlayer + "");
+// 					for (int i = 0; i < features.length; i++)
+// 						sb.append("," + features[i]);
+// 					handData.add(sb.toString());
+// 					// players[currentPlayer].unknownCards = uc;
+// 					deck.removeAll(hands.get(opponent));
 // -------------------- DATA D -------------------------------------------------------------↑
 
 
@@ -396,9 +382,9 @@ public class Collect {
 
 				// get [opponent meld]
 				ArrayList<ArrayList<Card>> opponentMelds = players[opponent].getFinalMelds();
+				meldsCopy = new ArrayList<ArrayList<Card>>();
 				for (ArrayList<Card> meld : opponentMelds)
 					meldsCopy.add((ArrayList<Card>) meld.clone());
-				meldsCopy = new ArrayList<ArrayList<Card>>();
 				for (int i = 0; i < 2; i++)
 					players[i].reportFinalMelds(opponent, meldsCopy);
 
@@ -489,7 +475,7 @@ public class Collect {
 			if (playVerbose)
 				System.out.printf("Player\tScore\n0\t%d\n1\t%d\n", scores[0], scores[1]);
 			for (int i = 0; i < 2; i++) {
-				players[i].reportScores(scores.clone());
+				players[i].reportScores(scores);
 			}
 
 
@@ -509,7 +495,7 @@ public class Collect {
 
 
 
-	public static String fileName = "gamma-1.csv";
+	public static String fileName = "delta-2.csv";
 	public static File file = new File(fileName);
 	public static PrintWriter pw;
 	static {
@@ -544,20 +530,20 @@ public class Collect {
 		// Beta to here
 		pw.print("num_nearby_opponent_cards,");
 		// Gamma to here
-		pw.print("num_vis_cards_to_opponent\n");
+		pw.print("discard_danger\n");
 		// Delta to here
+
 		//pw.print("num_set_melds");
 		//pw.print("num_run_melds");
 		//pw.print("num_set_combos");
 		//pw.print("num_run_combos\n");
-		// Gamma to here
 		// put new features directly above me
 
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 200; i++) {
 			setPlayVerbose(false);
 
-			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
+			Collect game = new Collect(new Player(BlackBox.GAMMA, BlackBox.LINEAR), new Player(BlackBox.GAMMA, BlackBox.LINEAR));
 
 
 			ArrayList<ArrayList<String>> csvOutput = game.getPlayData();
@@ -566,19 +552,20 @@ public class Collect {
 
 			csvOutput.remove(csvOutput.size() - 1);
 
-
 			for (ArrayList<String> handData : csvOutput) {
 				double handWinner = Double.parseDouble(handData.get(handData.size() - 1).toString());
 				handData.remove(handData.size() - 1);
 				for (String data : handData) {
 					double currentPlayer = Double.parseDouble(Arrays.asList(data.split(",")).get(0));
-					String calculatedFeatures = data.substring(2);
+					int comma = data.indexOf(",");
+					String calculatedFeatures = data.substring(comma + 1);
 					if (handWinner != 0.5) {
 
-						pw.println( currentPlayer + ","
-						 		  + ((currentPlayer == handWinner) ? "1" : "0") + ","
-								  + ((currentPlayer == gameWinner) ? "1" : "0") + ","
-								  + calculatedFeatures); // SOB!
+						String fdata = currentPlayer + ","
+													+ ((currentPlayer == handWinner) ? "1" : "0") + ","
+													+ ((currentPlayer == gameWinner) ? "1" : "0") + ","
+													+ calculatedFeatures;
+						pw.println(fdata);
 					}
 
 				}

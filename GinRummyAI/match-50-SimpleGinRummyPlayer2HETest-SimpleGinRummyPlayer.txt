@@ -1,0 +1,2 @@
+Match SimpleGinRummyPlayer2HETest vs. SimpleGinRummyPlayer (50 games) ... 50 games played in 390 ms.
+Games Won: SimpleGinRummyPlayer2HETest:31, SimpleGinRummyPlayer:19.

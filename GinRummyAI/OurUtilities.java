@@ -1,5 +1,6 @@
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
 
@@ -465,26 +466,121 @@ public class OurUtilities {
 	}
 
 
-	public static ArrayList<Card> nearbyCards(Card c) {
-		ArrayList<Card> nearby = new ArrayList<Card>();
+	// public static ArrayList<Integer> nearbyCards(int c) {
+	// 	ArrayList<Integer> nearby = new ArrayList<Integer>();
+	// 	int rank = c.getRank();
+	// 	int suit = c.getSuit();
+	// 	int id = c.getId();
+	// 	for (int i = 0; i < 4; i++) { // adds all cards of same rank
+	// 		nearby.add(id+(i-suit)*13);
+	// 	}
+	// 	if (rank != 0) { // adds card lower in rank
+	// 		nearby.add(id-1);
+	// 	}
+	// 	if (rank != 12) { //adds card higher in rank
+	// 		nearby.add(id+1);
+	// 	}
+	// 	return nearby;
+	// }
+
+
+
+	public static double discardDanger(Card c, HandEstimator est) {
+		double[] prob = est.prob;
+		double danger = 0;
+		int id = c.getId();
 		int rank = c.getRank();
 		int suit = c.getSuit();
-		int id = c.getId();
-		for (int i = 0; i < 4; i++) { // adds all cards of same rank
-			nearby.add(Card.allCards[id+(i-suit)*13]);
+		int from = id;
+		int to = id;
+		for (int i = id-1; i >= id-rank; i--) { // sets the lower bound for the run (inclusive)
+			if (prob[i] == 0) {
+				from = i+1;
+				break;
+			}
+			if (i == id-rank) {
+				from = 0;
+			}
 		}
-		if (rank != 0) { // adds card lower in rank
-			nearby.add(Card.allCards[id-1]);
+		for (int i = id+1; i < id-rank+Card.NUM_RANKS; i++) { // sets the upper bound for the run (inclusive)
+			if (prob[i] == 0) {
+				to = i-1;
+				break;
+			}
+			if (i == id - rank + Card.NUM_RANKS - 1) {
+				to = i;
+			}
 		}
-		if (rank != 12) { //adds card highr in rank
-			nearby.add(Card.allCards[id+1]);
+		ArrayList<Card> possibleRunCards = new ArrayList<Card>();
+		for (int i = from; i <= to; i++) {
+			possibleRunCards.add(Card.allCards[i]);
 		}
-		return nearby;
+		// possible run melds
+		ArrayList<ArrayList<Card>> meldPossibilities = GinRummyUtil.cardsToAllMelds(possibleRunCards);
+		for (ArrayList<Card> meld : meldPossibilities) {
+			if (meld.contains(c)) {
+				double addedDanger = 1;
+				for (Card c1 : meld) {
+					if (c1 != c)
+						addedDanger *= prob[c1.getId()];
+				}
+				// addedDanger *= meld.size(); //whatever weight we assign to the probability of that size run occurring
+				danger += addedDanger;
+			}
+		}
+
+		ArrayList<Card> possibleSetCards = new ArrayList<Card>();
+		for (int i = 0; i < Card.NUM_SUITS; i++) {
+			int idNum = rank + i * Card.NUM_RANKS;
+			if (id == idNum || prob[idNum] != 0) {
+				possibleSetCards.add(Card.allCards[idNum]);
+			}
+		}
+		// possible set melds
+		meldPossibilities = GinRummyUtil.cardsToAllMelds(possibleSetCards);
+		for (ArrayList<Card> meld : meldPossibilities) {
+			if (meld.contains(c)) {
+				double addedDanger = 1;
+				for (Card c1 : meld) {
+					if (c1 != c)
+						addedDanger *= prob[c1.getId()];
+				}
+				// addedDanger *= meld.size(); //whatever weight we assign to the probability of that size set occurring
+				danger += addedDanger;
+			}
+		}
+
+		return danger;
 	}
 
 
-	//   AS   (2S)   3S
-	//  [AD]   2D    3D
+	public static double getDangerOfDiscard(Card c, HandEstimator est) {
+		// get possible meld bit strings
+		ArrayList<Long> possibleMeldBitstrings = new ArrayList<Long>();
+		for (ArrayList<Long> meldBitstringList : GinRummyUtil.meldBitstrings) {
+			for (long meldBitstring : meldBitstringList) {
+				long cardBitstring = GinRummyUtil.cardBitstrings[c.getId()];
+				if ((meldBitstring & cardBitstring) == cardBitstring) {
+					possibleMeldBitstrings.add(meldBitstring);
+				}
+			}
+		}
+		// find danger of discard
+		double danger = 0;
+		for (long meldBitstring : possibleMeldBitstrings) {
+			double meldDanger = 1;
+			int cardID = 0;
+			while (meldBitstring > 0) {
+				if (cardID != c.getId())
+					meldDanger *= (meldBitstring & 1) == 1 ? est.prob[cardID] : 1;
+				meldBitstring >>= 1;
+				cardID++;
+			}
+			danger += meldDanger;
+		}
+		return danger;
+	}
+
 
 
 	/**
@@ -495,9 +591,8 @@ public class OurUtilities {
 		double current_player_score = player.scores[player.playerNum];
 
 		double opponent_score = player.scores[1 - player.playerNum];
-
 		double current_player_deadwood = deadwoodCount(player.hand);
-		
+
 		ArrayList<Card> possibleCards = new ArrayList<>(player.unknownCards);
 		possibleCards.addAll(player.opponentHand);
 		double current_player_num_hit_cards = numHitCards(possibleCards, player.hand);
@@ -521,6 +616,10 @@ public class OurUtilities {
 		ArrayList<Card> nearby = nearbyCards(player.opponentHand, player.hand);
 		double num_nearby_opponent_cards = nearby.size();
 
+		Card discardedCard = player.discardedCards.peek();
+		double discard_danger = getDangerOfDiscard(discardedCard, player.estimator);
+
+
 //		double pleaseputagoodnamehere =
 		//double num_set_melds = numSetMelds(organization.get(0));
 		//double num_run_melds = numRunMelds(organization.get(0));
@@ -536,6 +635,7 @@ public class OurUtilities {
 				opponent_score,
 				current_player_deadwood,
 				current_player_num_hit_cards,
+				// alpha to here
 				num_melds,
 				point_sum_melds,
 				num_combos,
@@ -545,56 +645,18 @@ public class OurUtilities {
 				num_load_cards,
 				point_sum_load_cards,
 				turns_taken,
+				// beta to here
 				num_nearby_opponent_cards,
+				// gamma to here
+				discard_danger,
+				// delta to here
+
 				//num_set_melds
 				//num_run_melds
 				//num_set_combos
 				//num_run_combos
 		};
 	}
-
-	// public static double[] calcSimple2(SimplePlayer player) {
-	//
-	// 	double current_player_score = player.scores[player.playerNum];
-	//
-	// 	double opponent_score = player.scores[1 - player.playerNum];
-	//
-	// 	double current_player_deadwood = deadwoodCount(player.hand);
-	//
-	// 	double current_player_num_hit_cards = numHitCards(player.unknownCards, player.hand);
-	//
-	// 	double turns_taken = player.turn;
-	//
-	// 	ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(player.hand);
-	//
-	// 	double num_melds = organization.get(0).size();
-	// 	double point_sum_melds = getPoints(organization.get(0));
-	//
-	// 	double num_combos = organization.get(1).size();
-	// 	double point_sum_combos = getPoints(organization.get(1));
-	//
-	// 	double num_knock_cache = organization.get(2).get(0).size();
-	// 	double point_sum_knock_cache = getPoints(organization.get(2));
-	//
-	// 	double num_load_cards = organization.get(3).get(0).size();
-	// 	double point_sum_load_cards = getPoints(organization.get(3));
-	//
-	// 	return new double[] {
-	// 						current_player_score,
-	// 						opponent_score,
-	// 						current_player_deadwood,
-	// 						current_player_num_hit_cards,
-	// 						num_melds,
-	// 						point_sum_melds,
-	// 						num_combos,
-	// 						point_sum_combos,
-	// 						num_knock_cache,
-	// 						point_sum_knock_cache,
-	// 						num_load_cards,
-	// 						point_sum_load_cards,
-	// 						turns_taken,
-	// 	};
-	// }
 
 	public static double[] calculateSimpleFeatures(SimpleGinRummyPlayer player, ArrayList<Card> deck, int[] scores) {
 
@@ -720,7 +782,6 @@ public class OurUtilities {
 		// p3 hand is probably better? p3 hand has +1 combo +3 deadwood
 		testPlayers.add(p3);
 		testPlayers.add(p4);
-
 
 
 		Player p5 = new Player(testVersion, testType);

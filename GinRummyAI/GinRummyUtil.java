@@ -62,12 +62,12 @@ public class GinRummyUtil {
 	/**
 	 * Card bitstrings indexed by card id number
 	 */
-	private static long[] cardBitstrings = new long[Card.NUM_CARDS];
+	static long[] cardBitstrings = new long[Card.NUM_CARDS];
 	/**
 	 * List of lists of meld bitstrings.  Melds appearing after melds in lists are supersets, so the
 	 * first meld not made in a list makes further checking in that list unnnecessary.
 	 */
-	private static ArrayList<ArrayList<Long>> meldBitstrings;
+	static ArrayList<ArrayList<Long>> meldBitstrings;
 	/**
 	 * Map from meld bitstrings to corresponding lists of cards
 	 */

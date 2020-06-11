@@ -72,6 +72,33 @@ Rank the top three (derived) features you would select to predict (1) hand score
 - number of cards that when added would allow you to shuffle your hand and reduce deadwood
 - number of "combo"-hit cards
 - number of set/run melds/combos
+- Differentiate between combos / triangles / squares
+	- Triangle counts as 2 combos, but acts differently when we acquire a hit card
+	- Triangles seem to be better than any other 2 combos
+- Number of "split" combos
+	- Ex. 3C 5C
+- Number of melded cards or size of melds
+	- Harder to knock with a run of 5 (5-melded) pg 24
+- Aggression with safety of discards
+	- Sometimes it pays to make riskier discards to keep combos intact pg 25
+	- Player should learn this on its own
+- Point sum of unknown cards / Number of low-mid-high cards
+	- Could be helpful in determining when somebody is likely to knock
+- Point sum of highest combo
+- Bottom of pg 31
+- Number of times opponent draws faceup
+	- Could give a better indicator about how likely they are to knock (if happening a lot)
+- Learn how to fish pg 35-36
+	- Discarding a card with the same rank as another card that would complete a run
+		- Discarding 9C when you have 7D and 8D
+		- This makes it more likely for the opponent to discard another 9, like the one we need
+	- As a feature -> # of these types of cards such as the 9C
+- Don't know what to call it, but make it so A and K, then 2 and Q are better discards then the rest
+	- A and K have 4 possible melds
+	- 2 and Q have 5
+	- rest have 6
+	- this might be taken care of depending on how we implement the estimation feature
+- Redo num options?
 
 
 

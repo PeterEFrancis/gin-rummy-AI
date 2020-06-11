@@ -145,3 +145,13 @@ Finished structural development on Python version and completed the aleph cycle.
 ### Monday 6/8/20
 
 Tried using python version to generate XGBoost models. Began hand estimation.
+
+
+### Tuesday 6/9/20
+
+Added hand estimation as a feature (new normalization of probabilities). Brainstormed new features.
+
+
+### Wednesday 6/10/20
+
+Different probabilistic interpretation of hand estimation data. Bug fixes and large data collection. Tomorrow: add more features, XGBOOST <- make it easier to do.

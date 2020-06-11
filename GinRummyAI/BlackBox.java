@@ -14,7 +14,7 @@ public class BlackBox {
 
 	static final String GBMName = "xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88";
 	static final String[] FILENAMES = new String[] {"linear_coef.csv", "quadratic_coef.csv"};
-	static final int ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3;
+	static final int ALPHA = 0, BETA = 1, GAMMA = 2, DELTA = 3, EPSILON = 4;
 	static final int LINEAR = 0, QUADRATIC = 1, NETWORK = 2, XGBOOST = 3;
 
 	static final int[] VERSIONS = {ALPHA, BETA, GAMMA, DELTA};

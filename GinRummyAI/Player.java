@@ -23,25 +23,26 @@ public class Player implements GinRummyPlayer{
 	public ArrayList<Card> opponentHand;          // opponent picked up cards at the moment
 	public Stack<Card> discardedCards;
 	public boolean drewFaceUp;
-	public double[] discardProbabilities;
 
-//	for hand estimation
-	Card faceUpCard;
+	// for hand estimation
 	public HandEstimator estimator = new HandEstimator();
 	private int totalDiscarded = 0;
 	ArrayList<Double> ratios = new ArrayList<Double>();
+
 
 	public Player(int version, int type) {
 		reset();
 		this.version = version;
 		this.type = type;
+		this.scores = new int[2];
 	}
 
 	public Player(int version, int type, long seed) {
 		reset();
 		this.version = version;
 		this.type = type;
-		random.setSeed(seed);
+		this.random.setSeed(seed);
+		this.scores = new int[2];
 	}
 
 	public void reset() {
@@ -58,8 +59,6 @@ public class Player implements GinRummyPlayer{
 		hand = new ArrayList<Card>();
 		unknownCards = new ArrayList<Card>();
 		discardedCards = new Stack<Card>();
-		scores = new int[2];
-		discardProbabilities = new double[52];
 		random = new Random();
 	}
 
@@ -80,34 +79,28 @@ public class Player implements GinRummyPlayer{
 		this.playerNum = playerNum;
 		this.startingPlayerNum = startingPlayerNum;
 
-		 estimator.init();
-		 ArrayList<Card> handAL = new ArrayList<Card>();
-		 for (Card c : cards)
-		 	handAL.add(c);
-		 estimator.setKnown(handAL, false);
-		 estimator.print();
-		 totalDiscarded = 0;
+		  estimator.init();
+		  ArrayList<Card> handAL = new ArrayList<Card>();
+		  for (Card c : hand)
+		  	handAL.add(c);
+		  estimator.setKnown(handAL, false);
+//		  estimator.print();
 	}
 
 
-	/**
-	 * Sets the discard probabilities and returns the card object corresponding
-	 * to the discard with highest winning probability.
-	**/
 	// TODO: change datastructure to better remove and add?
-	public Card setDiscardProbabilities(Card faceUpCard) {
+	public double[] getBestDiscardAndProb(Card faceUpCard) {
 		LinkedList<Card> possibleDiscards = new LinkedList<Card>();
 		possibleDiscards.addAll(hand);
 		if (faceUpCard != null) {
 			possibleDiscards.remove(faceUpCard);
 		}
 		Card bestDiscard = null;
-		double bestProbOfWinning = Double.MIN_VALUE;
+		double bestProbOfWinning = -Double.MAX_VALUE;
 		for (Card possDiscard : possibleDiscards) {
 			hand.remove(possDiscard);
 			discardedCards.add(possDiscard);
 			double probOfWinning = BlackBox.regFunction(this);
-			discardProbabilities[possDiscard.getId()] = probOfWinning;
 			if (probOfWinning > bestProbOfWinning) {
 				bestProbOfWinning = probOfWinning;
 				bestDiscard = possDiscard;
@@ -115,16 +108,18 @@ public class Player implements GinRummyPlayer{
 			discardedCards.remove(possDiscard);
 			hand.add(possDiscard);
 		}
-		return bestDiscard;
+		double[] ret = new double[2];
+		ret[0] = bestDiscard.getId();
+		ret[1] = bestProbOfWinning;
+		return ret;
 	}
 
 
 	@Override
 	public boolean willDrawFaceUpCard(Card faceUpCard) {
-		faceUpCard = OurUtilities.transformCard(faceUpCard);
 
-		 estimator.setKnown(card, false);
-		 this.faceUpCard = card;
+		// hand estimator
+		estimator.setKnown(faceUpCard, false);
 
 		// first turn -- this... this is how we find out what the initial face up card is.
 		if (discardedCards.isEmpty()) {
@@ -132,12 +127,10 @@ public class Player implements GinRummyPlayer{
 			unknownCards.remove(faceUpCard);
 		}
 
-		discardProbabilities = new double[52];
-
 		// find probability of winning if draw face up
 		hand.add(discardedCards.pop());
-		Card bestDiscard = setDiscardProbabilities(faceUpCard);
-		double drawFaceUpCardWinProb = discardProbabilities[bestDiscard.getId()];
+		double[] bestDiscardAndProb = getBestDiscardAndProb(faceUpCard);
+		double drawFaceUpCardWinProb = bestDiscardAndProb[1];
 		hand.remove(faceUpCard);
 		discardedCards.push(faceUpCard);
 
@@ -146,8 +139,7 @@ public class Player implements GinRummyPlayer{
 		for (int i = 0; i < unknownCards.size(); i++) {
 			Card card = unknownCards.remove(0);
 			hand.add(card);
-			Card bestDiscard1 = setDiscardProbabilities(null);
-			drawFaceDownWinProbAvg += discardProbabilities[bestDiscard1.getId()];
+			drawFaceDownWinProbAvg += getBestDiscardAndProb(null)[1];
 			hand.remove(card);
 			unknownCards.add(card);
 		}
@@ -162,15 +154,12 @@ public class Player implements GinRummyPlayer{
 
 	@Override
 	public void reportDraw(int playerNum, Card drawnCard) {
-		try {
-			drawnCard = OurUtilities.transformCard(drawnCard);
-		} catch (Exception e) {
-			// lol. Yeah, we really need a Card class, don't we?
-			// this sure is making EVERYONE's lives easier.       (@)/(@)
-		}
-		
+
 		// our draw
 		if (playerNum == this.playerNum) {
+			// hand estimator
+			estimator.setKnown(drawnCard, false);
+
 			hand.add(drawnCard);
 			this.drawnCard = drawnCard;
 			// we draw face-up card
@@ -198,10 +187,13 @@ public class Player implements GinRummyPlayer{
 			if (drawnCard != null){
 				opponentHand.add(discardedCards.pop());
 				opponentAllTimeHand.add(faceUpCard);
+				this.drawnCard = drawnCard;
+				drewFaceUp = true;
 			}
 			// opponent draws face down card
 			else {
 				opponentPassedCards.add(faceUpCard);
+				drewFaceUp = false;
 			}
 		}
 
@@ -211,23 +203,19 @@ public class Player implements GinRummyPlayer{
 	@Override
 	public Card getDiscard() {
 		// TODO : Prevent future repeat of draw, discard pair?
-		Card bestDiscard = null;
-		double bestProb = Double.MIN_VALUE;
-		for (int i = 0; i < hand.size(); i++) {
-			Card currCard = hand.get(i);
-			double discardProb = discardProbabilities[currCard.getId()];
-			if (discardProb > bestProb) {
-				bestProb = discardProb;
-				bestDiscard = currCard;
-			}
+		if (drewFaceUp) {
+			return Card.getCard((int) getBestDiscardAndProb(drawnCard)[0]);
 		}
-		return bestDiscard;
+		return Card.getCard((int) getBestDiscardAndProb(null)[0]);
 	}
 
 
 	@Override
 	public void reportDiscard(int playerNum, Card discardedCard) {
-		discardedCard = OurUtilities.transformCard(discardedCard);
+		Card pastFaceUpCard = null;
+		if (!discardedCards.isEmpty()) {
+			pastFaceUpCard = discardedCards.peek();
+		}
 
 		discardedCards.push(discardedCard);
 
@@ -240,8 +228,13 @@ public class Player implements GinRummyPlayer{
 			opponentHand.remove(discardedCard);
 			opponentDiscardedCards.add(discardedCard);
 			unknownCards.remove(discardedCard);
-		}
 
+			// hand estimator
+			if (drewFaceUp) {
+				pastFaceUpCard = drawnCard;
+			}
+			estimator.reportDrawDiscard(pastFaceUpCard, drewFaceUp, discardedCard);
+		}
 		turn++;
 	}
 
@@ -264,7 +257,7 @@ public class Player implements GinRummyPlayer{
 
 	@Override
 	public void reportScores(int[] scores) {
-		this.scores = scores.clone();
+		this.scores = scores;
 	}
 
 	@Override
