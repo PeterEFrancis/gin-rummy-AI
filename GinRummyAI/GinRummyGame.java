@@ -303,7 +303,7 @@ public class GinRummyGame {
 		// long start = System.currentTimeMillis();
 
 		setPlayVerbose(true);
-		GinRummyGame game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new SimpleGinRummyPlayer());
+		GinRummyGame game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.EPSILON, BlackBox.XGBOOST));
 
 		game.play();
 
@@ -315,7 +315,7 @@ public class GinRummyGame {
 		setPlayVerbose(false);
 		int numGames = 500;
 		int numP1Wins = 0;
-		game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new SimpleGinRummyPlayer());
+		game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.EPSILON, BlackBox.XGBOOST));
 		long startMs = System.currentTimeMillis();
 		for (int i = 0; i < numGames; i++) {
 			if (i % 10 == 0) {

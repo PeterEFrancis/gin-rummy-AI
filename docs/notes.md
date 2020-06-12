@@ -102,18 +102,6 @@ Rank the top three (derived) features you would select to predict (1) hand score
 
 
 
-##### Our Function
-
-- Input
-    - current game state (which cards we know, probability of other cards)
-    - our cards in the hand
-    - how far we are in the game
-    - deadwood points
-
-- Output - 2 actions:
-    - which card to pick
-    - which card to discard
-
 
 
 ### Questions

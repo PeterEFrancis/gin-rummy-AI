@@ -18,7 +18,7 @@ public class BlackBox {
 	static final int LINEAR = 0, QUADRATIC = 1, NETWORK = 2, XGBOOST = 3;
 
 	static final int[] VERSIONS = {ALPHA, BETA, GAMMA, DELTA};
-	static final String[] STRING_VERSIONS = {"alpha", "beta", "gamma", "delta"};
+	static final String[] STRING_VERSIONS = {"alpha", "beta", "gamma", "delta", "epsilon"};
 	static final int[] COEFFICIENT_TYPES = {LINEAR, QUADRATIC};
 	static String base_post_url = "http://127.0.0.1:4201/";
 
@@ -106,14 +106,24 @@ public class BlackBox {
 		}
 
 		if (player.type == XGBOOST) {
-//
-//			double[] features = OurUtilities.calculateFeatures(player);
-//			//System.out.println(Arrays.toString(features));
-//
-////			xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88 xgb = new xgboost_817c4595_1ef8_4d35_aa14_3c1c731d4b88();
-////			double[] val = xgb.score0(features, new double[1]);
-//			// System.out.println("val= " + val[0]);
-//			return val[0];
+
+			double[] features = OurUtilities.calculateFeatures(player);
+			// System.out.println(Arrays.toString(features));
+
+
+			xgboost_5d577028_7e3d_4520_8ef3_4a7574d6ed3a xgb = new xgboost_5d577028_7e3d_4520_8ef3_4a7574d6ed3a();
+			// double[] red_features = new double[] {features[0], features[1], features[2], features[3], features[12], features[13], features[14]};
+
+			double[] val = xgb.score0(features, new double[1]);
+//			 System.out.println("val= " + val[0]);
+			return val[0];
+
+			// xgboost_ea6fe23c_5dd1_4e5c_bed4_d01cb74709ae p = new xgboost_ea6fe23c_5dd1_4e5c_bed4_d01cb74709ae();
+			// double[] red_features = new double[] {features[0], features[1], features[2], features[3], features[12], features[13], features[14]};
+			// double[] preds = new double[p.getPredsSize()];
+			// p.score0(red_features, preds);
+			// return preds[0];
+
 
 			// String modelClassName = "xgboost_0373d649_c119_4ca5_a67d_c22d2c258b81"; //insert class name here
 			// hex.genmodel.GenModel rawModel;

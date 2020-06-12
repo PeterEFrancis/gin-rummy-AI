@@ -42,3 +42,7 @@
 # Delta
 0. 200 games between gamma-1 linear and itself, collecting C
 1. 200 games between gamma-1 linear and itself, collecting C
+
+# Epsilon
+0.
+1. 200 games between alpha-8 linear and itself, collecting C

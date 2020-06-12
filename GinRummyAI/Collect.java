@@ -272,9 +272,6 @@ public class Collect {
 
 
 
-
-
-
 // -------------------- DATA C -------------------------------------------------------------↓
 					// deck.addAll(hands.get(opponent));
 					// ArrayList<Card> uc = players[currentPlayer].unknownCards;
@@ -344,6 +341,7 @@ public class Collect {
 // -------------------- DATA D -------------------------------------------------------------↑
 
 
+			int[] scores_before_addition = scores.clone();
 
 			if (knockMelds != null) { // round didn't end due to non-knocking and 2 cards remaining in draw pile
 				// check legality of knocking meld
@@ -470,6 +468,8 @@ public class Collect {
 			}
 
 			handData.add("" + handWinner);
+			handData.add("" + (scores[0] - scores_before_addition[0]));
+			handData.add("" + (scores[1] - scores_before_addition[1]));
 
 			// score reporting
 			if (playVerbose)
@@ -495,7 +495,7 @@ public class Collect {
 
 
 
-	public static String fileName = "delta-2.csv";
+	public static String fileName = "epsilon-3.csv";
 	public static File file = new File(fileName);
 	public static PrintWriter pw;
 	static {
@@ -512,7 +512,9 @@ public class Collect {
 		pw.print("current_player,");
 		pw.print("is_current_player_hand_winner,");
 		pw.print("is_current_player_game_winner,");
+		pw.print("current_player_end_hand_score_advantage,");
 		// this space is intentional
+		// calculated features below
 		pw.print("current_player_score,");
 		pw.print("opponent_score,");
 		pw.print("current_player_deadwood,");
@@ -540,10 +542,10 @@ public class Collect {
 		// put new features directly above me
 
 
-		for (int i = 0; i < 200; i++) {
+		for (int i = 0; i < 1000000; i++) {
 			setPlayVerbose(false);
 
-			Collect game = new Collect(new Player(BlackBox.GAMMA, BlackBox.LINEAR), new Player(BlackBox.GAMMA, BlackBox.LINEAR));
+			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
 
 
 			ArrayList<ArrayList<String>> csvOutput = game.getPlayData();
@@ -553,17 +555,26 @@ public class Collect {
 			csvOutput.remove(csvOutput.size() - 1);
 
 			for (ArrayList<String> handData : csvOutput) {
-				double handWinner = Double.parseDouble(handData.get(handData.size() - 1).toString());
+				double handWinner = Double.parseDouble(handData.get(handData.size() - 3).toString());
+				double handScore0 = Double.parseDouble(handData.get(handData.size() - 2).toString());
+				double handScore1 = Double.parseDouble(handData.get(handData.size() - 1).toString());
+				handData.remove(handData.size() - 1);
+				handData.remove(handData.size() - 1);
 				handData.remove(handData.size() - 1);
 				for (String data : handData) {
 					double currentPlayer = Double.parseDouble(Arrays.asList(data.split(",")).get(0));
 					int comma = data.indexOf(",");
 					String calculatedFeatures = data.substring(comma + 1);
 					if (handWinner != 0.5) {
+						boolean is_current_player_hand_winner = currentPlayer == handWinner;
+						boolean is_current_player_game_winner = currentPlayer == gameWinner;
+						double current_player_end_hand_score_advantage = currentPlayer == 0 ? (handScore0 - handScore1) : (handScore1 - handScore0);
 
 						String fdata = currentPlayer + ","
-													+ ((currentPlayer == handWinner) ? "1" : "0") + ","
-													+ ((currentPlayer == gameWinner) ? "1" : "0") + ","
+													+ (is_current_player_hand_winner ? "1" : "0") + ","
+													+ (is_current_player_game_winner ? "1" : "0") + ","
+													+ current_player_end_hand_score_advantage + ","
+													// add hand scores here
 													+ calculatedFeatures;
 						pw.println(fdata);
 					}
