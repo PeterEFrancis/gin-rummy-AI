@@ -90,6 +90,17 @@ public class BlackBox {
 
 		if (player.type == NETWORK) {
 
+			double[] features = OurUtilities.calculateFeatures(player);
+			// System.out.println("\t" + Arrays.toString(features));
+
+			deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc dl = new deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc();
+			double[] red_features = new double[] {features[2], features[4], features[12]};
+
+			double[] val = dl.score0(red_features, new double[10]);
+			// System.out.println("\tval= " + val[0]);
+			return val[0];
+
+
 			// double[] features = OurUtilities.calculateFeatures(player);
 			// features = new double[] {features[0], features[1], features[2], features[3], features[13]};
 			// String featuresStr1 = Arrays.toString(features);
@@ -108,15 +119,21 @@ public class BlackBox {
 		if (player.type == XGBOOST) {
 
 			double[] features = OurUtilities.calculateFeatures(player);
-			// System.out.println(Arrays.toString(features));
+			// System.out.println("\t" + Arrays.toString(features));
 
+			xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d xgb = new xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d();
+			double[] red_features = new double[] {features[2], features[4], features[12]};
 
-			xgboost_5d577028_7e3d_4520_8ef3_4a7574d6ed3a xgb = new xgboost_5d577028_7e3d_4520_8ef3_4a7574d6ed3a();
-			// double[] red_features = new double[] {features[0], features[1], features[2], features[3], features[12], features[13], features[14]};
-
-			double[] val = xgb.score0(features, new double[1]);
-//			 System.out.println("val= " + val[0]);
+			double[] val = xgb.score0(red_features, new double[1]);
+			// System.out.println("\tval= " + val[0]);
 			return val[0];
+
+
+
+
+
+
+
 
 			// xgboost_ea6fe23c_5dd1_4e5c_bed4_d01cb74709ae p = new xgboost_ea6fe23c_5dd1_4e5c_bed4_d01cb74709ae();
 			// double[] red_features = new double[] {features[0], features[1], features[2], features[3], features[12], features[13], features[14]};

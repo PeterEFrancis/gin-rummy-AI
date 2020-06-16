@@ -46,3 +46,4 @@
 # Epsilon
 0.
 1. 200 games between alpha-8 linear and itself, collecting C
+2. ~1000 games between alpha-8 linear and itself, collecting C

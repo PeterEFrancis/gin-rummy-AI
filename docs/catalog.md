@@ -154,4 +154,20 @@ Added hand estimation as a feature (new normalization of probabilities). Brainst
 
 ### Wednesday 6/10/20
 
-Different probabilistic interpretation of hand estimation data. Bug fixes and large data collection. Tomorrow: add more features, XGBOOST <- make it easier to do.
+Different probabilistic interpretation of hand estimation data. Bug fixes and large data collection.
+
+### Thursday 6/11/20
+
+Tested more possible XGBoost features.
+
+### Friday 6/12/20
+
+Printed out regression values and features to analyze decisions made by our player. Tried modifying components of the xgboost and providing it with fewer features to gain a clearer insight of what could be wrong.
+
+
+
+## Week 5
+
+### Monday
+
+Read about convolutional networks and how we could apply them to a given game state. Figured out the (conjectured) minimum length sequence that contains all of the permutations of Z_4 up to reflection.

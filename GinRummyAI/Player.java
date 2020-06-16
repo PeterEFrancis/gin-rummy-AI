@@ -6,6 +6,9 @@ import java.util.Stack;
 
 public class Player implements GinRummyPlayer{
 
+	int test_turn = 4;
+
+
 	public int type;
 	public int version;
 	public int playerNum;
@@ -88,19 +91,46 @@ public class Player implements GinRummyPlayer{
 	}
 
 
+	public static String disp_features_prob(double[] features, double prob) {
+		StringBuilder sb = new StringBuilder("[");
+		for (double d : features) {
+			sb.append((d + "            ").substring(0,6));
+		}
+		sb.append("] -> " + prob);
+		return sb.toString();
+	}
+
+
+
 	// TODO: change datastructure to better remove and add?
 	public double[] getBestDiscardAndProb(Card faceUpCard) {
+		if (turn == test_turn) {
+			System.out.println("\tFinding the best discard ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ v ");
+		}
 		LinkedList<Card> possibleDiscards = new LinkedList<Card>();
 		possibleDiscards.addAll(hand);
 		if (faceUpCard != null) {
 			possibleDiscards.remove(faceUpCard);
 		}
+		if (turn == test_turn) {
+			System.out.println("\t|\tpossible discards: " + possibleDiscards);
+		}
 		Card bestDiscard = null;
 		double bestProbOfWinning = -Double.MAX_VALUE;
+
+		if (turn == test_turn) {
+			System.out.println("\t|");
+			System.out.println("\t|\t\ttest Discard       CPSc  OPSc  DeWo  nHCa  nMel  psMe  nCom  psCo  nKCa  psKC  nLoC  psLC  TuTa  nNOC  DisDan     Prob. of Winning");
+			System.out.println("\t|\t\t                                *           *                                               *                                     ");
+		}
+
 		for (Card possDiscard : possibleDiscards) {
 			hand.remove(possDiscard);
 			discardedCards.add(possDiscard);
 			double probOfWinning = BlackBox.regFunction(this);
+			if (turn == test_turn) {
+				System.out.println("\t|\t\t\t" + possDiscard + "    ->  " + disp_features_prob(OurUtilities.calculateFeatures(this), probOfWinning));
+			}
 			if (probOfWinning > bestProbOfWinning) {
 				bestProbOfWinning = probOfWinning;
 				bestDiscard = possDiscard;
@@ -111,8 +141,16 @@ public class Player implements GinRummyPlayer{
 		double[] ret = new double[2];
 		ret[0] = bestDiscard.getId();
 		ret[1] = bestProbOfWinning;
+		if (turn == test_turn) {
+			System.out.println("\t|\n\t|\tbest discard: " + Card.allCards[(int) ret[0]]);
+			System.out.println("\t|\tbest discard prob: " + ret[1]);
+		}
+		if (turn == test_turn) {
+			System.out.println("\t~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ^ ");
+		}
 		return ret;
 	}
+
 
 
 	@Override
@@ -127,17 +165,38 @@ public class Player implements GinRummyPlayer{
 			unknownCards.remove(faceUpCard);
 		}
 
+		if (turn == test_turn) {
+			System.out.println("==================================================================================== Begin Extensive Verbose Turn");
+			System.out.println("Finding best draw option for player " + playerNum);
+			System.out.println("#############################");
+			System.out.println("draw face up card option:");
+		}
+
 		// find probability of winning if draw face up
-		hand.add(discardedCards.pop());
+		Card fuc = discardedCards.pop();
+		hand.add(fuc);
+		if (turn == test_turn) {
+			System.out.println("\tface up card: " + faceUpCard);
+//			System.out.println("\tfuc: " + fuc);
+		}
 		double[] bestDiscardAndProb = getBestDiscardAndProb(faceUpCard);
 		double drawFaceUpCardWinProb = bestDiscardAndProb[1];
 		hand.remove(faceUpCard);
 		discardedCards.push(faceUpCard);
 
+		if (turn == test_turn) {
+			System.out.println("draw face up win prob: " + drawFaceUpCardWinProb);
+			System.out.println("#############################");
+			System.out.println("draw face down card options:");
+		}
+
 		// find average probability of winning if you draw from face down card
 		double drawFaceDownWinProbAvg = 0;
 		for (int i = 0; i < unknownCards.size(); i++) {
 			Card card = unknownCards.remove(0);
+			if (turn == test_turn) {
+				System.out.println("\tpossible draw card: " + card);
+			}
 			hand.add(card);
 			drawFaceDownWinProbAvg += getBestDiscardAndProb(null)[1];
 			hand.remove(card);
@@ -145,10 +204,22 @@ public class Player implements GinRummyPlayer{
 		}
 		drawFaceDownWinProbAvg /= unknownCards.size();
 
-		if (drawFaceDownWinProbAvg < drawFaceUpCardWinProb){
-			return true;
+		if (turn == test_turn) {
+			System.out.println("draw face down average win prob: " + drawFaceDownWinProbAvg);
+			System.out.println("#############################");
 		}
-		return false;
+
+		boolean retBool = false;
+		if (drawFaceDownWinProbAvg < drawFaceUpCardWinProb){
+			retBool = true;
+		}
+
+		if (turn == test_turn) {
+			System.out.println("Player decides to draw " + (retBool ? "face up card (" + faceUpCard + ")" : "face down card"));
+			System.out.println("#############################");
+		}
+
+		return retBool;
 	}
 
 
@@ -203,6 +274,7 @@ public class Player implements GinRummyPlayer{
 	@Override
 	public Card getDiscard() {
 		// TODO : Prevent future repeat of draw, discard pair?
+
 		if (drewFaceUp) {
 			return Card.getCard((int) getBestDiscardAndProb(drawnCard)[0]);
 		}
@@ -235,6 +307,12 @@ public class Player implements GinRummyPlayer{
 			}
 			estimator.reportDrawDiscard(pastFaceUpCard, drewFaceUp, discardedCard);
 		}
+
+		if (test_turn != -1 && turn > test_turn) {
+			System.out.println("==================================================================================== End Extensive Verbose Turn");
+			System.out.println(1/0);
+		}
+
 		turn++;
 	}
 

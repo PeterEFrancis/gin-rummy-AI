@@ -33,7 +33,7 @@ public class GinRummyGame {
 	/**
 	 * Random number generator
 	 */
-	private static final Random RANDOM = new Random();
+	private static final Random RANDOM = new Random(5);
 
 	/**
 	 * Hand size (before and after turn). After draw and before discard there is one extra card.
@@ -106,6 +106,9 @@ public class GinRummyGame {
 			int turnsTaken = 0;
 			ArrayList<ArrayList<Card>> knockMelds = null;
 			while (deck.size() > 2) { // while the deck has more than two cards remaining, play round
+				if (playVerbose)
+					System.out.println("----------Turns Taken: " + turnsTaken);
+					
 				// DRAW
 				boolean drawFaceUp = false;
 				Card faceUpCard = discards.peek();
@@ -312,20 +315,20 @@ public class GinRummyGame {
 		// System.out.println("-----------");
 
 		// Multiple non-verbose games
-		setPlayVerbose(false);
-		int numGames = 500;
-		int numP1Wins = 0;
-		game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.EPSILON, BlackBox.XGBOOST));
-		long startMs = System.currentTimeMillis();
-		for (int i = 0; i < numGames; i++) {
-			if (i % 10 == 0) {
-				System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
-			}
-			numP1Wins += game.play();
-		}
-		long totalMs = System.currentTimeMillis() - startMs;
-		System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
-		System.out.printf("Games Won: P0:%d, P1:%d.\n", numGames - numP1Wins, numP1Wins);
+		 setPlayVerbose(false);
+		 int numGames = 500;
+		 int numP1Wins = 0;
+		 game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.EPSILON, BlackBox.XGBOOST));
+		 long startMs = System.currentTimeMillis();
+		 for (int i = 0; i < numGames; i++) {
+		 	if (i % 10 == 0) {
+		 		System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
+		 	}
+		 	numP1Wins += game.play();
+		 }
+		 long totalMs = System.currentTimeMillis() - startMs;
+		 System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
+		 System.out.printf("Games Won: P0:%d, P1:%d.\n", numGames - numP1Wins, numP1Wins);
 	}
 
 }

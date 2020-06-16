@@ -631,24 +631,24 @@ public class OurUtilities {
 		// num_
 
 		return new double[] {
-				current_player_score,
-				opponent_score,
-				current_player_deadwood,
-				current_player_num_hit_cards,
+				current_player_score,						// 0
+				opponent_score, 								// 1
+				current_player_deadwood, 				// 2
+				current_player_num_hit_cards,		// 3
 				// alpha to here
-				num_melds,
-				point_sum_melds,
-				num_combos,
-				point_sum_combos,
-				num_knock_cache,
-				point_sum_knock_cache,
-				num_load_cards,
-				point_sum_load_cards,
-				turns_taken,
+				num_melds,											// 4
+				point_sum_melds,								// 5
+				num_combos,											// 6
+				point_sum_combos,								// 7
+				num_knock_cache,								// 8
+				point_sum_knock_cache,					// 9
+				num_load_cards,									// 10
+				point_sum_load_cards,						// 11
+				turns_taken,										// 12
 				// beta to here
-				num_nearby_opponent_cards,
+				num_nearby_opponent_cards,			// 13
 				// gamma to here
-				discard_danger,
+				discard_danger,									// 14
 				// delta to here
 
 				//num_set_melds
@@ -756,46 +756,42 @@ public class OurUtilities {
 		testCards[10] = set6ranks;
 		testCards[11] = set6suits;
 
-		int testVersion = BlackBox.ALPHA;
+		int testVersion = BlackBox.GAMMA;
 		int testType = BlackBox.LINEAR;
 
-		Player p1 = new Player(testVersion, testType);
-		p1.hand = stringToHand("AC 2C 3C 4H 5S 6D 8C 8H 9S TD");
-		setupGenericPlayer(p1);
 
-		Player p2 = new Player(testVersion, testType);
-		p2.hand = stringToHand("AC 2C 3C 4H 5S 6D 7C 8H 9S TD");
-		setupGenericPlayer(p2);
+		String[] handOnlyTests = {
+			"AC 2C 3C 4H 5S 6D 8C 8H 9S TD", // +1 combo +1 deadwood
+			"AC 2C 3C 4H 5S 6D 7C 8H 9S TD",
 
-		//p1 state better because +1 combo +1 deadwood
-		testPlayers.add(p1);
-		testPlayers.add(p2);
+			"AC 2H 3S 4D 5C 6H TS 8D 9C TH", // +1 combo +3 deadwood
+			"AC 2H 3S 4D 5C 6H 7S 8D 9C TH",
 
+			"AC AH AD 4C 6H 6S 8C 8D KC 4D", // -6 deadwood
+			"AC AH AD 4C 6H 6S 8C 8D KC KD",
 
-		Player p3 = new Player(testVersion, testType);
-		p3.hand = stringToHand("AC 2H 3S 4D 5C 6H TS 8D 9C TH");
-		setupGenericPlayer(p3);
+			"AC 2C 2S 4H 5H 7S 8C 9H TS JD", //-1 deadwood +2 combos
+			"AC 3D 2S 4H 5H 7S 8C 9H TS JD",
 
-		Player p4 = new Player(testVersion, testType);
-		setupGenericPlayer(p4);
+			"2C 2H 2S 4D 5C 6H 7S 8D 9C TH", // +1 meld -1 combo
+			"AC 2H AS 4D 5C 6H 7S 8D 9C TH",
 
-		// p3 hand is probably better? p3 hand has +1 combo +3 deadwood
-		testPlayers.add(p3);
-		testPlayers.add(p4);
+			"AC 2H 3S 4D 4C 6H 7S 8D 9C TH", // +1 combo -1 deadwood
+			"AC 2H 3S 4D 5C 6H 7S 8D 9C TH",
 
+			"AC 2C 2D 3D 5C 6H 7S 8D 9C TH", // +2 combo -1 deadwood
+			"AC 2C 3S DD 5C 6H 7S 8D 9C TH",
 
-		Player p5 = new Player(testVersion, testType);
-		p5.hand = stringToHand("AC AH AD 4C 6H 6S 8C 8D KC 4D");
-		setupGenericPlayer(p5);
+			"AC 2H 3S 3D 5C 6H 7S 8D 9C TH", // +1 combo -7 deadwood
+			"AC 2H 3S JS 5C 6H 7S 8D 9C TH"
+		};
 
-		Player p6 = new Player(testVersion, testType);
-		p6.hand = stringToHand("AC AH AD 4C 6H 6S 8C 8D KC KD");
-		setupGenericPlayer(p6);
-
-		// p5 hand better than p6 because p5 has -6 deadwood
-		testPlayers.add(p5);
-		testPlayers.add(p6);
-
+		for (String s : handOnlyTests) {
+			Player p = new Player(testVersion, testType);
+			p.hand = stringToHand(s);
+			setupGenericPlayer(p);
+			testPlayers.add(p);
+		}
 
 	}
 
@@ -807,6 +803,9 @@ public class OurUtilities {
 		if (p.opponentHand == null)
 			p.opponentHand = new ArrayList<Card>();
 		p.turn = 3; // a few turns in
+		if (p.discardedCards.isEmpty()) {
+			p.discardedCards.push(Card.allCards[38]); //KS
+		}
 	}
 
 //	public static void testRegressionFit() {
@@ -892,7 +891,6 @@ public class OurUtilities {
 //
 //
 //	}
-//
 
 
 	public static void testDecisions() {
@@ -969,7 +967,7 @@ public class OurUtilities {
 	public static void main(String[] args) {
 
 //		testRegressionFit();
-		// testDecisions();
+		testDecisions();
 		// testUtils();
 
 		// find distributions
