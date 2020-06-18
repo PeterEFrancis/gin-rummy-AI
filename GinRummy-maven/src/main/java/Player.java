@@ -91,12 +91,17 @@ public class Player implements GinRummyPlayer{
 	}
 
 
-	public static String disp_features_prob(double[] features, double prob) {
+	public static String disp_arr(double[] arr, int precision, int spacing) {
 		StringBuilder sb = new StringBuilder("[");
-		for (double d : features) {
-			sb.append((d + "            ").substring(0,6));
+		for (double d : arr) {
+			String toAdd = (d + "               ").substring(0, precision);
+			toAdd = (toAdd.trim() + ",                ").substring(0,precision + 1);
+			sb.append(toAdd);
+			for (int i = 0; i < spacing; i++) {
+				sb.append(" ");
+			}
 		}
-		sb.append("] -> " + prob);
+		sb.append("]");
 		return sb.toString();
 	}
 
@@ -129,7 +134,7 @@ public class Player implements GinRummyPlayer{
 			discardedCards.add(possDiscard);
 			double probOfWinning = BlackBox.regFunction(this);
 			if (turn == test_turn) {
-				System.out.println("\t|\t\t\t" + possDiscard + "    ->  " + disp_features_prob(OurUtilities.calculateFeatures(this), probOfWinning));
+				System.out.println("\t|\t\t\t" + possDiscard + "    ->  " + disp_arr(OurUtilities.calculateFeatures(this), 5, 0) + " ->  " + probOfWinning);
 			}
 			if (probOfWinning > bestProbOfWinning) {
 				bestProbOfWinning = probOfWinning;
@@ -166,7 +171,15 @@ public class Player implements GinRummyPlayer{
 		}
 
 		if (turn == test_turn) {
-			System.out.println("==================================================================================== Begin Extensive Verbose Turn");
+			System.out.println("==================================================================================== Begin Extensive Verbose Turn: Player " + playerNum);
+			System.out.println("Hand estimation matrix:");
+			double[][] matrix = OurUtilities.getCardProbImageMatrix(this);
+			for (int i = 0; i < matrix.length; i++) {
+				System.out.println("\t" + disp_arr(matrix[i], 5, 4));
+			}
+			System.out.println("\nestimator:\n");
+			estimator.print();
+			System.out.println();
 			System.out.println("Finding best draw option for player " + playerNum);
 			System.out.println("#############################");
 			System.out.println("draw face up card option:");
@@ -177,7 +190,8 @@ public class Player implements GinRummyPlayer{
 		hand.add(fuc);
 		if (turn == test_turn) {
 			System.out.println("\tface up card: " + faceUpCard);
-//			System.out.println("\tfuc: " + fuc);
+			// System.out.println("\tfuc: " + fuc);
+
 		}
 		double[] bestDiscardAndProb = getBestDiscardAndProb(faceUpCard);
 		double drawFaceUpCardWinProb = bestDiscardAndProb[1];

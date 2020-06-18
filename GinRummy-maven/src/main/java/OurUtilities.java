@@ -583,6 +583,10 @@ public class OurUtilities {
 
 
 
+
+
+
+
 	/**
 	 * calculates all possible features about a player's current state
 	 **/
@@ -619,8 +623,7 @@ public class OurUtilities {
 		Card discardedCard = player.discardedCards.peek();
 		double discard_danger = getDangerOfDiscard(discardedCard, player.estimator);
 
-
-//		double pleaseputagoodnamehere =
+		// double pleaseputagoodnamehere =
 		//double num_set_melds = numSetMelds(organization.get(0));
 		//double num_run_melds = numRunMelds(organization.get(0));
 		//double num_set_combos = numSetCombos(organization.get(1));
@@ -675,6 +678,35 @@ public class OurUtilities {
 				current_player_num_hit_cards
 		};
 	}
+
+	public static double[][] getCardProbImageMatrix(Player player) {
+		HandEstimator est = player.estimator;
+		double[][] ret = new double[17][13];
+		int[] order = {0, 1, 2, 3, 0, 1, 2, 0, 3, 1, 2, 0, 1, 3, 2, 0, 1};
+		for (int i = 0; i < 17; i++) {
+			double[] row;
+			if (i < 4) {
+				row = new double[13];
+				for (int j = 0; j < 13; j++) {
+					row[j] = est.prob[order[i] * 13 + j];
+				}
+			} else {
+				row = (double[]) ret[order[i]].clone();
+			}
+			ret[i] = row;
+		}
+		return ret;
+	}
+
+
+
+
+
+
+
+
+
+
 
 	public static void printAsSorted(ArrayList<Card> cards) {
 		for (int i = 0; i < 52; i++) {

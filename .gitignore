@@ -3,3 +3,4 @@
 /.metadata/
 **/.ipynb_checkpoints
 web/venv
+data/*-*.csv

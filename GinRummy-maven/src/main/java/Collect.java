@@ -43,6 +43,11 @@ public class Collect {
 		Collect.playVerbose = playVerbose;
 	}
 
+
+
+
+
+
 	/**
 	 * Create a GinRummyGame with two given players
 	 * @param player0 Player 0
@@ -65,7 +70,7 @@ public class Collect {
 	 * @return the winning player number 0 or 1
 	 */
 	@SuppressWarnings("unchecked")
-	public ArrayList<ArrayList<String>> getPlayData() {
+	public ArrayList<ArrayList<String>> getPlayData(ArrayList<StringBuilder> matrices) {
 
 		int line_number = 2;
 
@@ -81,6 +86,7 @@ public class Collect {
 		while (scores[0] < GinRummyUtil.GOAL_SCORE && scores[1] < GinRummyUtil.GOAL_SCORE) { // while game not over
 
 			ArrayList<String> handData = new ArrayList<String>();
+			StringBuilder cardMatrixData = new StringBuilder();
 
 			// hand winner
 			double handWinner = 0.5;
@@ -281,9 +287,10 @@ public class Collect {
 						ArrayList<Card> deckArray = new ArrayList<Card>();
 						deckArray.addAll(deck);
 						features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
-
 					} else if (players[currentPlayer] instanceof Player) {
 						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
+						double[][] cardMatrix = OurUtilities.getCardProbImageMatrix((Player) players[currentPlayer]);
+						cardMatrixData.append(Arrays.deepToString(cardMatrix) + "\n");
 					} else {
 						System.err.println("You can only collect data on SimpleGinRummyPlayer or Player.");
 					}
@@ -292,6 +299,7 @@ public class Collect {
 						sb.append("," + features[i]);
 					handData.add(sb.toString());
 					deck.removeAll(hands.get(opponent));
+
 // -------------------- DATA C -------------------------------------------------------------↑
 
 
@@ -480,6 +488,7 @@ public class Collect {
 
 
 			csvOutput.add(handData);
+			matrices.add(cardMatrixData);
 		}
 
 		if (playVerbose)
@@ -495,12 +504,15 @@ public class Collect {
 
 
 
-	public static String fileName = "epsilon-3.csv";
-	public static File file = new File(fileName);
-	public static PrintWriter pw;
+	public static String name = "epsilon-3";
+	public static File f_file = new File(name + "-f.csv");
+	public static File m_file = new File(name + "-m.csv");
+	public static PrintWriter f_pw;
+	public static PrintWriter m_pw;
 	static {
 		try {
-			pw = new PrintWriter(file);
+			f_pw = new PrintWriter(f_file);
+			m_pw = new PrintWriter(m_file);
 		} catch (FileNotFoundException e) {
 			System.err.println("No file.");
 		}
@@ -509,30 +521,30 @@ public class Collect {
 
 	public static void main(String args[]) {
 
-		pw.print("current_player,");
-		pw.print("is_current_player_hand_winner,");
-		pw.print("is_current_player_game_winner,");
-		pw.print("current_player_end_hand_score_advantage,");
+		f_pw.print("current_player,");
+		f_pw.print("is_current_player_hand_winner,");
+		f_pw.print("is_current_player_game_winner,");
+		f_pw.print("current_player_end_hand_score_advantage,");
 		// this space is intentional
 		// calculated features below
-		pw.print("current_player_score,");
-		pw.print("opponent_score,");
-		pw.print("current_player_deadwood,");
-		pw.print("current_player_num_hit_cards,");
+		f_pw.print("current_player_score,");
+		f_pw.print("opponent_score,");
+		f_pw.print("current_player_deadwood,");
+		f_pw.print("current_player_num_hit_cards,");
 		// Alpha to here
-		pw.print("num_melds,");
-		pw.print("point_sum_melds,");
-		pw.print("num_combos,");
-		pw.print("point_sum_combos,");
-		pw.print("num_knock_cache,");
-		pw.print("point_sum_knock_cache,");
-		pw.print("num_load_cards,");
-		pw.print("point_sum_load_cards,");
-		pw.print("turns_taken,");
+		f_pw.print("num_melds,");
+		f_pw.print("point_sum_melds,");
+		f_pw.print("num_combos,");
+		f_pw.print("point_sum_combos,");
+		f_pw.print("num_knock_cache,");
+		f_pw.print("point_sum_knock_cache,");
+		f_pw.print("num_load_cards,");
+		f_pw.print("point_sum_load_cards,");
+		f_pw.print("turns_taken,");
 		// Beta to here
-		pw.print("num_nearby_opponent_cards,");
+		f_pw.print("num_nearby_opponent_cards,");
 		// Gamma to here
-		pw.print("discard_danger\n");
+		f_pw.print("discard_danger\n");
 		// Delta to here
 
 		//pw.print("num_set_melds");
@@ -542,30 +554,45 @@ public class Collect {
 		// put new features directly above me
 
 
-		for (int i = 0; i < 1000000; i++) {
+		for (int i = 0; i < 100; i++) {
 			setPlayVerbose(false);
 
 			Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));
 
+			ArrayList<StringBuilder> matrices = new ArrayList<StringBuilder>();
+			ArrayList<ArrayList<String>> csvOutput = game.getPlayData(matrices);
 
-			ArrayList<ArrayList<String>> csvOutput = game.getPlayData();
 
 			double gameWinner = Double.parseDouble(csvOutput.get(csvOutput.size() - 1).get(0));
 
 			csvOutput.remove(csvOutput.size() - 1);
 
-			for (ArrayList<String> handData : csvOutput) {
+			if (csvOutput.size() != matrices.size()) {
+				System.out.println("ERROR -- F data and M data are not the same length");
+				System.exit(-1);
+			}
+
+			for (int j = 0; j < csvOutput.size(); j++) {
+				ArrayList<String> handData = csvOutput.get(j);
+				StringBuilder cardMatrixData = matrices.get(j);
+
 				double handWinner = Double.parseDouble(handData.get(handData.size() - 3).toString());
 				double handScore0 = Double.parseDouble(handData.get(handData.size() - 2).toString());
 				double handScore1 = Double.parseDouble(handData.get(handData.size() - 1).toString());
 				handData.remove(handData.size() - 1);
 				handData.remove(handData.size() - 1);
 				handData.remove(handData.size() - 1);
-				for (String data : handData) {
-					double currentPlayer = Double.parseDouble(Arrays.asList(data.split(",")).get(0));
-					int comma = data.indexOf(",");
-					String calculatedFeatures = data.substring(comma + 1);
-					if (handWinner != 0.5) {
+
+				if (handWinner != 0.5) { //Check if not a draw hand
+					// matrix stuff
+					m_pw.write(cardMatrixData.toString());
+
+					// feature stuff
+					for (String data : handData) {
+						double currentPlayer = Double.parseDouble(Arrays.asList(data.split(",")).get(0));
+						int comma = data.indexOf(",");
+						String calculatedFeatures = data.substring(comma + 1);
+
 						boolean is_current_player_hand_winner = currentPlayer == handWinner;
 						boolean is_current_player_game_winner = currentPlayer == gameWinner;
 						double current_player_end_hand_score_advantage = currentPlayer == 0 ? (handScore0 - handScore1) : (handScore1 - handScore0);
@@ -576,18 +603,48 @@ public class Collect {
 													+ current_player_end_hand_score_advantage + ","
 													// add hand scores here
 													+ calculatedFeatures;
-						pw.println(fdata);
+						f_pw.println(fdata);
 					}
-
 				}
-
 			}
+
+
+
+			// for (ArrayList<String> handData : csvOutput) {
+			// 	double handWinner = Double.parseDouble(handData.get(handData.size() - 3).toString());
+			// 	double handScore0 = Double.parseDouble(handData.get(handData.size() - 2).toString());
+			// 	double handScore1 = Double.parseDouble(handData.get(handData.size() - 1).toString());
+			// 	handData.remove(handData.size() - 1);
+			// 	handData.remove(handData.size() - 1);
+			// 	handData.remove(handData.size() - 1);
+			// 	for (String data : handData) {
+			// 		double currentPlayer = Double.parseDouble(Arrays.asList(data.split(",")).get(0));
+			// 		int comma = data.indexOf(",");
+			// 		String calculatedFeatures = data.substring(comma + 1);
+			// 		if (handWinner != 0.5) {
+			// 			boolean is_current_player_hand_winner = currentPlayer == handWinner;
+			// 			boolean is_current_player_game_winner = currentPlayer == gameWinner;
+			// 			double current_player_end_hand_score_advantage = currentPlayer == 0 ? (handScore0 - handScore1) : (handScore1 - handScore0);
+			//
+			// 			String fdata = currentPlayer + ","
+			// 										+ (is_current_player_hand_winner ? "1" : "0") + ","
+			// 										+ (is_current_player_game_winner ? "1" : "0") + ","
+			// 										+ current_player_end_hand_score_advantage + ","
+			// 										// add hand scores here
+			// 										+ calculatedFeatures;
+			// 			f_pw.println(fdata);
+			// 		}
+			//
+			// 	}
+			//
+			// }
 			if (i % 100 == 0) {
 				System.out.println(i);
 			}
 		}
 
-		pw.close();
+		f_pw.close();
+		m_pw.close();
 
 		System.out.println("done");
 	}
