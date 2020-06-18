@@ -171,3 +171,9 @@ Printed out regression values and features to analyze decisions made by our play
 ### Monday
 
 Read about convolutional networks and how we could apply them to a given game state. Figured out the (conjectured) minimum length sequence that contains all of the permutations of Z_4 up to reflection.
+
+### Tuesday
+
+Started working on CNN -- worked an example with Maven and Eclipse; struggled working with dependency management for dl4j.
+
+### Wednesday
