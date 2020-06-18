@@ -177,3 +177,10 @@ Read about convolutional networks and how we could apply them to a given game st
 Started working on CNN -- worked an example with Maven and Eclipse; struggled working with dependency management for dl4j.
 
 ### Wednesday
+
+Worked with Nd4j and dl4j to get optimal saving formats for data collection.
+
+
+### Thursday
+
+Added cardMatrix to Collect and used dl4j to load keras models into java. Started learning about multi-input functional models in keras.

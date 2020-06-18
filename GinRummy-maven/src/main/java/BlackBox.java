@@ -63,7 +63,7 @@ public class BlackBox {
 			 // new ClassPathResource("/regression_models/linear_coef.csv").getFile();
 			 simpleMlp = "regression_models/gamma.h5";
 			 Scanner scanner = new Scanner(new File(simpleMlp));
-			 model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
+			 model = KerasModelImport.importKerasFunctionalModelAndWeights(simpleMlp);
 		 } catch (Exception e) {
 			 e.printStackTrace();
 		 }
