@@ -9,10 +9,10 @@ import org.nd4j.common.io.ClassPathResource;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import hex.genmodel.easy.EasyPredictModelWrapper;
-import hex.genmodel.easy.RowData;
-import hex.genmodel.easy.exception.PredictException;
-import hex.genmodel.easy.prediction.BinomialModelPrediction;
+//import hex.genmodel.easy.EasyPredictModelWrapper;
+//import hex.genmodel.easy.RowData;
+//import hex.genmodel.easy.exception.PredictException;
+//import hex.genmodel.easy.prediction.BinomialModelPrediction;
 
 import java.util.Arrays;
 
@@ -56,18 +56,18 @@ public class BlackBox {
 
 
 	static String simpleMlp;
-	static MultiLayerNetwork model;
-
-	static {
-		 try {
-			 // new ClassPathResource("/regression_models/linear_coef.csv").getFile();
-			 simpleMlp = "regression_models/gamma.h5";
-			 Scanner scanner = new Scanner(new File(simpleMlp));
-			 model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
-		 } catch (Exception e) {
-			 e.printStackTrace();
-		 }
-	}
+//	static MultiLayerNetwork model;
+//
+//	static {
+//		 try {
+//			 // new ClassPathResource("/regression_models/linear_coef.csv").getFile();
+//			 simpleMlp = "regression_models/gamma.h5";
+//			 Scanner scanner = new Scanner(new File(simpleMlp));
+//			 model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
+//		 } catch (Exception e) {
+//			 e.printStackTrace();
+//		 }
+//	}
 
 
 	/**
@@ -113,29 +113,29 @@ public class BlackBox {
 
 		if (player.type == NETWORK) {
 
-			double[] features = OurUtilities.calculateFeatures(player);
-			// System.out.println("\t" + Arrays.toString(features));
-
-			deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc dl = new deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc();
-			double[] red_features = new double[] {features[2], features[4], features[12]};
-
-			double[] val = dl.score0(red_features, new double[10]);
-			// System.out.println("\tval= " + val[0]);
-			return val[0];
+//			double[] features = OurUtilities.calculateFeatures(player);
+//			// System.out.println("\t" + Arrays.toString(features));
+//
+//			deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc dl = new deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc();
+//			double[] red_features = new double[] {features[2], features[4], features[12]};
+//
+//			double[] val = dl.score0(red_features, new double[10]);
+//			// System.out.println("\tval= " + val[0]);
+//			return val[0];
 
 		}
 
 		if (player.type == XGBOOST) {
 
-			double[] features = OurUtilities.calculateFeatures(player);
-			// System.out.println("\t" + Arrays.toString(features));
-
-			xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d xgb = new xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d();
-			double[] red_features = new double[] {features[2], features[4], features[12]};
-
-			double[] val = xgb.score0(red_features, new double[1]);
-			// System.out.println("\tval= " + val[0]);
-			return val[0];
+//			double[] features = OurUtilities.calculateFeatures(player);
+//			// System.out.println("\t" + Arrays.toString(features));
+//
+//			xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d xgb = new xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d();
+//			double[] red_features = new double[] {features[2], features[4], features[12]};
+//
+//			double[] val = xgb.score0(red_features, new double[1]);
+//			// System.out.println("\tval= " + val[0]);
+//			return val[0];
 
 			// xgboost_ea6fe23c_5dd1_4e5c_bed4_d01cb74709ae p = new xgboost_ea6fe23c_5dd1_4e5c_bed4_d01cb74709ae();
 			// double[] red_features = new double[] {features[0], features[1], features[2], features[3], features[12], features[13], features[14]};
@@ -216,10 +216,10 @@ public class BlackBox {
 
 		if (player.type == KERAS) {
 
-			double[] features = OurUtilities.calculateFeatures(player);
-			INDArray input = Nd4j.createFromArray(new double[][] {{features[0], features[1], features[2], features[3], features[13]}});
-			// INDArray input = Nd4j.create(features, neww int[] {1, 5} ,'c');
-			return model.output(input).getDouble(0,0);
+//			double[] features = OurUtilities.calculateFeatures(player);
+//			INDArray input = Nd4j.createFromArray(new double[][] {{features[0], features[1], features[2], features[3], features[13]}});
+//			// INDArray input = Nd4j.create(features, neww int[] {1, 5} ,'c');
+//			return model.output(input).getDouble(0,0);
 
 		}
 
@@ -229,7 +229,8 @@ public class BlackBox {
 
 
 	public static void main(String[] args) throws IOException {
-
+		
+		System.out.println("here");
 
 	}
 

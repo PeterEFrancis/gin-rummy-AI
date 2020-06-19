@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
 
-import hex.genmodel.easy.EasyPredictModelWrapper;
-import hex.genmodel.easy.RowData;
-import hex.genmodel.easy.prediction.BinomialModelPrediction;
-import hex.genmodel.easy.prediction.RegressionModelPrediction;
+//import hex.genmodel.easy.EasyPredictModelWrapper;
+//import hex.genmodel.easy.RowData;
+//import hex.genmodel.easy.prediction.BinomialModelPrediction;
+//import hex.genmodel.easy.prediction.RegressionModelPrediction;
 
 public class OurUtilities {
 
@@ -437,27 +437,27 @@ public class OurUtilities {
 		return points;
 	}
 
-	public static ArrayList<Card> nearbyCards(ArrayList<Card> cards, ArrayList<Card> possibleCards) { // counting multiplicity, also our hand would be passed in for possibleCards if we want a feature blocking their play
+	public static ArrayList<Card> nearbyCardsInHand(ArrayList<Card> cards, ArrayList<Card> possibleCards) { // counting multiplicity, also our hand would be passed in for possibleCards if we want a feature blocking their play
 		ArrayList<Card> nearby = new ArrayList<Card>();
-		for (Card c : possibleCards) {
+		for (Card c : cards) {
 			int rank = c.getRank();
 			int suit = c.getSuit();
 			int id = c.getId();
 			for (int i = 0; i < 4; i++) { // adds all cards of same rank
 				Card toAdd = Card.allCards[id+(i-suit)*13];
-				if (!cards.contains(toAdd)) {// this if shouldn't need to be here but just in case
+				if (!cards.contains(toAdd) && possibleCards.contains(toAdd)) {
 					nearby.add(toAdd);
 				}
 			}
 			if (rank != 0) { // adds card lower in rank
 				Card toAdd = Card.allCards[id-1];
-				if (!cards.contains(toAdd)) {// this if shouldn't need to be here but just in case
+				if (!cards.contains(toAdd) && possibleCards.contains(toAdd)) {
 					nearby.add(toAdd);
 				}
 			}
-			if (rank != 12) { //adds card highr in rank
+			if (rank != 12) { //adds card higher in rank
 				Card toAdd = Card.allCards[id+1];
-				if (!cards.contains(toAdd)) {// this if shouldn't need to be here but just in case
+				if (!cards.contains(toAdd) && possibleCards.contains(toAdd)) {
 					nearby.add(toAdd);
 				}
 			}
@@ -617,7 +617,10 @@ public class OurUtilities {
 		double num_load_cards = organization.get(3).get(0).size();
 		double point_sum_load_cards = getPoints(organization.get(3));
 
-		ArrayList<Card> nearby = nearbyCards(player.opponentHand, player.hand);
+		System.out.println("op hand: "+player.opponentHand);
+		System.out.println("our hand: "+player.hand);
+		ArrayList<Card> nearby = nearbyCardsInHand(player.opponentHand, player.hand);
+		System.out.println("nearby: "+nearby);
 		double num_nearby_opponent_cards = nearby.size();
 
 		Card discardedCard = player.discardedCards.peek();

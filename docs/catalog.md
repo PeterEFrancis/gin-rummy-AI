@@ -184,3 +184,8 @@ Worked with Nd4j and dl4j to get optimal saving formats for data collection.
 ### Thursday
 
 Added cardMatrix to Collect and used dl4j to load keras models into java. Started learning about multi-input functional models in keras.
+
+
+### Friday
+
+Write up about installations after struggling with maven. Implemented keras MLP+CNN on epsilon-3 and got average diff of -0.025.
