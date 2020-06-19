@@ -22,10 +22,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.deeplearning4j</groupId>
-    <artifactId>dl4j-examples</artifactId>
+    <artifactId>GinRummy-maven</artifactId>
     <version>1.0.0-beta7</version>
-    <name>Introduction to DL4J</name>
-    <description>A set of examples introducing the DL4J framework</description>
+    <name></name>
+    <description></description>
 
     <properties>
         <dl4j-master.version>1.0.0-beta7</dl4j-master.version>
