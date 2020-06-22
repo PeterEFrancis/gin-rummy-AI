@@ -189,3 +189,10 @@ Added cardMatrix to Collect and used dl4j to load keras models into java. Starte
 ### Friday
 
 Write up about installations after struggling with maven. Implemented keras MLP+CNN on epsilon-3 and got average diff of -0.025.
+
+
+## Week 6
+
+### Monday
+
+Imported the functional model from Python to Java. Created a new 2D array that keeps track of cards in hand that was passed on to the CNN instead of probability 2D array of cards. Planning to create separate boolean 2D arrays of where cards are whether: discarded, unknown, opponent hands, player hands. Then used those 2D arrays to separate CNN networks, and combine the outputs of CNNs afterwards with the game features and make a combined model. The probability 2D array of cards might be to difficult for CNN to discern the patterns. Implemented keras MLP+CNN on epsilon-3 and got average diff of -0.25. Implemented keras MLP+CNN on epsilon-4 with cards on hand 2D array and got average diff of -0.34.

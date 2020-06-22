@@ -72,7 +72,7 @@ public class BlackBox {
 			 model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
 			 
 			 // Functional Model SetUp
-			 fullModel = "regression_models/best_model.h5";
+			 fullModel = "regression_models/best_model_2.h5";
 			 funcModel = KerasModelImport.importKerasModelAndWeights(fullModel);
 		 } catch (Exception e) {
 			 e.printStackTrace();
@@ -233,9 +233,63 @@ public class BlackBox {
 			
 			
 			// Functional model input-output
+			
+			// Input
+			// Features array
 			double[] fullFeatures = OurUtilities.calculateFeatures(player);
-			INDArray fullInput = Nd4j.createFromArray(new double[][] {fullFeatures});
-			return funcModel.output(fullInput)[0].getDouble(0);
+			INDArray fullInput = Nd4j.createFromArray(new double[][] {{fullFeatures[3], fullFeatures[4], fullFeatures[6], fullFeatures[12]}});
+
+			// Card Prob Matrix
+			double[][] matrix = OurUtilities.getCardProbImageMatrix(player);
+			
+			double[][][][] matrix4d = new double[1][17][13][1];
+			for (int i = 0; i < 17; i++) {
+				
+				double[][] beforeTranspose = new double[][] {matrix[i]};
+				
+				int m = beforeTranspose.length;
+				int n = beforeTranspose[0].length;
+				
+				double[][] afterTranspose = new double[n][m];
+				
+				for (int a = 0; a < n; a++) {
+					for (int b = 0; b < m; b++) {
+						afterTranspose[a][b] = beforeTranspose[b][a];
+					}
+				}
+				
+				matrix4d[0][i] = afterTranspose;
+			}
+			INDArray matrix4dND = Nd4j.createFromArray(matrix4d);
+			
+			// Card Boolean Matrix
+			int[][] cardMat = OurUtilities.getCardMatImageMatrix(player);
+			double[][][][] cardMatrix4d = new double[1][17][13][1];
+			for (int i = 0; i < 17; i++) {
+				
+				int[][] beforeTranspose = new int[][] {cardMat[i]};
+				
+				int m = beforeTranspose.length;
+				int n = beforeTranspose[0].length;
+				
+				double[][] afterTranspose = new double[n][m];
+				
+				for (int a = 0; a < n; a++) {
+					for (int b = 0; b < m; b++) {
+						afterTranspose[a][b] = beforeTranspose[b][a];
+					}
+				}
+				
+				cardMatrix4d[0][i] = afterTranspose;
+			}
+			INDArray cardMatrix4dND = Nd4j.createFromArray(cardMatrix4d);
+			
+			// Output
+			INDArray[] out = funcModel.output(fullInput, cardMatrix4dND);
+//			System.out.println("Length: " + out.length);
+//			System.out.println("Out[0]: " + out[0]);
+			return out[0].getDouble(0, 0);
+//			return funcModel.output(fullInput, matrixOnesND)[0].getDouble(0);
 
 		}
 

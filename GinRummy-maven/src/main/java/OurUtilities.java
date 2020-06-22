@@ -700,7 +700,26 @@ public class OurUtilities {
 		}
 		return ret;
 	}
+	
 
+
+	public static int[][] getCardMatImageMatrix(Player player) {
+		int[][] ret = new int[17][13];
+		int[] order = {0, 1, 2, 3, 0, 1, 2, 0, 3, 1, 2, 0, 1, 3, 2, 0, 1};
+		for (int i = 0; i < 17; i++) {
+			int[] row;
+			if (i < 4) {
+				row = new int[13];
+				for (int j = 0; j < 13; j++) {
+					row[j] = player.cardMat[order[i] * 13 + j];
+				}
+			} else {
+				row = (int[]) ret[order[i]].clone();
+			}
+			ret[i] = row;
+		}
+		return ret;
+	}
 
 
 
@@ -792,7 +811,7 @@ public class OurUtilities {
 		testCards[11] = set6suits;
 
 		int testVersion = BlackBox.GAMMA;
-		int testType = BlackBox.LINEAR;
+		int testType = BlackBox.KERAS;
 
 
 		String[] handOnlyTests = {
@@ -833,14 +852,22 @@ public class OurUtilities {
 	public static void setupGenericPlayer(Player p) {
 		if (p.hand == null)
 			p.hand = stringToHand("AC 2H 3S 4D 5C 6H 7S 8D 9C TH"); // trash hand
+		Card[] handArr = new Card[10];
+		int i = 0;
+		for (Card c : p.hand) {
+			handArr[i] = c;
+			i++;
+		}
+		p.startGame(0, 0, handArr);
 		p.playerNum = 0;
-		p.scores = new int[]{10,10}; // a few hands in
+		p.scores = new int[]{0,0}; // a few hands in
 		if (p.opponentHand == null)
 			p.opponentHand = new ArrayList<Card>();
-		p.turn = 3; // a few turns in
+		p.turn = 1; // a few turns in
 		if (p.discardedCards.isEmpty()) {
 			p.discardedCards.push(Card.allCards[38]); //KS
 		}
+		
 	}
 
 //	public static void testRegressionFit() {

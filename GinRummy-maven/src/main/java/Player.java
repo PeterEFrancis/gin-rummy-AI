@@ -26,7 +26,8 @@ public class Player implements GinRummyPlayer{
 	public ArrayList<Card> opponentHand;          // opponent picked up cards at the moment
 	public Stack<Card> discardedCards;
 	public boolean drewFaceUp;
-
+	public int[] cardMat;
+	
 	// for hand estimation
 	public HandEstimator estimator = new HandEstimator();
 	private int totalDiscarded = 0;
@@ -63,6 +64,7 @@ public class Player implements GinRummyPlayer{
 		unknownCards = new ArrayList<Card>();
 		discardedCards = new Stack<Card>();
 		random = new Random();
+		cardMat = new int[Card.NUM_CARDS];
 	}
 
 	@Override
@@ -82,12 +84,16 @@ public class Player implements GinRummyPlayer{
 		this.playerNum = playerNum;
 		this.startingPlayerNum = startingPlayerNum;
 
-		  estimator.init();
-		  ArrayList<Card> handAL = new ArrayList<Card>();
-		  for (Card c : hand)
-		  	handAL.add(c);
-		  estimator.setKnown(handAL, false);
-//		  estimator.print();
+		estimator.init();
+		ArrayList<Card> handAL = new ArrayList<Card>();
+		for (Card c : hand) {
+			handAL.add(c);
+			// update card matrix
+			cardMat[c.getId()] = 1;
+		}
+		estimator.setKnown(handAL, false);
+
+		//		  estimator.print();
 	}
 
 
@@ -257,6 +263,8 @@ public class Player implements GinRummyPlayer{
 				drewFaceUp = false;
 				unknownCards.remove(drawnCard);
 			}
+			// update card matrix
+			cardMat[drawnCard.getId()] = 1;
 		}
 		// opponent draw
 		else {
@@ -308,6 +316,8 @@ public class Player implements GinRummyPlayer{
 		// our discard
 		if (playerNum == this.playerNum) {
 			hand.remove(discardedCard);
+
+			cardMat[discardedCard.getId()] = 0;
 		}
 		// opponent discard
 		else {
