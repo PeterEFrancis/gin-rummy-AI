@@ -1,0 +1,2 @@
+Match MyPlayer vs. SimpleGinRummyPlayer (1 games) ... 1 games played in 916 ms.
+Games Won: MyPlayer:0, SimpleGinRummyPlayer:1.

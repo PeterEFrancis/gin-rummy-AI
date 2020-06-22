@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.modelimport.keras.KerasModelImport;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.common.io.ClassPathResource;
@@ -54,20 +55,29 @@ public class BlackBox {
 
 	static Request request = new Request(post_url);
 
-
+	// Sequential Model
 	static String simpleMlp;
-//	static MultiLayerNetwork model;
-//
-//	static {
-//		 try {
-//			 // new ClassPathResource("/regression_models/linear_coef.csv").getFile();
-//			 simpleMlp = "regression_models/gamma.h5";
-//			 Scanner scanner = new Scanner(new File(simpleMlp));
-//			 model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
-//		 } catch (Exception e) {
-//			 e.printStackTrace();
-//		 }
-//	}
+	static MultiLayerNetwork model;
+	
+	// Functional Model
+	static String fullModel;
+	static ComputationGraph funcModel;
+
+	static {
+		 try {
+			 // Sequential Model SetUp
+			 // new ClassPathResource("/regression_models/linear_coef.csv").getFile();
+			 simpleMlp = "regression_models/gamma.h5";
+			 //Scanner scanner = new Scanner(new File(simpleMlp));
+			 model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
+			 
+			 // Functional Model SetUp
+			 fullModel = "regression_models/best_model.h5";
+			 funcModel = KerasModelImport.importKerasModelAndWeights(fullModel);
+		 } catch (Exception e) {
+			 e.printStackTrace();
+		 }
+	}
 
 
 	/**
@@ -216,10 +226,16 @@ public class BlackBox {
 
 		if (player.type == KERAS) {
 
-//			double[] features = OurUtilities.calculateFeatures(player);
-//			INDArray input = Nd4j.createFromArray(new double[][] {{features[0], features[1], features[2], features[3], features[13]}});
-//			// INDArray input = Nd4j.create(features, neww int[] {1, 5} ,'c');
-//			return model.output(input).getDouble(0,0);
+			//double[] features = OurUtilities.calculateFeatures(player);
+			//INDArray input = Nd4j.createFromArray(new double[][] {{features[0], features[1], features[2], features[3], features[13]}});
+			// INDArray input = Nd4j.create(features, neww int[] {1, 5} ,'c');
+			//return model.output(input).getDouble(0,0);
+			
+			
+			// Functional model input-output
+			double[] fullFeatures = OurUtilities.calculateFeatures(player);
+			INDArray fullInput = Nd4j.createFromArray(new double[][] {fullFeatures});
+			return funcModel.output(fullInput)[0].getDouble(0);
 
 		}
 

@@ -617,10 +617,10 @@ public class OurUtilities {
 		double num_load_cards = organization.get(3).get(0).size();
 		double point_sum_load_cards = getPoints(organization.get(3));
 
-		System.out.println("op hand: "+player.opponentHand);
-		System.out.println("our hand: "+player.hand);
+		//System.out.println("op hand: "+player.opponentHand);
+		//System.out.println("our hand: "+player.hand);
 		ArrayList<Card> nearby = nearbyCardsInHand(player.opponentHand, player.hand);
-		System.out.println("nearby: "+nearby);
+		//System.out.println("nearby: "+nearby);
 		double num_nearby_opponent_cards = nearby.size();
 
 		Card discardedCard = player.discardedCards.peek();

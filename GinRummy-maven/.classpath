@@ -1,8 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
-	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="var" path="M2_REPO/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7.jar" sourcepath="M2_REPO/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/nd4j/nd4j-native/1.0.0-beta7/nd4j-native-1.0.0-beta7-macosx-x86_64.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/javacpp/1.5.3/javacpp-1.5.3.jar" sourcepath="M2_REPO/org/bytedeco/javacpp/1.5.3/javacpp-1.5.3-sources.jar"/>
@@ -63,10 +76,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/flandmark/1.07-1.5.3/flandmark-1.07-1.5.3.jar" sourcepath="M2_REPO/org/bytedeco/flandmark/1.07-1.5.3/flandmark-1.07-1.5.3-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/leptonica/1.79.0-1.5.3/leptonica-1.79.0-1.5.3.jar" sourcepath="M2_REPO/org/bytedeco/leptonica/1.79.0-1.5.3/leptonica-1.79.0-1.5.3-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/tesseract/4.1.1-1.5.3/tesseract-4.1.1-1.5.3.jar" sourcepath="M2_REPO/org/bytedeco/tesseract/4.1.1-1.5.3/tesseract-4.1.1-1.5.3-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/openjfx/javafx-graphics/13/javafx-graphics-13.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/openjfx/javafx-graphics/13/javafx-graphics-13-mac.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/openjfx/javafx-base/13/javafx-base-13.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/openjfx/javafx-base/13/javafx-base-13-mac.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/opencv-platform/4.3.0-1.5.3/opencv-platform-4.3.0-1.5.3.jar" sourcepath="M2_REPO/org/bytedeco/opencv-platform/4.3.0-1.5.3/opencv-platform-4.3.0-1.5.3-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/openblas-platform/0.3.7-1.5.2/openblas-platform-0.3.7-1.5.2.jar" sourcepath="M2_REPO/org/bytedeco/openblas-platform/0.3.7-1.5.2/openblas-platform-0.3.7-1.5.2-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/javacpp-platform/1.5.3/javacpp-platform-1.5.3.jar" sourcepath="M2_REPO/org/bytedeco/javacpp-platform/1.5.3/javacpp-platform-1.5.3-sources.jar"/>
@@ -376,6 +385,17 @@
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/tesseract/4.1.0-1.5.2/tesseract-4.1.0-1.5.2-macosx-x86_64.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/tesseract/4.1.0-1.5.2/tesseract-4.1.0-1.5.2-windows-x86.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/bytedeco/tesseract/4.1.0-1.5.2/tesseract-4.1.0-1.5.2-windows-x86_64.jar"/>
-	<classpathentry kind="lib" path="src/main/java/h2o-genmodel.jar"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
