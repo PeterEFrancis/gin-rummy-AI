@@ -1,2 +1,0 @@
-Match MyPlayer vs. SimpleGinRummyPlayer (50 games) ... 50 games played in 13971 ms.
-Games Won: MyPlayer:32, SimpleGinRummyPlayer:18.
