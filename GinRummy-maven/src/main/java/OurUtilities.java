@@ -1,15 +1,80 @@
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Scanner;
+import java.util.HashMap;
+
+import ginrummy.*;
 
 //import hex.genmodel.easy.EasyPredictModelWrapper;
 //import hex.genmodel.easy.RowData;
 //import hex.genmodel.easy.prediction.BinomialModelPrediction;
 //import hex.genmodel.easy.prediction.RegressionModelPrediction;
 
+@SuppressWarnings("unchecked")
 public class OurUtilities {
+
+	static long[] cardBitstrings = new long[Card.NUM_CARDS];
+
+	static ArrayList<ArrayList<Long>> meldBitstrings;
+
+	static HashMap<Long, ArrayList<Card>> meldBitstringToCardsMap;
+
+	static {
+		// initialize cardBitStrings
+		long bitstring = 1L;
+		for (int i = 0; i < Card.NUM_CARDS; i++) {
+			cardBitstrings[i] = bitstring;
+			bitstring <<= 1;
+		}
+
+		// build list of lists of meld bitstring where each subsequent meld bitstring in the list is a superset of previous meld bitstrings
+		meldBitstrings = new ArrayList<ArrayList<Long>>();
+		meldBitstringToCardsMap = new HashMap<Long, ArrayList<Card>>();
+
+		// build run meld lists
+		for (int suit = 0; suit < Card.NUM_SUITS; suit++) {
+			for (int runRankStart = 0; runRankStart < Card.NUM_RANKS - 2; runRankStart++) {
+				ArrayList<Long> bitstringList = new ArrayList<Long>();
+				ArrayList<Card> cards = new ArrayList<Card>();
+				Card c = Card.getCard(runRankStart, suit);
+				cards.add(c);
+				long meldBitstring = cardBitstrings[c.getId()];
+				c = Card.getCard(runRankStart + 1, suit);
+				cards.add(c);
+				meldBitstring |= cardBitstrings[c.getId()];
+				for (int rank = runRankStart + 2; rank < Card.NUM_RANKS; rank++) {
+					c = Card.getCard(rank, suit);
+					cards.add(c);
+					meldBitstring |= cardBitstrings[c.getId()];
+					bitstringList.add(meldBitstring);
+					meldBitstringToCardsMap.put(meldBitstring, (ArrayList<Card>) cards.clone());
+				}
+				meldBitstrings.add(bitstringList);
+			}
+		}
+
+		// build set meld lists
+		for (int rank = 0; rank < Card.NUM_RANKS; rank++) {
+			ArrayList<Card> cards = new ArrayList<Card>();
+			for (int suit = 0; suit < Card.NUM_SUITS; suit++)
+				cards.add(Card.getCard(rank,  suit));
+			for (int suit = 0; suit <= Card.NUM_SUITS; suit++) {
+				ArrayList<Card> cardSet = (ArrayList<Card>) cards.clone();
+				if (suit < Card.NUM_SUITS)
+					cardSet.remove(Card.getCard(rank,  suit));
+				ArrayList<Long> bitstringList = new ArrayList<Long>();
+				long meldBitstring = 0L;
+				for (Card card : cardSet)
+					meldBitstring |= cardBitstrings[card.getId()];
+				bitstringList.add(meldBitstring);
+				meldBitstringToCardsMap.put(meldBitstring, cardSet);
+				meldBitstrings.add(bitstringList);
+			}
+		}
+	}
+
+
+
+
 
 	/**
 	 * returns the number of deadwood points in player's hand
@@ -557,9 +622,9 @@ public class OurUtilities {
 	public static double getDangerOfDiscard(Card c, HandEstimator est) {
 		// get possible meld bit strings
 		ArrayList<Long> possibleMeldBitstrings = new ArrayList<Long>();
-		for (ArrayList<Long> meldBitstringList : GinRummyUtil.meldBitstrings) {
+		for (ArrayList<Long> meldBitstringList : meldBitstrings) {
 			for (long meldBitstring : meldBitstringList) {
-				long cardBitstring = GinRummyUtil.cardBitstrings[c.getId()];
+				long cardBitstring = cardBitstrings[c.getId()];
 				if ((meldBitstring & cardBitstring) == cardBitstring) {
 					possibleMeldBitstrings.add(meldBitstring);
 				}
@@ -664,15 +729,15 @@ public class OurUtilities {
 		};
 	}
 
-	public static double[] calculateSimpleFeatures(SimpleGinRummyPlayer player, ArrayList<Card> deck, int[] scores) {
+	public static double[] calculateSimpleFeatures(OurSimpleGinRummyPlayer players, ArrayList<Card> deck, int[] scores) {
 
-		double current_player_score = scores[player.playerNum];
+		double current_player_score = scores[players.playerNum];
 
-		double opponent_score = scores[1 - player.playerNum];
+		double opponent_score = scores[1 - players.playerNum];
 
-		double current_player_deadwood = deadwoodCount(player.cards);
+		double current_player_deadwood = deadwoodCount(players.cards);
 
-		double current_player_num_hit_cards = numHitCards(deck, player.cards);
+		double current_player_num_hit_cards = numHitCards(deck, players.cards);
 
 		return new double[] {
 				current_player_score,
@@ -700,7 +765,7 @@ public class OurUtilities {
 		}
 		return ret;
 	}
-	
+
 
 
 	public static int[][] getCardMatImageMatrix(Player player) {
@@ -720,7 +785,6 @@ public class OurUtilities {
 		}
 		return ret;
 	}
-
 
 
 
@@ -867,7 +931,7 @@ public class OurUtilities {
 		if (p.discardedCards.isEmpty()) {
 			p.discardedCards.push(Card.allCards[38]); //KS
 		}
-		
+
 	}
 
 //	public static void testRegressionFit() {

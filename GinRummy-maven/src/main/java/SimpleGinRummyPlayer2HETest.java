@@ -3,6 +3,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import ginrummy.*;
+
 
 /**
  * Implements a random dummy Gin Rummy player that has the following trivial, poor play policy: 

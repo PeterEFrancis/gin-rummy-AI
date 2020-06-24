@@ -2,6 +2,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import ginrummy.Card;
+import ginrummy.GinRummyPlayer;
+import ginrummy.GinRummyUtil;
+
 
 /**
  * Player that makes decisions based on maximizing hit cards and minimizing deadwoods

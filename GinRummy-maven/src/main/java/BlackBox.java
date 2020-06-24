@@ -56,9 +56,9 @@ public class BlackBox {
 	static Request request = new Request(post_url);
 
 	// Sequential Model
-	static String simpleMlp;
-	static MultiLayerNetwork model;
-	
+	// static String simpleMlp;
+	// static MultiLayerNetwork model;
+
 	// Functional Model
 	static String fullModel;
 	static ComputationGraph funcModel;
@@ -67,12 +67,12 @@ public class BlackBox {
 		 try {
 			 // Sequential Model SetUp
 			 // new ClassPathResource("/regression_models/linear_coef.csv").getFile();
-			 simpleMlp = "regression_models/gamma.h5";
+			 // simpleMlp = "regression_models/gamma.h5";
 			 //Scanner scanner = new Scanner(new File(simpleMlp));
-			 model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
-			 
+			 // model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
+
 			 // Functional Model SetUp
-			 fullModel = "regression_models/best_model_2.h5";
+			 fullModel = "regression_models/hoang.h5";
 			 funcModel = KerasModelImport.importKerasModelAndWeights(fullModel);
 		 } catch (Exception e) {
 			 e.printStackTrace();
@@ -122,30 +122,30 @@ public class BlackBox {
 		}
 
 		if (player.type == NETWORK) {
-
-//			double[] features = OurUtilities.calculateFeatures(player);
-//			// System.out.println("\t" + Arrays.toString(features));
-//
-//			deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc dl = new deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc();
-//			double[] red_features = new double[] {features[2], features[4], features[12]};
-//
-//			double[] val = dl.score0(red_features, new double[10]);
-//			// System.out.println("\tval= " + val[0]);
-//			return val[0];
+			//
+			// double[] features = OurUtilities.calculateFeatures(player);
+			// // System.out.println("\t" + Arrays.toString(features));
+			//
+			// deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc dl = new deeplearning_faf3fb3c_87a1_445e_9332_e95539ce38bc();
+			// double[] red_features = new double[] {features[2], features[4], features[12]};
+			//
+			// double[] val = dl.score0(red_features, new double[10]);
+			// // System.out.println("\tval= " + val[0]);
+			// return val[0];
 
 		}
 
 		if (player.type == XGBOOST) {
 
-//			double[] features = OurUtilities.calculateFeatures(player);
-//			// System.out.println("\t" + Arrays.toString(features));
-//
-//			xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d xgb = new xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d();
-//			double[] red_features = new double[] {features[2], features[4], features[12]};
-//
-//			double[] val = xgb.score0(red_features, new double[1]);
-//			// System.out.println("\tval= " + val[0]);
-//			return val[0];
+			// double[] features = OurUtilities.calculateFeatures(player);
+			// // System.out.println("\t" + Arrays.toString(features));
+			//
+			// xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d xgb = new xgboost_8eda59da_c567_472f_9f17_6fa62fe9f11d();
+			// double[] red_features = new double[] {features[2], features[4], features[12]};
+			//
+			// double[] val = xgb.score0(red_features, new double[1]);
+			// // System.out.println("\tval= " + val[0]);
+			// return val[0];
 
 			// xgboost_ea6fe23c_5dd1_4e5c_bed4_d01cb74709ae p = new xgboost_ea6fe23c_5dd1_4e5c_bed4_d01cb74709ae();
 			// double[] red_features = new double[] {features[0], features[1], features[2], features[3], features[12], features[13], features[14]};
@@ -230,66 +230,65 @@ public class BlackBox {
 			//INDArray input = Nd4j.createFromArray(new double[][] {{features[0], features[1], features[2], features[3], features[13]}});
 			// INDArray input = Nd4j.create(features, neww int[] {1, 5} ,'c');
 			//return model.output(input).getDouble(0,0);
-			
-			
+
 			// Functional model input-output
-			
+
 			// Input
 			// Features array
 			double[] fullFeatures = OurUtilities.calculateFeatures(player);
-			INDArray fullInput = Nd4j.createFromArray(new double[][] {{fullFeatures[3], fullFeatures[4], fullFeatures[6], fullFeatures[12]}});
+			INDArray fullInput = Nd4j.createFromArray(new double[][] {{fullFeatures[2], fullFeatures[3], fullFeatures[4], fullFeatures[6], fullFeatures[12]}});
 
 			// Card Prob Matrix
 			double[][] matrix = OurUtilities.getCardProbImageMatrix(player);
-			
+
 			double[][][][] matrix4d = new double[1][17][13][1];
 			for (int i = 0; i < 17; i++) {
-				
+
 				double[][] beforeTranspose = new double[][] {matrix[i]};
-				
+
 				int m = beforeTranspose.length;
 				int n = beforeTranspose[0].length;
-				
+
 				double[][] afterTranspose = new double[n][m];
-				
+
 				for (int a = 0; a < n; a++) {
 					for (int b = 0; b < m; b++) {
 						afterTranspose[a][b] = beforeTranspose[b][a];
 					}
 				}
-				
+
 				matrix4d[0][i] = afterTranspose;
 			}
 			INDArray matrix4dND = Nd4j.createFromArray(matrix4d);
-			
+
 			// Card Boolean Matrix
-			int[][] cardMat = OurUtilities.getCardMatImageMatrix(player);
-			double[][][][] cardMatrix4d = new double[1][17][13][1];
-			for (int i = 0; i < 17; i++) {
-				
-				int[][] beforeTranspose = new int[][] {cardMat[i]};
-				
-				int m = beforeTranspose.length;
-				int n = beforeTranspose[0].length;
-				
-				double[][] afterTranspose = new double[n][m];
-				
-				for (int a = 0; a < n; a++) {
-					for (int b = 0; b < m; b++) {
-						afterTranspose[a][b] = beforeTranspose[b][a];
-					}
-				}
-				
-				cardMatrix4d[0][i] = afterTranspose;
-			}
-			INDArray cardMatrix4dND = Nd4j.createFromArray(cardMatrix4d);
-			
+			// int[][] cardMat = OurUtilities.getCardMatImageMatrix(player);
+			// double[][][][] cardMatrix4d = new double[1][17][13][1];
+			// for (int i = 0; i < 17; i++) {
+			//
+			// 	int[][] beforeTranspose = new int[][] {cardMat[i]};
+			//
+			// 	int m = beforeTranspose.length;
+			// 	int n = beforeTranspose[0].length;
+			//
+			// 	double[][] afterTranspose = new double[n][m];
+			//
+			// 	for (int a = 0; a < n; a++) {
+			// 		for (int b = 0; b < m; b++) {
+			// 			afterTranspose[a][b] = beforeTranspose[b][a];
+			// 		}
+			// 	}
+			//
+			// 	cardMatrix4d[0][i] = afterTranspose;
+			// }
+			// INDArray cardMatrix4dND = Nd4j.createFromArray(cardMatrix4d);
+
 			// Output
-			INDArray[] out = funcModel.output(fullInput, cardMatrix4dND);
-//			System.out.println("Length: " + out.length);
-//			System.out.println("Out[0]: " + out[0]);
+			INDArray[] out = funcModel.output(fullInput, matrix4dND);
+			// System.out.println("Length: " + out.length);
+			// System.out.println("Out[0]: " + out[0]);
 			return out[0].getDouble(0, 0);
-//			return funcModel.output(fullInput, matrixOnesND)[0].getDouble(0);
+			// return funcModel.output(fullInput, matrixOnesND)[0].getDouble(0);
 
 		}
 
@@ -299,7 +298,7 @@ public class BlackBox {
 
 
 	public static void main(String[] args) throws IOException {
-		
+
 		System.out.println("here");
 
 	}

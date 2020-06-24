@@ -47,3 +47,5 @@
 0.
 1. 200 games between alpha-8 linear and itself, collecting C
 2. ~1000 games between alpha-8 linear and itself, collecting C
+3. 500 games between alpha-8 linear and itself, collecting C
+4. Alpha-8 vs alpha-8 100 games C

@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.Random;
 
+import ginrummy.Card;
+import ginrummy.GinRummyPlayer;
+import ginrummy.GinRummyUtil;
+
 
 /**
  * Implements a random dummy Gin Rummy player that has the following trivial, poor play policy: 

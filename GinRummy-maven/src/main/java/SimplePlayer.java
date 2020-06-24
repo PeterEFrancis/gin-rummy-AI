@@ -3,6 +3,8 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.Stack;
 
+import ginrummy.*;
+
 public class SimplePlayer implements GinRummyPlayer{
 
    public Random random = new Random();

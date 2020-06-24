@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.Stack;
 
+import ginrummy.*;
+
 /**
  * Collect.java - Collects play data and stores it in a csv files
  **/
@@ -287,7 +289,7 @@ public class Collect {
 					if (players[currentPlayer] instanceof SimpleGinRummyPlayer) {
 						ArrayList<Card> deckArray = new ArrayList<Card>();
 						deckArray.addAll(deck);
-						features = OurUtilities.calculateSimpleFeatures((SimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
+						features = OurUtilities.calculateSimpleFeatures((OurSimpleGinRummyPlayer) players[currentPlayer], deckArray, scores);
 					} else if (players[currentPlayer] instanceof Player) {
 						features = OurUtilities.calculateFeatures((Player) players[currentPlayer]);
 						double[][] cardMatrix = OurUtilities.getCardProbImageMatrix((Player) players[currentPlayer]);
@@ -567,7 +569,7 @@ public class Collect {
 			// put new features directly above me
 
 
-			for (int i = 0; i < 100; i++) {
+			for (int i = 0; i < 500; i++) {
 				setPlayVerbose(false);
 
 				Collect game = new Collect(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.ALPHA, BlackBox.LINEAR));

@@ -4,9 +4,13 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Stack;
 
+import ginrummy.Card;
+import ginrummy.GinRummyPlayer;
+import ginrummy.GinRummyUtil;
+
 public class Player implements GinRummyPlayer{
 
-	int test_turn = -1;
+	int test_turn = -2;
 
 
 	public int type;
@@ -27,11 +31,19 @@ public class Player implements GinRummyPlayer{
 	public Stack<Card> discardedCards;
 	public boolean drewFaceUp;
 	public int[] cardMat;
-	
+
 	// for hand estimation
 	public HandEstimator estimator = new HandEstimator();
 	private int totalDiscarded = 0;
 	ArrayList<Double> ratios = new ArrayList<Double>();
+
+
+	public Player() {
+		reset();
+		this.version = BlackBox.ALPHA;
+		this.type = BlackBox.LINEAR;
+		this.scores = new int[2];
+	}
 
 
 	public Player(int version, int type) {
@@ -332,9 +344,9 @@ public class Player implements GinRummyPlayer{
 			estimator.reportDrawDiscard(pastFaceUpCard, drewFaceUp, discardedCard);
 		}
 
-		if (test_turn != -1 && turn > test_turn) {
+		if (test_turn != -1 && turn == test_turn + 1) {
 			System.out.println("==================================================================================== End Extensive Verbose Turn");
-			System.out.println(1/0);
+//			System.out.println(1/0);
 		}
 
 		turn++;
@@ -372,6 +384,7 @@ public class Player implements GinRummyPlayer{
 		// Ignored by simple player, but could affect strategy of more complex player.
 	}
 
+	// added v
 
 
 }
