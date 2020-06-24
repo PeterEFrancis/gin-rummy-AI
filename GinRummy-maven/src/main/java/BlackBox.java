@@ -72,7 +72,7 @@ public class BlackBox {
 			 // model = KerasModelImport.importKerasSequentialModelAndWeights(simpleMlp);
 
 			 // Functional Model SetUp
-			 fullModel = "regression_models/hoang.h5";
+			 fullModel = "regression_models/epsilon.h5";
 			 funcModel = KerasModelImport.importKerasModelAndWeights(fullModel);
 		 } catch (Exception e) {
 			 e.printStackTrace();

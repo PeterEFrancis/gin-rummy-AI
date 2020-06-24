@@ -200,3 +200,8 @@ Imported the functional model from Python to Java. Created a new 2D array that k
 ### Tuesday
 
 Tested different settings for keras network. Got vermouth working for `OurSimpleGinRummyPlayer`.
+
+
+### Wednesday
+
+Discussed Paper, BBL, and worked with Keras settings.

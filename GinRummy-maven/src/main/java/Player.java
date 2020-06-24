@@ -10,7 +10,7 @@ import ginrummy.GinRummyUtil;
 
 public class Player implements GinRummyPlayer{
 
-	int test_turn = -2;
+	int test_turn = 5;
 
 
 	public int type;
@@ -37,13 +37,13 @@ public class Player implements GinRummyPlayer{
 	private int totalDiscarded = 0;
 	ArrayList<Double> ratios = new ArrayList<Double>();
 
-
-	public Player() {
-		reset();
-		this.version = BlackBox.ALPHA;
-		this.type = BlackBox.LINEAR;
-		this.scores = new int[2];
-	}
+//
+//	public Player() {
+//		reset();
+//		this.version = BlackBox.ALPHA;
+//		this.type = BlackBox.LINEAR;
+//		this.scores = new int[2];
+//	}
 
 
 	public Player(int version, int type) {

@@ -35,7 +35,7 @@ public class OurGinRummyGame {
 	/**
 	 * Random number generator
 	 */
-	private static final Random RANDOM = new Random(5);
+	private static final Random RANDOM = new Random();
 
 	/**
 	 * Hand size (before and after turn). After draw and before discard there is one extra card.
@@ -305,27 +305,27 @@ public class OurGinRummyGame {
 	public static void main(String[] args) {
 		// Single verbose demonstration game
 
-		// long start = System.currentTimeMillis();
+		 long start = System.currentTimeMillis();
 
 		setPlayVerbose(true);
 		OurGinRummyGame game = new OurGinRummyGame(new Player(BlackBox.EPSILON, BlackBox.KERAS), new SimpleGinRummyPlayer());
 
 		game.play();
 
-		// System.out.println(System.currentTimeMillis() - start);
-		//
-		// System.out.println("-----------");
+		 System.out.println(System.currentTimeMillis() - start);
+		
+		 System.out.println("-----------");
 
 		// Multiple non-verbose games
-//		 setPlayVerbose(false);
 //		 int numGames = 500;
 //		 int numP1Wins = 0;
-//		 game = new GinRummyGame(new Player(BlackBox.ALPHA, BlackBox.LINEAR), new Player(BlackBox.GAMMA, BlackBox.KERAS));
+//		 OurGinRummyGame game = new OurGinRummyGame(new Player(BlackBox.EPSILON, BlackBox.KERAS), new SimpleGinRummyPlayer());
+//		 setPlayVerbose(false);
 //		 long startMs = System.currentTimeMillis();
 //		 for (int i = 0; i < numGames; i++) {
-//		 	if (i % 10 == 0) {
-//		 		System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
-//		 	}
+////		 	if (i % 1 == 0) {
+//		 	System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
+////		 	}
 //		 	numP1Wins += game.play();
 //		 }
 //		 long totalMs = System.currentTimeMillis() - startMs;
