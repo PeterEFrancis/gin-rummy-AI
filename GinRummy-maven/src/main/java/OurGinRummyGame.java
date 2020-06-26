@@ -80,7 +80,7 @@ public class OurGinRummyGame {
 		hands.add(new ArrayList<Card>());
 		int startingPlayer = RANDOM.nextInt(2);
 		
-		((ShankarPlayer) players[0]).start_collect();
+//		((ShankarPlayer) players[0]).start_collect();
 
 		while (scores[0] < GinRummyUtil.GOAL_SCORE && scores[1] < GinRummyUtil.GOAL_SCORE) { // while game not over
 			int currentPlayer = startingPlayer;
@@ -330,13 +330,13 @@ public class OurGinRummyGame {
 //		 System.out.println("-----------");
 
 		// Multiple non-verbose games
-		 int numGames = 10000;
+		 int numGames = 1000;
 		 int numP1Wins = 0;
-		 OurGinRummyGame game = new OurGinRummyGame(new ShankarPlayer(), new SimpleGinRummyPlayer());
+		 OurGinRummyGame game = new OurGinRummyGame(new TaylorPlayer(), new ShankarPlayer());
 		 setPlayVerbose(false);
 		 long startMs = System.currentTimeMillis();
 		 for (int i = 0; i < numGames; i++) {
-		 	if (i % 1000 == 0) {
+		 	if (i % 10 == 0) {
 		 		System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
 		 	}
 		 	numP1Wins += game.play();

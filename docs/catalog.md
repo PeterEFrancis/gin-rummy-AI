@@ -209,3 +209,7 @@ Discussed Paper, BBL, and worked with Keras settings.
 ### Thursday
 
 Worked on hand-made players.
+
+### Friday
+
+Work on ensemble players. Hoang and Peter: work on probability study. Taylor and Ryz: work on improving bas features for new player.
