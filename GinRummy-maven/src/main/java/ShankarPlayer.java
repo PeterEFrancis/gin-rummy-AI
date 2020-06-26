@@ -1,138 +1,395 @@
+
+/*//////////////////////////////////////////////////////////////////////////////
+
+Shankar's 10 rules:
+
+	1. Make all plays with the single goal of getting below the knock cache count, and as soon as possible.
+	2. Knock at first opportunity, if you are playing for a knock.
+	3. Always pick up a card that makes a meld in your hand.
+	4. Never pick up a card that does not make a meld, or adds to an existing meld in your hand.
+	5. Do not throw cards that the opponent can use.
+	6. Do no throw cards that the opponent may use.
+	7. Holding four or more 10-point cards at the deal, start discarding these no matter how promising the high card combination.
+	8. Pick up A,2,3,4 to build knock cache, if you have safer card to discard (knock cache is like a meld).
+	9. Play for a tie by going to the bottom of the stock instead for a doubtful win.
+	10. Prefer to be undercut by knocking than Ginning the opponent by making a dubious discard.
+
+
+*///////////////////////////////////////////////////////////////////////////////
+
+
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.Random;
-import java.util.Stack;
 
 import ginrummy.Card;
 import ginrummy.GinRummyPlayer;
-import ginrummy.GinRummyUtil;
 
-public class Player implements GinRummyPlayer{
-
-	int test_turn = -2;
+public class ShankarPlayer implements GinRummyPlayer {
 
 
-	public int type;
-	public int version;
+	boolean debug = false;
+
+
 	public int playerNum;
 	public int startingPlayerNum;
-	public int turn;
 	public int[] scores;
 	public boolean opponentKnocked;
 	public Random random;
-	public Card drawnCard;
 	public ArrayList<Card> hand;
-	public ArrayList<Card> unknownCards;
-	public ArrayList<Card> opponentDiscardedCards;
-	public ArrayList<Card> opponentPassedCards;
-	public ArrayList<Card> opponentAllTimeHand;   // opponent picked up cards throughout the startGame
-	public ArrayList<Card> opponentHand;          // opponent picked up cards at the moment
-	public Stack<Card> discardedCards;
+	public ArrayList<Card> opponentHand;
+	public boolean heldFourOrMoreTensAtStart;
+	public Card faceUpCard;
 	public boolean drewFaceUp;
-	public int[] cardMat;
+	public ArrayList<Card> discardedCards;
 
-	// for hand estimation
-	public HandEstimator estimator = new HandEstimator();
-	private int totalDiscarded = 0;
-	ArrayList<Double> ratios = new ArrayList<Double>();
+	double adjRateConst;
+	double sudoAdjRateConst;
+	double meldRateConst;
+	double discardedAdjCardsConst;
+	double discardedSudoAdjConst;
 
-
-	public Player() {
+	public ShankarPlayer() {
 		reset();
-		this.version = BlackBox.ALPHA;
-		this.type = BlackBox.LINEAR;
 		this.scores = new int[2];
 	}
 
-
-	public Player(int version, int type) {
+	public ShankarPlayer(long seed) {
 		reset();
-		this.version = version;
-		this.type = type;
-		this.scores = new int[2];
-	}
-
-	public Player(int version, int type, long seed) {
-		reset();
-		this.version = version;
-		this.type = type;
 		this.random.setSeed(seed);
 		this.scores = new int[2];
 	}
 
 	public void reset() {
-		opponentDiscardedCards = new ArrayList<Card>();
-		opponentPassedCards = new ArrayList<Card>();
-		opponentAllTimeHand = new ArrayList<Card>();
-		opponentHand = new ArrayList<Card>();
-		drawnCard = null;
+		drewFaceUp = false; // just to be safe
+		faceUpCard = null;
 		playerNum = -1;
 		startingPlayerNum = -1;
-		turn = 0;
-		opponentKnocked = false;
-		drewFaceUp = false;
 		hand = new ArrayList<Card>();
-		unknownCards = new ArrayList<Card>();
-		discardedCards = new Stack<Card>();
+		opponentHand = new ArrayList<Card>();
 		random = new Random();
-		cardMat = new int[Card.NUM_CARDS];
+		heldFourOrMoreTensAtStart = false;
+		opponentKnocked = false;
+		discardedCards = new ArrayList<Card>();
 	}
+
+
+	public void start_collect() {
+		adjRateConst = 0; // random.nextDouble();
+		sudoAdjRateConst = 1; // random.nextDouble();
+		meldRateConst = 1; // random.nextDouble();
+		discardedAdjCardsConst = 1; // random.nextDouble();
+		discardedSudoAdjConst = 1; // random.nextDouble();
+
+		File f = new File("data.csv");
+		try {
+			FileWriter pw = new FileWriter(f, true);
+			pw.write(adjRateConst + "," + sudoAdjRateConst + "," + meldRateConst + "," + discardedAdjCardsConst + "," + discardedSudoAdjConst + ",");
+			pw.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 
 	@Override
 	public void startGame(int playerNum, int startingPlayerNum, Card[] hand) {
 		reset();
-
+		int tenCount = 0;
 		for (Card card : hand) {
 			this.hand.add(card);
+			if (ginrummy.GinRummyUtil.getDeadwoodPoints(card) >= 10) {
+				tenCount++;
+			}
 		}
+		ArrayList<ArrayList<ArrayList<Card>>> bestMeldsSets = ginrummy.GinRummyUtil.cardsToBestMeldSets(this.hand);
+		if (!bestMeldsSets.isEmpty()) {
+			ArrayList<ArrayList<Card>> bestMeld = bestMeldsSets.get(0);
+			for (ArrayList<Card> meld : bestMeld) {
+				for (Card card : meld) {
+					if (card.getRank() > 8) {
+						tenCount--;
+					}
+				}
+			}
+		}
+		this.heldFourOrMoreTensAtStart = (tenCount >= 4);
 
 		this.playerNum = playerNum;
 		this.startingPlayerNum = startingPlayerNum;
 
+
 	}
 
 
-
-
-	// TODO: change datastructure to better remove and add?
-	public double[] getBestDiscardAndProb(Card faceUpCard) {
-
-		return ;
-	}
 
 
 
 	@Override
 	public boolean willDrawFaceUpCard(Card faceUpCard) {
+		/**
+		1. Make all plays with the single goal of getting below the knock cache count, and as soon as possible.
+		3. Always pick up a card that makes a meld in your hand.
+		4. Never pick up a card that does not (1) make a meld or (2) adds to an existing meld in your hand.
+		8. Pick up A,2,3,4 to build knock cache, if you have safer card to discard (knock cache is like a meld).
+		**/
+
+		// ArrayList<ArrayList<ArrayList<Card>>> bestMeldSetsBeforeDraw = ginrummy.GinRummyUtil.cardsToBestMeldSets(hand);
+		// ArrayList<ArrayList<Card>> bestMeldSetBeforeDraw = new ArrayList<ArrayList<Card>>();
+		// if (!bestMeldSetsBeforeDraw.isEmpty()){
+		// 	bestMeldSetBeforeDraw = bestMeldSetsBeforeDraw.get(0);
+		// }
+		// int numMeldsBeforeDraw = bestMeldSetBeforeDraw.size();
+		hand.add(faceUpCard);
+		ArrayList<ArrayList<ArrayList<Card>>> bestHandOrganization = OurUtilities.getBestHandOrganization(hand);
+		ArrayList<ArrayList<Card>> bestMeldSet = bestHandOrganization.get(0);
+		hand.remove(faceUpCard);
+		// if (!bestMeldSetsAfterDraw.isEmpty()){
+		// 	bestMeldSetAfterDraw = bestMeldSetsAfterDraw.get(0);
+		// }
+		// int numMeldsAfterDraw = bestMeldSetAfterDraw.size();
+		for (ArrayList<Card> meld : bestMeldSet) {
+			if (meld.contains(faceUpCard)) {
+				drewFaceUp = true;
+				return true;
+			}
+		}
+
+		ArrayList<Card> knockCache = bestHandOrganization.get(2).get(0);
+		if (knockCache.contains(faceUpCard)) {
+			drewFaceUp = true;
+			return true;
+		}
+		drewFaceUp = false;
 		return false;
 	}
 
 
+
+
+
 	@Override
 	public void reportDraw(int playerNum, Card drawnCard) {
-
+		if (this.playerNum == playerNum) {
+			hand.add(drawnCard);
+			if (drewFaceUp) {
+				faceUpCard = drawnCard;
+				discardedCards.remove(drawnCard);
+			}
+		}
+		else {
+			if (drawnCard != null) {
+				opponentHand.add(drawnCard);
+				discardedCards.remove(drawnCard);
+			}
+		}
 	}
+
+
+
+
+	public double getOpponentUsefulness(Card card) {
+
+		if (opponentHand.size() == 0) {
+			return 0;
+		}
+
+		int numAdj = 0;
+		for (Card c : opponentHand) {
+			if (c.getRank() ==  card.getRank())
+				numAdj++;
+			if (c.getSuit() == card.getSuit() && Math.abs(c.getRank() - card.getRank()) < 2 )
+				numAdj++;
+		}
+
+		int numSudoAdj = 0;
+		for (Card c : opponentHand) {
+			if (c.getSuit() == card.getSuit() && Math.abs(c.getRank() - card.getRank()) == 2 )
+				numSudoAdj++;
+		}
+
+		int numMeldAdditions = 0;
+		opponentHand.add(card);
+		ArrayList<ArrayList<Card>> allOpponentMelds = ginrummy.GinRummyUtil.cardsToAllMelds(opponentHand);
+		for (ArrayList<Card> opponentMeld : allOpponentMelds) {
+			if (opponentMeld.contains(card)) {
+				numMeldAdditions++;
+			}
+		}
+		opponentHand.remove(card);
+
+		int numAdjCardsInDiscarded = 0;
+		for (Card c : discardedCards) {
+			if (c.getRank() ==  card.getRank())
+				numAdjCardsInDiscarded++;
+			if (c.getSuit() == card.getSuit() && Math.abs(c.getRank() - card.getRank()) < 2 )
+				numAdjCardsInDiscarded++;
+		}
+
+		int numSudoAdjInDiscarded = 0;
+		for (Card c : opponentHand) {
+			if (c.getSuit() == card.getSuit() && Math.abs(c.getRank() - card.getRank()) == 2 )
+				numSudoAdjInDiscarded++;
+		}
+
+
+		double usefulness = 0;
+		usefulness += numAdj * adjRateConst;
+		usefulness += numSudoAdj * sudoAdjRateConst;
+		usefulness += numMeldAdditions * meldRateConst;
+		usefulness -= numAdjCardsInDiscarded * discardedAdjCardsConst;
+		usefulness -= numSudoAdjInDiscarded * discardedSudoAdjConst;
+		return usefulness;
+	}
+
 
 
 	@Override
 	public Card getDiscard() {
+		/*
+		5. Do not throw cards that the opponent can use.
+		6. Do not throw cards that the opponent may use.
+		7. Holding four or more 10-point cards at the deal, start discarding these no matter how promising the high card combination.
+		*/
 
-	}
+		double usefulnessCutOff = 0.54;
+
+		ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = ginrummy.GinRummyUtil.cardsToBestMeldSets(hand);
+		ArrayList<ArrayList<Card>> bestMelds = new ArrayList<ArrayList<Card>>();
+		if (!bestMeldSets.isEmpty()){
+			bestMelds = bestMeldSets.get(0);
+		}
+		ArrayList<Card> possibleDiscards = OurUtilities.cardsNotInMeld(bestMelds, hand);
+		if (drewFaceUp) {
+			possibleDiscards.remove(faceUpCard);
+		}
+
+		// if our hand is a gin
+		if (possibleDiscards.isEmpty()) {
+			for (ArrayList<Card> meld : bestMelds) {
+				if (meld.size() > 3) {
+					// if it's a set
+					if (meld.get(0).getRank() == meld.get(1).getRank()) {
+						return meld.get(0);
+					}
+					// if it's a run
+					else {
+						Card highestRankCard = null;
+						int highestRank = -1;
+						for (Card c : meld) {
+							if (c.getRank() > highestRank) {
+								highestRank = c.getRank();
+								highestRankCard = c;
+							}
+						}
+						return highestRankCard;
+					}
+				}
+			}
+		}
+
+		ArrayList<Card> minOUDiscard = new ArrayList<Card>();
+		ArrayList<Card> toRemove = new ArrayList<Card>();
+
+		do {
+			possibleDiscards.addAll(toRemove);
+			usefulnessCutOff +=0.05;
+			if (debug) {
+				System.out.println("Usefulness cut off: " + usefulnessCutOff);
+			}
+			double min = Double.MAX_VALUE;
+			HashMap<Card, Double> mapToUsefulness = new HashMap<Card, Double>();
+			toRemove = new ArrayList<Card>();
+			for (Card c : possibleDiscards) {
+				double opponentUsefulness = getOpponentUsefulness(c);
+				mapToUsefulness.put(c, opponentUsefulness);
+				if (opponentUsefulness < min) {
+					min = opponentUsefulness;
+					minOUDiscard.clear();
+					minOUDiscard.add(c);
+				} else if (opponentUsefulness == min) {
+					minOUDiscard.add(c);
+				}
+				if (opponentUsefulness >= usefulnessCutOff) {
+					toRemove.add(c);
+				}
+			}
+			possibleDiscards.removeAll(toRemove);
+			if (debug) {
+				System.out.println("map to usefuleness: " + mapToUsefulness);
+			}
+			Card bestTenDiscard = null;
+			double minOU = Double.MAX_VALUE;
+			for (Card c : possibleDiscards) {
+				if (c.getRank() > 8) {
+					if (mapToUsefulness.get(c) < minOU) {
+						bestTenDiscard = c;
+					}
+				}
+			}
+			if (bestTenDiscard != null) {
+				return bestTenDiscard;
+			}
+
+		} while (possibleDiscards.size() == 0);
+
+		Card minDeadwoodDiscard = null;
+		int maxDeadwood = -Integer.MAX_VALUE;
+		for (Card c : minOUDiscard) {
+			int dw = ginrummy.GinRummyUtil.getDeadwoodPoints(c);
+			if (dw > maxDeadwood) {
+				maxDeadwood = dw;
+				minDeadwoodDiscard = c;
+			}
+		}
+
+		return minDeadwoodDiscard;
+		}
+
+
+
 
 
 	@Override
 	public void reportDiscard(int playerNum, Card discardedCard) {
-
+		// System.out.println("before discard player " + this.playerNum + " hand: " + hand);
+		if (playerNum == this.playerNum) {
+			hand.remove(discardedCard);
+		} else {
+			opponentHand.remove(discardedCard);
+		}
+		discardedCards.add(discardedCard);
+		// System.out.println(" after discard player " + this.playerNum + " hand: " + hand);
 	}
+
 
 
 	@Override
 	public ArrayList<ArrayList<Card>> getFinalMelds() {
+		/*
+		2. Knock at first opportunity, if you are playing for a knock.
+		9. Play for a tie by going to the bottom of the stock instead for a doubtful win.
+		10. Prefer to be undercut by knocking than Ginning the opponent by making a dubious discard.
+		*/
+
 		// Check if deadwood of maximal meld is low enough to go out.
-		ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(hand);
-		if (!opponentKnocked && (bestMeldSets.isEmpty() || GinRummyUtil.getDeadwoodPoints(bestMeldSets.get(0), hand) > GinRummyUtil.MAX_DEADWOOD))
+		ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = ginrummy.GinRummyUtil.cardsToBestMeldSets(hand);
+
+		if (!opponentKnocked && (bestMeldSets.isEmpty() || ginrummy.GinRummyUtil.getDeadwoodPoints(bestMeldSets.get(0), hand) > ginrummy.GinRummyUtil.MAX_DEADWOOD))
 			return null;
+
+		// System.out.println("ginrummy.GinRummyUtil.MAX_DEADWOOD: " + ginrummy.GinRummyUtil.MAX_DEADWOOD);
+		// System.out.println("Hand: " + hand);
+		// System.out.println("Best Meld: " + bestMeldSets.get(0));
+		// System.out.println("ginrummy.GinRummyUtil.getDeadwoodPoints(bestMeldSets.get(0), hand): " + ginrummy.GinRummyUtil.getDeadwoodPoints(bestMeldSets.get(0), hand));
 		return bestMeldSets.isEmpty() ? new ArrayList<ArrayList<Card>>() : bestMeldSets.get(random.nextInt(bestMeldSets.size()));
 	}
 

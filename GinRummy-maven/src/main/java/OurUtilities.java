@@ -328,7 +328,7 @@ public class OurUtilities {
 	 **/
 	public static int getFaceValue(Card c) {
 		int rank = c.getRank();
-		if (rank >= 10)
+		if (rank >= 9)
 			return 10;
 		return rank;
 	}
@@ -702,24 +702,24 @@ public class OurUtilities {
 		// num_
 
 		return new double[] {
-				current_player_score,						// 0
-				opponent_score, 								// 1
-				current_player_deadwood, 				// 2
-				current_player_num_hit_cards,		// 3
+				current_player_score,           // 0
+				opponent_score,                 // 1
+				current_player_deadwood,        // 2
+				current_player_num_hit_cards,   // 3
 				// alpha to here
-				num_melds,											// 4
-				point_sum_melds,								// 5
-				num_combos,											// 6
-				point_sum_combos,								// 7
-				num_knock_cache,								// 8
-				point_sum_knock_cache,					// 9
-				num_load_cards,									// 10
-				point_sum_load_cards,						// 11
-				turns_taken,										// 12
+				num_melds,                      // 4
+				point_sum_melds,                // 5
+				num_combos,                     // 6
+				point_sum_combos,               // 7
+				num_knock_cache,                // 8
+				point_sum_knock_cache,          // 9
+				num_load_cards,                 // 10
+				point_sum_load_cards,           // 11
+				turns_taken,                    // 12
 				// beta to here
-				num_nearby_opponent_cards,			// 13
+				num_nearby_opponent_cards,      // 13
 				// gamma to here
-				discard_danger,									// 14
+				discard_danger,                 // 14
 				// delta to here
 
 				//num_set_melds
@@ -1092,7 +1092,7 @@ public class OurUtilities {
 
 	public static void main(String[] args) {
 
-//		testRegressionFit();
+		// testRegressionFit();
 		testDecisions();
 		// testUtils();
 

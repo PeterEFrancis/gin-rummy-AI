@@ -205,3 +205,7 @@ Tested different settings for keras network. Got vermouth working for `OurSimple
 ### Wednesday
 
 Discussed Paper, BBL, and worked with Keras settings.
+
+### Thursday
+
+Worked on hand-made players.

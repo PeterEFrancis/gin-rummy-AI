@@ -10,7 +10,7 @@ import ginrummy.GinRummyUtil;
 
 public class Player implements GinRummyPlayer{
 
-	int test_turn = 5;
+	int test_turn = -1;
 
 
 	public int type;

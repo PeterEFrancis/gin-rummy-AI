@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Stack;
@@ -11,11 +14,7 @@ import ginrummy.*;
  * @author Todd W. Neller
  * @version 1.0
 
-Copyright (C) 2020 Todd Neller
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
+Copyright (C) 2020 TodeSoftware Foundation; either version 2
 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -80,6 +79,8 @@ public class OurGinRummyGame {
 		hands.add(new ArrayList<Card>());
 		hands.add(new ArrayList<Card>());
 		int startingPlayer = RANDOM.nextInt(2);
+		
+		((ShankarPlayer) players[0]).start_collect();
 
 		while (scores[0] < GinRummyUtil.GOAL_SCORE && scores[1] < GinRummyUtil.GOAL_SCORE) { // while game not over
 			int currentPlayer = startingPlayer;
@@ -292,6 +293,18 @@ public class OurGinRummyGame {
 		}
 		if (playVerbose)
 			System.out.printf("Player %s wins.\n", scores[0] > scores[1] ? 0 : 1);
+		
+		File f = new File("data.csv");
+		try {
+			FileWriter pw = new FileWriter(f, true);
+			pw.append(scores[0] >= GinRummyUtil.GOAL_SCORE ? "1" : "0");
+			pw.append("\n");
+			pw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
 		return scores[0] >= GinRummyUtil.GOAL_SCORE ? 0 : 1;
 	}
 
@@ -305,32 +318,32 @@ public class OurGinRummyGame {
 	public static void main(String[] args) {
 		// Single verbose demonstration game
 
-		 long start = System.currentTimeMillis();
-
-		setPlayVerbose(true);
-		OurGinRummyGame game = new OurGinRummyGame(new Player(BlackBox.EPSILON, BlackBox.KERAS), new SimpleGinRummyPlayer());
-
-		game.play();
-
-		 System.out.println(System.currentTimeMillis() - start);
-		
-		 System.out.println("-----------");
+//		 long start = System.currentTimeMillis();
+//
+//		setPlayVerbose(true);
+//		OurGinRummyGame game = new OurGinRummyGame(new ShankarPlayer(), new SimpleGinRummyPlayer());
+//
+//		game.play();
+//
+//		 System.out.println(System.currentTimeMillis() - start);
+//		
+//		 System.out.println("-----------");
 
 		// Multiple non-verbose games
-//		 int numGames = 500;
-//		 int numP1Wins = 0;
-//		 OurGinRummyGame game = new OurGinRummyGame(new Player(BlackBox.EPSILON, BlackBox.KERAS), new SimpleGinRummyPlayer());
-//		 setPlayVerbose(false);
-//		 long startMs = System.currentTimeMillis();
-//		 for (int i = 0; i < numGames; i++) {
-////		 	if (i % 1 == 0) {
-//		 	System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
-////		 	}
-//		 	numP1Wins += game.play();
-//		 }
-//		 long totalMs = System.currentTimeMillis() - startMs;
-//		 System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
-//		 System.out.printf("Games Won: P0:%d, P1:%d.\n", numGames - numP1Wins, numP1Wins);
+		 int numGames = 10000;
+		 int numP1Wins = 0;
+		 OurGinRummyGame game = new OurGinRummyGame(new ShankarPlayer(), new SimpleGinRummyPlayer());
+		 setPlayVerbose(false);
+		 long startMs = System.currentTimeMillis();
+		 for (int i = 0; i < numGames; i++) {
+		 	if (i % 1000 == 0) {
+		 		System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
+		 	}
+		 	numP1Wins += game.play();
+		 }
+		 long totalMs = System.currentTimeMillis() - startMs;
+		 System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
+		 System.out.printf("Games Won: P0:%d, P1:%d.\n", numGames - numP1Wins, numP1Wins);
 	}
 
 }
