@@ -7,13 +7,13 @@ import ginrummy.*;
 
 
 /**
- * Implements a random dummy Gin Rummy player that has the following trivial, poor play policy: 
+ * Implements a random dummy Gin Rummy player that has the following trivial, poor play policy:
  * Ignore opponent actions and cards no longer in play.
  * Draw face up card only if it becomes part of a meld.  Draw face down card otherwise.
  * Discard a highest ranking unmelded card from among the deadwood of melds that minimize deadwood points (without regard to breaking up pairs, etc.)
  * Knock as early as possible.
  * ******Hand estimator testing version.******
- * 
+ *
  * @author Todd W. Neller
  */
 public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
@@ -23,13 +23,14 @@ public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
 	private ArrayList<Card> cards = new ArrayList<Card>();
 	private Random random = new Random();
 	private boolean opponentKnocked = false;
-	Card faceUpCard, drawnCard; 
+	Card faceUpCard, drawnCard;
 	ArrayList<Long> drawDiscardBitstrings = new ArrayList<Long>();
-	HandEstimator estimator = new HandEstimator();
+	SpecificCardHandEstimator estimator = new SpecificCardHandEstimator();
 	private int totalDiscarded = 0;
 	ArrayList<Double> ratios = new ArrayList<Double>();
-	
-	boolean verbose = false;
+	int turnsTaken;
+
+	boolean verbose = true;
 
 	@Override
 	public void startGame(int playerNum, int startingPlayerNum, Card[] cards) {
@@ -48,7 +49,8 @@ public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
 		if (verbose)
 			estimator.print();
 		totalDiscarded = 0;
-	}	
+		turnsTaken = 0;
+	}
 
 	@Override
 	public boolean willDrawFaceUpCard(Card card) {
@@ -71,6 +73,11 @@ public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
 			cards.add(drawnCard);
 			estimator.setKnown(drawnCard, false);
 		}
+		else {
+			if (drawnCard != null) {
+				faceUpCard = this.drawnCard;
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -89,7 +96,7 @@ public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
 			drawDiscard.add(card);
 			if (drawDiscardBitstrings.contains(GinRummyUtil.cardsToBitstring(drawDiscard)))
 				continue;
-			
+
 			ArrayList<Card> remainingCards = (ArrayList<Card>) cards.clone();
 			remainingCards.remove(card);
 			ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(remainingCards);
@@ -137,16 +144,17 @@ public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
 			cards.remove(discardedCard);
 		}
 		else {
-			estimator.reportDrawDiscard(faceUpCard, faceUpCard == drawnCard, discardedCard);
+			estimator.reportDrawDiscard(turnsTaken, faceUpCard, faceUpCard == drawnCard, discardedCard);
 		}
 		faceUpCard = discardedCard;
 		if (verbose)
 			estimator.print();
+		turnsTaken++;
 	}
 
 	@Override
 	public ArrayList<ArrayList<Card>> getFinalMelds() {
-		// Check if deadwood of maximal meld is low enough to go out. 
+		// Check if deadwood of maximal meld is low enough to go out.
 		ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(cards);
 		if (!opponentKnocked && (bestMeldSets.isEmpty() || GinRummyUtil.getDeadwoodPoints(bestMeldSets.get(0), cards) > GinRummyUtil.MAX_DEADWOOD))
 			return null;
@@ -164,10 +172,10 @@ public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
 	public void reportScores(int[] scores) {
 		// Ignored by simple player, but could affect strategy of more complex player.
 	}
-	
+
 	@Override
 	public void reportLayoff(int playerNum, Card layoffCard, ArrayList<Card> opponentMeld) {
-		
+
 	}
 
 	@Override
@@ -192,7 +200,7 @@ public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
 			if (verbose)
 				System.out.println("Number of candidates: " + numCandidates);
 			double singleCardProb = (double) estimator.numUnknownInHand / numCandidates;
-			for (int i = 0; i < estimator.numUnknownInHand; i++) 
+			for (int i = 0; i < estimator.numUnknownInHand; i++)
 				uniformProb *= singleCardProb;
 
 			if (verbose)
@@ -209,9 +217,12 @@ public class SimpleGinRummyPlayer2HETest implements GinRummyPlayer {
 	}
 
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, FileNotFoundException, UnsupportedEncodingException {
-		String[] playerNames = {"SimpleGinRummyPlayer2HETest", "SimpleGinRummyPlayer"};
-		GinRummyTournament.setPlayVerbose(false);
-		int numGames = 10000;
+		String[] playerNames = {"SimpleGinRummyPlayer2HETest", "OurSimpleGinRummyPlayer"};
+		GinRummyTournament.setPlayVerbose(true);
+		int numGames = 1;
 		new GinRummyTournament().match(playerNames[0], playerNames[1], numGames);
+//		OurGinRummyGame game = new OurGinRummyGame(new SimpleGinRummyPlayer2HETest(), new OurSimpleGinRummyPlayer());
+//		game.setPlayVerbose(true);
+//		game.play();
 	}
 }

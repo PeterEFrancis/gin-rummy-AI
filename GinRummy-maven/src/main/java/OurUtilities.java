@@ -789,6 +789,14 @@ public class OurUtilities {
 
 
 
+	public static int[][] handTo2DBitArray(ArrayList<Card> hand) {
+		int[][] handArr = new int[4][13];
+		for (Card card : hand) {
+			handArr[card.getSuit()][card.getRank()] = 1;
+		}
+		return handArr;
+	}
+
 
 
 
@@ -825,114 +833,114 @@ public class OurUtilities {
 		return -1;
 	}
 
-	// C=0, H=1, S=2, D=3
-	// AC 2C 3C AD 2D 3D AH 2H 3H 2S  (all melded, several optimal meld combinations)
-	public static int[] set1ranks = {0,0,0,1,1,1,1,2,2,2};
-	public static int[] set1suits = {0,0,0,3,2,3,1,1,1,2};
-
-	// 2C 3C 4C 5H 6H 7H 8C 8D 8H KC (2 run, 1 set, 1 deadwood card)
-	public static int[] set2ranks = {1,2,3,4,5,6,7,7,7,12};
-	public static int[] set2suits = {0,0,0,1,1,1,0,3,1,0};
-
-	// AC 2D 3H 4S 6C 6D 6H 7C 10H 10S (triangle shape, 1 combination)
-	public static int[] set3ranks = {0,1,2,3,5,5,5,6,9,9};
-	public static int[] set3suits = {0,3,1,2,0,3,1,0,1,2};
-
-	// AC 2D 3H 4S 5C 6D 7H 8S 9C 10D (no hit cards)
-	public static int[] set4ranks = {0,1,2,3,4,5,6,7,8,9};
-	public static int[] set4suits = {0,3,1,2,0,1,1,2,0,3};
-
-	// 2C 3C 2H 3H 7C 8C 7H 8H KC KH (18 hit cards)
-	public static int[] set5ranks = {1,2,1,2,6,7,6,7,12,12};
-	public static int[] set5suits = {0,0,1,1,0,0,1,1,0,1};
-
-	// 4C 5C 6C 3S 4S 5S 2H 3H AS 2D
-	// 1C 8C KC
-	public static int[] set6ranks = {0,7,12};
-	public static int[] set6suits = {0,0,0};
-
-	// ArrayList of generated player states bunched in groups of two. The first state should be
-	//   better than the second state by an amount substantial enough to superceed bias
-	// Things that need to be added to each Player (used in calculateFeatures):
-	// 	-
-	// pair 1:
-	public static ArrayList<Player> testPlayers = new ArrayList<Player>();
-
-	public static int[][] testCards;
-	static {
-		testCards = new int[14][10];
-		testCards[0] = set1ranks;
-		testCards[1] = set1suits;
-		testCards[2] = set2ranks;
-		testCards[3] = set2suits;
-		testCards[4] = set3ranks;
-		testCards[5] = set3suits;
-		testCards[6] = set4ranks;
-		testCards[7] = set4suits;
-		testCards[8] = set5ranks;
-		testCards[9] = set5suits;
-		testCards[10] = set6ranks;
-		testCards[11] = set6suits;
-
-		int testVersion = BlackBox.GAMMA;
-		int testType = BlackBox.KERAS;
-
-
-		String[] handOnlyTests = {
-			"AC 2C 3C 4H 5S 6D 8C 8H 9S TD", // +1 combo +1 deadwood
-			"AC 2C 3C 4H 5S 6D 7C 8H 9S TD",
-
-			"AC 2H 3S 4D 5C 6H TS 8D 9C TH", // +1 combo +3 deadwood
-			"AC 2H 3S 4D 5C 6H 7S 8D 9C TH",
-
-			"AC AH AD 4C 6H 6S 8C 8D KC 4D", // -6 deadwood
-			"AC AH AD 4C 6H 6S 8C 8D KC KD",
-
-			"AC 2C 2S 4H 5H 7S 8C 9H TS JD", //-1 deadwood +2 combos
-			"AC 3D 2S 4H 5H 7S 8C 9H TS JD",
-
-			"2C 2H 2S 4D 5C 6H 7S 8D 9C TH", // +1 meld -1 combo
-			"AC 2H AS 4D 5C 6H 7S 8D 9C TH",
-
-			"AC 2H 3S 4D 4C 6H 7S 8D 9C TH", // +1 combo -1 deadwood
-			"AC 2H 3S 4D 5C 6H 7S 8D 9C TH",
-
-			"AC 2C 2D 3D 5C 6H 7S 8D 9C TH", // +2 combo -1 deadwood
-			"AC 2C 3S DD 5C 6H 7S 8D 9C TH",
-
-			"AC 2H 3S 3D 5C 6H 7S 8D 9C TH", // +1 combo -7 deadwood
-			"AC 2H 3S JS 5C 6H 7S 8D 9C TH"
-		};
-
-		for (String s : handOnlyTests) {
-			Player p = new Player(testVersion, testType);
-			p.hand = stringToHand(s);
-			setupGenericPlayer(p);
-			testPlayers.add(p);
-		}
-
-	}
-
-	public static void setupGenericPlayer(Player p) {
-		if (p.hand == null)
-			p.hand = stringToHand("AC 2H 3S 4D 5C 6H 7S 8D 9C TH"); // trash hand
-		Card[] handArr = new Card[10];
-		int i = 0;
-		for (Card c : p.hand) {
-			handArr[i] = c;
-			i++;
-		}
-		p.startGame(0, 0, handArr);
-		p.playerNum = 0;
-		p.scores = new int[]{0,0}; // a few hands in
-		if (p.opponentHand == null)
-			p.opponentHand = new ArrayList<Card>();
-		p.turn = 1; // a few turns in
-		if (p.discardedCards.isEmpty()) {
-			p.discardedCards.push(Card.allCards[38]); //KS
-		}
-
-	}
+//	// C=0, H=1, S=2, D=3
+//	// AC 2C 3C AD 2D 3D AH 2H 3H 2S  (all melded, several optimal meld combinations)
+//	public static int[] set1ranks = {0,0,0,1,1,1,1,2,2,2};
+//	public static int[] set1suits = {0,0,0,3,2,3,1,1,1,2};
+//
+//	// 2C 3C 4C 5H 6H 7H 8C 8D 8H KC (2 run, 1 set, 1 deadwood card)
+//	public static int[] set2ranks = {1,2,3,4,5,6,7,7,7,12};
+//	public static int[] set2suits = {0,0,0,1,1,1,0,3,1,0};
+//
+//	// AC 2D 3H 4S 6C 6D 6H 7C 10H 10S (triangle shape, 1 combination)
+//	public static int[] set3ranks = {0,1,2,3,5,5,5,6,9,9};
+//	public static int[] set3suits = {0,3,1,2,0,3,1,0,1,2};
+//
+//	// AC 2D 3H 4S 5C 6D 7H 8S 9C 10D (no hit cards)
+//	public static int[] set4ranks = {0,1,2,3,4,5,6,7,8,9};
+//	public static int[] set4suits = {0,3,1,2,0,1,1,2,0,3};
+//
+//	// 2C 3C 2H 3H 7C 8C 7H 8H KC KH (18 hit cards)
+//	public static int[] set5ranks = {1,2,1,2,6,7,6,7,12,12};
+//	public static int[] set5suits = {0,0,1,1,0,0,1,1,0,1};
+//
+//	// 4C 5C 6C 3S 4S 5S 2H 3H AS 2D
+//	// 1C 8C KC
+//	public static int[] set6ranks = {0,7,12};
+//	public static int[] set6suits = {0,0,0};
+//
+//	// ArrayList of generated player states bunched in groups of two. The first state should be
+//	//   better than the second state by an amount substantial enough to superceed bias
+//	// Things that need to be added to each Player (used in calculateFeatures):
+//	// 	-
+//	// pair 1:
+//	public static ArrayList<Player> testPlayers = new ArrayList<Player>();
+//
+//	public static int[][] testCards;
+//	static {
+//		testCards = new int[14][10];
+//		testCards[0] = set1ranks;
+//		testCards[1] = set1suits;
+//		testCards[2] = set2ranks;
+//		testCards[3] = set2suits;
+//		testCards[4] = set3ranks;
+//		testCards[5] = set3suits;
+//		testCards[6] = set4ranks;
+//		testCards[7] = set4suits;
+//		testCards[8] = set5ranks;
+//		testCards[9] = set5suits;
+//		testCards[10] = set6ranks;
+//		testCards[11] = set6suits;
+//
+//		int testVersion = BlackBox.GAMMA;
+//		int testType = BlackBox.KERAS;
+//
+//
+//		String[] handOnlyTests = {
+//			"AC 2C 3C 4H 5S 6D 8C 8H 9S TD", // +1 combo +1 deadwood
+//			"AC 2C 3C 4H 5S 6D 7C 8H 9S TD",
+//
+//			"AC 2H 3S 4D 5C 6H TS 8D 9C TH", // +1 combo +3 deadwood
+//			"AC 2H 3S 4D 5C 6H 7S 8D 9C TH",
+//
+//			"AC AH AD 4C 6H 6S 8C 8D KC 4D", // -6 deadwood
+//			"AC AH AD 4C 6H 6S 8C 8D KC KD",
+//
+//			"AC 2C 2S 4H 5H 7S 8C 9H TS JD", //-1 deadwood +2 combos
+//			"AC 3D 2S 4H 5H 7S 8C 9H TS JD",
+//
+//			"2C 2H 2S 4D 5C 6H 7S 8D 9C TH", // +1 meld -1 combo
+//			"AC 2H AS 4D 5C 6H 7S 8D 9C TH",
+//
+//			"AC 2H 3S 4D 4C 6H 7S 8D 9C TH", // +1 combo -1 deadwood
+//			"AC 2H 3S 4D 5C 6H 7S 8D 9C TH",
+//
+//			"AC 2C 2D 3D 5C 6H 7S 8D 9C TH", // +2 combo -1 deadwood
+//			"AC 2C 3S DD 5C 6H 7S 8D 9C TH",
+//
+//			"AC 2H 3S 3D 5C 6H 7S 8D 9C TH", // +1 combo -7 deadwood
+//			"AC 2H 3S JS 5C 6H 7S 8D 9C TH"
+//		};
+//
+//		for (String s : handOnlyTests) {
+//			Player p = new Player(testVersion, testType);
+//			p.hand = stringToHand(s);
+//			setupGenericPlayer(p);
+//			testPlayers.add(p);
+//		}
+//
+//	}
+//
+//	public static void setupGenericPlayer(Player p) {
+//		if (p.hand == null)
+//			p.hand = stringToHand("AC 2H 3S 4D 5C 6H 7S 8D 9C TH"); // trash hand
+//		Card[] handArr = new Card[10];
+//		int i = 0;
+//		for (Card c : p.hand) {
+//			handArr[i] = c;
+//			i++;
+//		}
+//		p.startGame(0, 0, handArr);
+//		p.playerNum = 0;
+//		p.scores = new int[]{0,0}; // a few hands in
+//		if (p.opponentHand == null)
+//			p.opponentHand = new ArrayList<Card>();
+//		p.turn = 1; // a few turns in
+//		if (p.discardedCards.isEmpty()) {
+//			p.discardedCards.push(Card.allCards[38]); //KS
+//		}
+//
+//	}
 
 //	public static void testRegressionFit() {
 //		String data = "alpha-81.csv";
@@ -1018,82 +1026,82 @@ public class OurUtilities {
 //
 //	}
 
+//
+//	public static void testDecisions() {
+//		for (int i = 0; i < testPlayers.size(); i+=2) {
+//			double reg1 = BlackBox.regFunction(testPlayers.get(i));
+//			double reg2 = BlackBox.regFunction(testPlayers.get(i+1));
+//			System.out.println("reg1: "+reg1);
+//			System.out.println("reg2: "+reg2);
+//			System.out.println("reg1 > reg2: "+(reg1 > reg2));
+//			System.out.println();
+//
+//		}
+//	}
 
-	public static void testDecisions() {
-		for (int i = 0; i < testPlayers.size(); i+=2) {
-			double reg1 = BlackBox.regFunction(testPlayers.get(i));
-			double reg2 = BlackBox.regFunction(testPlayers.get(i+1));
-			System.out.println("reg1: "+reg1);
-			System.out.println("reg2: "+reg2);
-			System.out.println("reg1 > reg2: "+(reg1 > reg2));
-			System.out.println();
-
-		}
-	}
-
-	public static void testUtils() {
-
-		Card c = new Card(10,3);
-		System.out.println(c);
-		System.out.println(transformCard(c));
-
-		for (int r = 0; r < testCards.length; r+=2) {
-			System.out.println("------------------CARD SET "+ r/2 +"------------------------");
-			ArrayList<Card> hand = new ArrayList<>();
-			for (int i = 0; i < testCards[r].length; i++) {
-				hand.add(new Card(testCards[r][i], testCards[r+1][i]));
-			}
-			long handbits = GinRummyUtil.cardsToBitstring(hand);
-			hand = GinRummyUtil.bitstringToCards(handbits);
-
-			System.out.println("Hand: " + hand);
-
-			// Test Deadwood
-			System.out.println("Deadwood Count: " + deadwoodCount(hand));
-
-			// Test getBestHandOrganization
-			ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(hand);
-			System.out.println("Best Organization: " + organization);
-			System.out.println("\tBest Melds: " + organization.get(0));
-			System.out.println("\tBest Combos: " + organization.get(1));
-			System.out.println("\tBest KnockCash$: " + organization.get(2));
-			System.out.println("\tBest Loads: " + organization.get(3));
-
-			// ArrayList<Card> nearby = nearbyCards(hand);
-			// System.out.println("\tNearby Cards: " + nearby);
-			// System.out.println("\tNum nearby Cards: " + nearby.size());
-
-			System.out.println("\tNumber of set melds: " + numSetMelds(organization.get(0)));
-			System.out.println("\tNumber of run melds: " + numRunMelds(organization.get(0)));
-			System.out.println("\tNumber of set combos: " + numSetCombos(organization.get(1)));
-			System.out.println("\tNumber of run combos: " + numRunCombos(organization.get(1)));
-
-			ArrayList<Card> deck = new ArrayList<>();
-			for (int i = 0; i < 52; i++) {
-				deck.add(new Card(i % 13, i / 13));
-			}
-
-			long deckbits = GinRummyUtil.cardsToBitstring(deck);
-			deck = GinRummyUtil.bitstringToCards(deckbits);
-
-			deck.removeAll(hand);
-
-			System.out.println("Hit Count: " + numHitCards(deck, hand));
-			System.out.println("Alpha was playing solitaire, but Gamma... Gamma is playing Gin Rummy.");
-			// System.out.println("Number of options: " + numOptions(deck, hand));
-		}
-
-
-	}
-
-
+//	public static void testUtils() {
+//
+//		Card c = new Card(10,3);
+//		System.out.println(c);
+//		System.out.println(transformCard(c));
+//
+//		for (int r = 0; r < testCards.length; r+=2) {
+//			System.out.println("------------------CARD SET "+ r/2 +"------------------------");
+//			ArrayList<Card> hand = new ArrayList<>();
+//			for (int i = 0; i < testCards[r].length; i++) {
+//				hand.add(new Card(testCards[r][i], testCards[r+1][i]));
+//			}
+//			long handbits = GinRummyUtil.cardsToBitstring(hand);
+//			hand = GinRummyUtil.bitstringToCards(handbits);
+//
+//			System.out.println("Hand: " + hand);
+//
+//			// Test Deadwood
+//			System.out.println("Deadwood Count: " + deadwoodCount(hand));
+//
+//			// Test getBestHandOrganization
+//			ArrayList<ArrayList<ArrayList<Card>>> organization = getBestHandOrganization(hand);
+//			System.out.println("Best Organization: " + organization);
+//			System.out.println("\tBest Melds: " + organization.get(0));
+//			System.out.println("\tBest Combos: " + organization.get(1));
+//			System.out.println("\tBest KnockCash$: " + organization.get(2));
+//			System.out.println("\tBest Loads: " + organization.get(3));
+//
+//			// ArrayList<Card> nearby = nearbyCards(hand);
+//			// System.out.println("\tNearby Cards: " + nearby);
+//			// System.out.println("\tNum nearby Cards: " + nearby.size());
+//
+//			System.out.println("\tNumber of set melds: " + numSetMelds(organization.get(0)));
+//			System.out.println("\tNumber of run melds: " + numRunMelds(organization.get(0)));
+//			System.out.println("\tNumber of set combos: " + numSetCombos(organization.get(1)));
+//			System.out.println("\tNumber of run combos: " + numRunCombos(organization.get(1)));
+//
+//			ArrayList<Card> deck = new ArrayList<>();
+//			for (int i = 0; i < 52; i++) {
+//				deck.add(new Card(i % 13, i / 13));
+//			}
+//
+//			long deckbits = GinRummyUtil.cardsToBitstring(deck);
+//			deck = GinRummyUtil.bitstringToCards(deckbits);
+//
+//			deck.removeAll(hand);
+//
+//			System.out.println("Hit Count: " + numHitCards(deck, hand));
+//			System.out.println("Alpha was playing solitaire, but Gamma... Gamma is playing Gin Rummy.");
+//			// System.out.println("Number of options: " + numOptions(deck, hand));
+//		}
+//
+//
+//	}
+//
+//
 
 
 
 	public static void main(String[] args) {
 
 		// testRegressionFit();
-		testDecisions();
+//		testDecisions();
 		// testUtils();
 
 		// find distributions

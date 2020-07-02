@@ -178,7 +178,7 @@ public class HandEstimator {
 			if (!known[i]) {
 				prob[i] *= normalizeFactor;
 				prob[i] = squiggle(prob[i]);
-//				prob[i] = step(prob[i]);
+				// prob[i] = step(prob[i]);
 			}
 		}
 	}

@@ -48,6 +48,8 @@ public class ShankarPlayer implements GinRummyPlayer {
 	public boolean drewFaceUp;
 	public ArrayList<Card> discardedCards;
 
+	public ShankarArray shankarr;
+
 	double adjRateConst;
 	double sudoAdjRateConst;
 	double meldRateConst;
@@ -57,12 +59,14 @@ public class ShankarPlayer implements GinRummyPlayer {
 	public ShankarPlayer() {
 		reset();
 		this.scores = new int[2];
+		shankarr = new ShankarArray();
 	}
 
 	public ShankarPlayer(long seed) {
 		reset();
 		this.random.setSeed(seed);
 		this.scores = new int[2];
+		shankarr = new ShankarArray();
 	}
 
 	public void reset() {
@@ -76,6 +80,7 @@ public class ShankarPlayer implements GinRummyPlayer {
 		heldFourOrMoreTensAtStart = false;
 		opponentKnocked = false;
 		discardedCards = new ArrayList<Card>();
+		shankarr = new ShankarArray();
 	}
 
 
@@ -110,6 +115,9 @@ public class ShankarPlayer implements GinRummyPlayer {
 				tenCount++;
 			}
 		}
+
+		shankarr.playerHand(this.hand);
+
 		ArrayList<ArrayList<ArrayList<Card>>> bestMeldsSets = ginrummy.GinRummyUtil.cardsToBestMeldSets(this.hand);
 		if (!bestMeldsSets.isEmpty()) {
 			ArrayList<ArrayList<Card>> bestMeld = bestMeldsSets.get(0);
@@ -142,20 +150,11 @@ public class ShankarPlayer implements GinRummyPlayer {
 		8. Pick up A,2,3,4 to build knock cache, if you have safer card to discard (knock cache is like a meld).
 		**/
 
-		// ArrayList<ArrayList<ArrayList<Card>>> bestMeldSetsBeforeDraw = ginrummy.GinRummyUtil.cardsToBestMeldSets(hand);
-		// ArrayList<ArrayList<Card>> bestMeldSetBeforeDraw = new ArrayList<ArrayList<Card>>();
-		// if (!bestMeldSetsBeforeDraw.isEmpty()){
-		// 	bestMeldSetBeforeDraw = bestMeldSetsBeforeDraw.get(0);
-		// }
-		// int numMeldsBeforeDraw = bestMeldSetBeforeDraw.size();
 		hand.add(faceUpCard);
 		ArrayList<ArrayList<ArrayList<Card>>> bestHandOrganization = OurUtilities.getBestHandOrganization(hand);
 		ArrayList<ArrayList<Card>> bestMeldSet = bestHandOrganization.get(0);
 		hand.remove(faceUpCard);
-		// if (!bestMeldSetsAfterDraw.isEmpty()){
-		// 	bestMeldSetAfterDraw = bestMeldSetsAfterDraw.get(0);
-		// }
-		// int numMeldsAfterDraw = bestMeldSetAfterDraw.size();
+
 		for (ArrayList<Card> meld : bestMeldSet) {
 			if (meld.contains(faceUpCard)) {
 				drewFaceUp = true;
@@ -178,17 +177,24 @@ public class ShankarPlayer implements GinRummyPlayer {
 
 	@Override
 	public void reportDraw(int playerNum, Card drawnCard) {
+		if (drawnCard != null) {
+			faceUpCard = drawnCard;
+		}
 		if (this.playerNum == playerNum) {
 			hand.add(drawnCard);
 			if (drewFaceUp) {
 				faceUpCard = drawnCard;
 				discardedCards.remove(drawnCard);
 			}
+			shankarr.playerDraw(drawnCard, drewFaceUp);
 		}
 		else {
 			if (drawnCard != null) {
 				opponentHand.add(drawnCard);
 				discardedCards.remove(drawnCard);
+				shankarr.opponentDrawFaceUpCard(drawnCard, true);
+			} else {
+				shankarr.opponentDrawFaceUpCard(faceUpCard, false);
 			}
 		}
 	}
@@ -360,6 +366,9 @@ public class ShankarPlayer implements GinRummyPlayer {
 
 	@Override
 	public void reportDiscard(int playerNum, Card discardedCard) {
+
+		faceUpCard = discardedCard;
+
 		// System.out.println("before discard player " + this.playerNum + " hand: " + hand);
 		if (playerNum == this.playerNum) {
 			hand.remove(discardedCard);

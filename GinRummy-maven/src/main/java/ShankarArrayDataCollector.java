@@ -2,76 +2,34 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Stack;
 
 import ginrummy.*;
 
 
-/**
- * A class for modeling a game of Gin Rummy
- *
- * @author Todd W. Neller
- * @version 1.0
+public class ShankarArrayDataCollector {
 
-Copyright (C) 2020 TodeSoftware Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-Information about the GNU General Public License is available online at:
-  http://www.gnu.org/licenses/
-To receive a copy of the GNU General Public License, write to the Free
-Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.
-
- */
-public class OurGinRummyGame {
-
-	/**
-	 * Random number generator
-	 */
 	private static final Random RANDOM = new Random();
-
-	/**
-	 * Hand size (before and after turn). After draw and before discard there is one extra card.
-	 */
 	private static final int HAND_SIZE = 10;
-
-	/**
-	 * Whether or not to print information during game play
-	 */
 	private static boolean playVerbose = false;
-
-	/**
-	 * Two Gin Rummy players numbered according to their array index.
-	 */
 	private GinRummyPlayer[] players;
+	private File sa_file = new File("data-sa.csv");
+	private File ph_file = new File("data-ph.csv");
 
-	/**
-	 * Set whether or not there is to be printed output during gameplay.
-	 * @param playVerbose whether or not there is to be printed output during gameplay
-	 */
+	private ShankarArray[] shankarrs = new ShankarArray[2];
+
+
+
 	public static void setPlayVerbose(boolean playVerbose) {
-		OurGinRummyGame.playVerbose = playVerbose;
+		ShankarArrayDataCollector.playVerbose = playVerbose;
 	}
 
-	/**
-	 * Create a GinRummyGame with two given players
-	 * @param player0 Player 0
-	 * @param player1 Player 1
-	 */
-	public OurGinRummyGame(GinRummyPlayer player0, GinRummyPlayer player1) {
+	public ShankarArrayDataCollector(GinRummyPlayer player0, GinRummyPlayer player1) {
 		players = new GinRummyPlayer[] {player0, player1};
 	}
 
-	/**
-	 * Play a game of Gin Rummy and return the winning player number 0 or 1.
-	 * @return the winning player number 0 or 1
-	 */
 	@SuppressWarnings("unchecked")
 	public int play() {
 		int[] scores = new int[2];
@@ -79,8 +37,7 @@ public class OurGinRummyGame {
 		hands.add(new ArrayList<Card>());
 		hands.add(new ArrayList<Card>());
 		int startingPlayer = RANDOM.nextInt(2);
-		
-//		((ShankarPlayer) players[0]).start_collect();
+
 
 		while (scores[0] < GinRummyUtil.GOAL_SCORE && scores[1] < GinRummyUtil.GOAL_SCORE) { // while game not over
 			int currentPlayer = startingPlayer;
@@ -90,11 +47,18 @@ public class OurGinRummyGame {
 			Stack<Card> deck = Card.getShuffle(RANDOM.nextInt());
 			hands.get(0).clear();
 			hands.get(1).clear();
-			for (int i = 0; i < 2 * HAND_SIZE; i++)
+			for (int i = 0; i < 2 * HAND_SIZE; i++){
 				hands.get(i % 2).add(deck.pop());
+			}
+
 			for (int i = 0; i < 2; i++) {
 				Card[] handArr = new Card[HAND_SIZE];
 				hands.get(i).toArray(handArr);
+				
+				
+				shankarrs[i] = new ShankarArray();
+				shankarrs[i].playerHand(hands.get(i));
+
 				players[i].startGame(i, startingPlayer, handArr);
 				if (playVerbose)
 					System.out.printf("Player %d is dealt %s.\n", i, hands.get(i));
@@ -123,8 +87,13 @@ public class OurGinRummyGame {
 				}
 				if (!(!drawFaceUp && turnsTaken < 2 && faceUpCard == firstFaceUpCard)) { // continue with turn if not initial declined option
 					Card drawCard = drawFaceUp ? discards.pop() : deck.pop();
-					for (int i = 0; i < 2; i++)
+					for (int i = 0; i < 2; i++) {
 						players[i].reportDraw(currentPlayer, (i == currentPlayer || drawFaceUp) ? drawCard : null);
+					}
+
+					shankarrs[currentPlayer].playerDraw(drawCard, drawFaceUp, true);
+					shankarrs[opponent].opponentDrawFaceUpCard(faceUpCard, drawFaceUp);
+
 					if (playVerbose)
 						System.out.printf("Player %d draws %s.\n", currentPlayer, drawCard);
 					hands.get(currentPlayer).add(drawCard);
@@ -139,6 +108,31 @@ public class OurGinRummyGame {
 					hands.get(currentPlayer).remove(discardCard);
 					for (int i = 0; i < 2; i++)
 						players[i].reportDiscard(currentPlayer, discardCard);
+
+
+					shankarrs[currentPlayer].playerDiscard(discardCard);
+					shankarrs[opponent].opponentDiscard(discardCard);
+
+
+					try {
+						FileWriter sa_pw = new FileWriter(sa_file, true);
+						sa_pw.append(shankarrs[0].export() + "\n");
+						sa_pw.append(shankarrs[1].export() + "\n");
+						sa_pw.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+					try {
+						FileWriter ph_pw = new FileWriter(ph_file, true);
+						ph_pw.append(Arrays.deepToString(OurUtilities.handTo2DBitArray(hands.get(0))) + "\n");
+						ph_pw.append(Arrays.deepToString(OurUtilities.handTo2DBitArray(hands.get(1))) + "\n");
+						ph_pw.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+
 					if (playVerbose)
 						System.out.printf("Player %d discards %s.\n", currentPlayer, discardCard);
 					discards.push(discardCard);
@@ -290,21 +284,12 @@ public class OurGinRummyGame {
 				System.out.printf("Player\tScore\n0\t%d\n1\t%d\n", scores[0], scores[1]);
 			for (int i = 0; i < 2; i++)
 				players[i].reportScores(scores.clone());
+
 		}
 		if (playVerbose)
 			System.out.printf("Player %s wins.\n", scores[0] > scores[1] ? 0 : 1);
-		
-		File f = new File("data.csv");
-		try {
-			FileWriter pw = new FileWriter(f, true);
-			pw.append(scores[0] >= GinRummyUtil.GOAL_SCORE ? "1" : "0");
-			pw.append("\n");
-			pw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
+
+
 		return scores[0] >= GinRummyUtil.GOAL_SCORE ? 0 : 1;
 	}
 
@@ -326,17 +311,17 @@ public class OurGinRummyGame {
 //		game.play();
 //
 //		 System.out.println(System.currentTimeMillis() - start);
-//		
+//
 //		 System.out.println("-----------");
 
 		// Multiple non-verbose games
-		 int numGames = 1000;
+		 int numGames = 10000;
 		 int numP1Wins = 0;
-		 OurGinRummyGame game = new OurGinRummyGame(new Player(0,0), new ShankarPlayer());
+		 ShankarArrayDataCollector game = new ShankarArrayDataCollector(new SimpleGinRummyPlayer(), new SimpleGinRummyPlayer());
 		 setPlayVerbose(false);
 		 long startMs = System.currentTimeMillis();
 		 for (int i = 0; i < numGames; i++) {
-		 	if (i % 10 == 0) {
+		 	if (i % 100 == 0) {
 		 		System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
 		 	}
 		 	numP1Wins += game.play();
