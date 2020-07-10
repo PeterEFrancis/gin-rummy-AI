@@ -367,11 +367,11 @@ public class OurNNDataCollector {
 	 */
 	public static void main(String[] args) {
 
-		OurNNDataCollector.playVerbose = true;
+		OurNNDataCollector.playVerbose = false;
 		OurNNDataCollector.saveData = false;
 		OurNNDataCollector.reportEvaluation = true;
 
-		int numGames = 1;
+		int numGames = 10;
 		int countStep = 1;
 
 		int numP1Wins = 0;
@@ -380,17 +380,15 @@ public class OurNNDataCollector {
 
 		long startMs = System.currentTimeMillis();
 		for (int i = 0; i < numGames; i++) {
-			if (i % countStep == 0 && OurNNDataCollector.playVerbose) {
+			if (i % countStep == 0) {
 				System.out.println(i);
 				// System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
 			}
 			numP1Wins += game.play();
 		}
 		long totalMs = System.currentTimeMillis() - startMs;
-		if (OurNNDataCollector.playVerbose) {
-			System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
-			System.out.printf("Games Won: P0:%d, P1:%d.\n\n", numGames - numP1Wins, numP1Wins);
-		}
+		System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
+		System.out.printf("Games Won: P0:%d, P1:%d.\n\n", numGames - numP1Wins, numP1Wins);
 		if (OurNNDataCollector.reportEvaluation) {
 			// do a statistical analysis on all of the data
 			String[] heFeatures = new String[] {"mean_squared_difference", "probabilistic_integrity", "top_n_cards", "minimum_top_largest"};
@@ -406,7 +404,7 @@ public class OurNNDataCollector {
 					for (int y = 0; y < evaluationData.get(p).get(z).size(); y++) {
 						stdev += Math.pow((evaluationData.get(p).get(z).get(y) - avg), 2);
 					}
-					stdev = Math.sqrt(stdev) / evaluationData.get(p).get(z).size();
+					stdev = Math.sqrt(stdev) / (evaluationData.get(p).get(z).size() - 1);
 					System.out.printf("\tPlayer %d: %f +/- %f\n", p, avg, stdev);
 				}
 

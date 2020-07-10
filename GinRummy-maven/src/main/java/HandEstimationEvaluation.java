@@ -9,7 +9,7 @@ public class HandEstimationEvaluation {
 		for (int i = 0; i < 52; i++) {
 			s += Math.pow(actualHand[i] - handProbEstimation[i], 2);
 		}
-		return Math.sqrt(s);
+		return Math.sqrt(s) / 52;
 	}
 
 	public static double probabilistic_integrity(double[] handProbEstimation) {
@@ -124,7 +124,7 @@ public class HandEstimationEvaluation {
 
 		double[] actual = {0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0 ,0 ,0 , 0};
 
-		pretty_report(actual, pred);
+		report(actual, pred, true);
 
 
 	}
