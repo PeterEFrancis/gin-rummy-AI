@@ -798,6 +798,106 @@ public class OurUtilities {
 	}
 
 
+	public static double[] handTo1DArray(ArrayList<Card> hand) {
+		double[] handDouble = new double[52];
+
+		for (Card card : hand) {
+			handDouble[card.getId()] = 1;
+		}
+		return handDouble;
+	}
+
+
+	public static int numGinHits(ArrayList<Card> possibleCards, ArrayList<Card> hand) {
+		ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(hand);
+		if (bestMeldSets.isEmpty()) {
+			bestMeldSets.add(new ArrayList<ArrayList<Card>>());
+		}
+		int ghitCount = 0;
+		for (ArrayList<ArrayList<Card>> meldSet : bestMeldSets) {
+			ArrayList<ArrayList<Card>> combos = getCombos(meldSet, hand);
+			ArrayList<Card> ghits = getGinHits(hand, combos, meldSet, possibleCards);
+			if (ghits.size() > ghitCount) {
+				ghitCount = ghits.size();
+			}
+		}
+		return ghitCount;
+	}
+
+	public static ArrayList<Card> getGinHits(ArrayList<Card> hand, ArrayList<ArrayList<Card>> combos, ArrayList<ArrayList<Card>> melds, ArrayList<Card> possibleCards) {
+		ArrayList<Card> ghits = new ArrayList<Card>();
+		for (Card c : possibleCards) {
+			if (isHitCard(combos,melds,c)) {
+				boolean gin = false;
+				hand.add(c);
+				for (int i = 0; i < hand.size()-1; i++) {
+					Card c1 = hand.remove(0);
+					ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(hand);
+					if (bestMeldSets.isEmpty()) {
+						hand.add(c1);
+						break;
+					}
+					ArrayList<ArrayList<Card>> set1 = bestMeldSets.get(0);
+					int count = 0;
+					for (ArrayList<Card> meld : set1)
+						count+=meld.size();
+					if (count == 10) {
+						gin = true;
+						hand.add(c1);
+						break;
+					}
+					hand.add(c1);
+				}
+				hand.remove(c);
+				if (gin) {
+					ghits.add(c);
+				}
+			}
+		}
+		return ghits;
+	}
+
+	public static int getGinRating(ArrayList<Card> hand, ArrayList<Card> unknownCards) {
+			ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets = GinRummyUtil.cardsToBestMeldSets(hand);
+			ArrayList<ArrayList<Card>> melds;
+			if (bestMeldSets.isEmpty()) {
+				return 0;
+			}
+			else {
+				melds = bestMeldSets.get(0);
+			}
+
+			ArrayList<Card> unmeldedCards = cardsNotInMeld(melds,hand);
+			if (unmeldedCards.size() == 1) {
+				return numHitCards(unknownCards, hand);
+			}
+			ArrayList<Card> ginHits = new ArrayList<Card>();
+			for (int i = 0; i < unknownCards.size(); i++) {
+				Card possHit = unknownCards.get(i);
+				unmeldedCards.add(possHit);
+				ArrayList<ArrayList<ArrayList<Card>>> bestMeldSets2 = GinRummyUtil.cardsToBestMeldSets(unmeldedCards);
+				ArrayList<ArrayList<Card>> melds2;
+				if (!bestMeldSets2.isEmpty()) {
+					melds2 = bestMeldSets2.get(0);
+					ArrayList<Card> unmeldedCards2 = cardsNotInMeld(melds2,unmeldedCards);
+					if (unmeldedCards2.size() <= 1) {
+						ginHits.add(unknownCards.get(i));
+					}
+				}
+				unmeldedCards.remove(possHit);
+			}
+			return ginHits.size();
+		}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1101,7 +1201,7 @@ public class OurUtilities {
 	public static void main(String[] args) {
 
 		// testRegressionFit();
-//		testDecisions();
+		// testDecisions();
 		// testUtils();
 
 		// find distributions

@@ -54,8 +54,8 @@ public class ShankarArrayDataCollector {
 			for (int i = 0; i < 2; i++) {
 				Card[] handArr = new Card[HAND_SIZE];
 				hands.get(i).toArray(handArr);
-				
-				
+
+
 				shankarrs[i] = new ShankarArray();
 				shankarrs[i].playerHand(hands.get(i));
 
@@ -125,8 +125,8 @@ public class ShankarArrayDataCollector {
 
 					try {
 						FileWriter ph_pw = new FileWriter(ph_file, true);
-						ph_pw.append(Arrays.deepToString(OurUtilities.handTo2DBitArray(hands.get(0))) + "\n");
 						ph_pw.append(Arrays.deepToString(OurUtilities.handTo2DBitArray(hands.get(1))) + "\n");
+						ph_pw.append(Arrays.deepToString(OurUtilities.handTo2DBitArray(hands.get(0))) + "\n");
 						ph_pw.close();
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -321,8 +321,9 @@ public class ShankarArrayDataCollector {
 		 setPlayVerbose(false);
 		 long startMs = System.currentTimeMillis();
 		 for (int i = 0; i < numGames; i++) {
-		 	if (i % 100 == 0) {
-		 		System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
+		 	if (i % 1000 == 0) {
+		 		System.out.println(i / 10000);
+		 		//		 		System.out.printf("Games Won: P0:%d, P1:%d.\n", i - numP1Wins, numP1Wins);
 		 	}
 		 	numP1Wins += game.play();
 		 }

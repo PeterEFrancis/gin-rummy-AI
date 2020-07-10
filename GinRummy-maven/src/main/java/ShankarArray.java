@@ -261,13 +261,13 @@ public class ShankarArray {
 		for (int suit = 0; suit < 4; suit++) {
 			for (int rank = 0; rank < 13; rank++) {
 				if (shankarr[suit][rank] == COMMA || shankarr[suit][rank] == DOT) {
-					copied[suit][rank] = -2;
-				} else if (shankarr[suit][rank] == x || shankarr[suit][rank] == X) {
-					copied[suit][rank] = -1;
-				} else if (shankarr[suit][rank] == BLANK) {
 					copied[suit][rank] = 0;
-				} else if (shankarr[suit][rank] == v || shankarr[suit][rank] == V) {
+				} else if (shankarr[suit][rank] == x || shankarr[suit][rank] == X) {
 					copied[suit][rank] = 1;
+				} else if (shankarr[suit][rank] == BLANK) {
+					copied[suit][rank] = 2;
+				} else if (shankarr[suit][rank] == v || shankarr[suit][rank] == V) {
+					copied[suit][rank] = 3;
 				}
 			}
 		}

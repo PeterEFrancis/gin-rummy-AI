@@ -177,9 +177,9 @@ public class ShankarPlayer implements GinRummyPlayer {
 
 	@Override
 	public void reportDraw(int playerNum, Card drawnCard) {
-		if (drawnCard != null) {
-			faceUpCard = drawnCard;
-		}
+		// if (drawnCard != null) {
+		// 	faceUpCard = drawnCard;
+		// }
 		if (this.playerNum == playerNum) {
 			hand.add(drawnCard);
 			if (drewFaceUp) {
@@ -192,9 +192,12 @@ public class ShankarPlayer implements GinRummyPlayer {
 			if (drawnCard != null) {
 				opponentHand.add(drawnCard);
 				discardedCards.remove(drawnCard);
-				shankarr.opponentDrawFaceUpCard(drawnCard, true);
-			} else {
-				shankarr.opponentDrawFaceUpCard(faceUpCard, false);
+				shankarr.opponentDrawFaceUpCard(faceUpCard, true);
+			}
+			else {
+				if (faceUpCard != null) { // thanks, Neller
+					shankarr.opponentDrawFaceUpCard(faceUpCard, false);
+				}
 			}
 		}
 	}
