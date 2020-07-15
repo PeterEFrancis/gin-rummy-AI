@@ -10,9 +10,7 @@ import java.util.Scanner;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
-import ginrummy.Card;
-import ginrummy.GinRummyPlayer;
-import ginrummy.GinRummyUtil;
+import ginrummy.*;
 
 /*
  * @author Todd W. Neller
@@ -421,7 +419,7 @@ public class GinRummyDataCollector {
 	 */
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, FileNotFoundException, UnsupportedEncodingException {
 //		String[] playerNames = {"SimpleGinRummyPlayer", "EvenSimplerPlayer", "GinRummyPlayer2", "MyFinalGinRummyPlayer", "NewGinRummyPlayer", "OurGinRummyPlayer"};
-		String[] playerNames = {"SimpleGinRummyPlayer", "SimpleGinRummyPlayer2"};
+		String[] playerNames = {"OurSimpleGinRummyPlayer", "OurSimpleGinRummyPlayer"};
 //		String computerName = getComputerName();
 //		Scanner in = new Scanner(computerName);
 //		int computerNum = Integer.parseInt(in.findInLine(Pattern.compile("[1-9][0-9]*")));

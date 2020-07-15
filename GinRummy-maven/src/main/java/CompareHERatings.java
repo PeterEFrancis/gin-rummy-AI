@@ -6,21 +6,24 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.Stack;
 
-import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.modelimport.keras.KerasModelImport;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
-import org.nd4j.common.io.ClassPathResource;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
-import ginrummy.*;
+import ginrummy.Card;
+import ginrummy.GinRummyPlayer;
+import ginrummy.GinRummyUtil;
+import ginrummy.SimpleGinRummyPlayer;
 
 
-public class OurNNDataCollector {
+public class CompareHERatings {
 
 	private static boolean playVerbose = false;
 	private static boolean saveData = false;
 	private static boolean reportEvaluation = false;
+	private static boolean doOurNNHE = true;
+	private static boolean doToddHE = true;
+
+	private static int minTurnStartCollecting = 0;
 
 	private static ArrayList<ArrayList<ArrayList<Double>>> evaluationData = new ArrayList<ArrayList<ArrayList<Double>>>();
 	static {
@@ -33,6 +36,17 @@ public class OurNNDataCollector {
 		}
 	}
 
+	private static ArrayList<ArrayList<ArrayList<Double>>> todd_evaluationData = new ArrayList<ArrayList<ArrayList<Double>>>();
+	static {
+		for (int p = 0; p < 2; p++) {
+			ArrayList<ArrayList<Double>> pal = new ArrayList<ArrayList<Double>>();
+			for (int z = 0; z < 4; z++) {
+				pal.add(new ArrayList<Double>());
+			}
+			todd_evaluationData.add(pal);
+		}
+	}
+
 	private static final Random RANDOM = new Random();
 	private static final int HAND_SIZE = 10;
 	private GinRummyPlayer[] players;
@@ -40,6 +54,7 @@ public class OurNNDataCollector {
 	private File ph_file = new File("data-ph.csv");
 
 	private OurNNHandEstimator[] nn_hand_estimators = new OurNNHandEstimator[2];
+	private HandEstimator[] todd_hand_estimators = new HandEstimator[2];
 
 	// KERAS Import
 	public static String keras_file = "";
@@ -48,7 +63,7 @@ public class OurNNDataCollector {
 	static {
 		try {
 			// Sequential Model SetUp
-			keras_file = "regression_models/nnhe-simple-2.h5";
+			keras_file = "regression_models/nnhe-simple-3.h5";
 			// Scanner scanner = new Scanner(new File(simpleMlp));
 			model = KerasModelImport.importKerasSequentialModelAndWeights(keras_file);
 		} catch (Exception e) {
@@ -59,10 +74,10 @@ public class OurNNDataCollector {
 
 
 	public static void setPlayVerbose(boolean playVerbose) {
-		OurNNDataCollector.playVerbose = playVerbose;
+		CompareHERatings.playVerbose = playVerbose;
 	}
 
-	public OurNNDataCollector(GinRummyPlayer player0, GinRummyPlayer player1) {
+	public CompareHERatings(GinRummyPlayer player0, GinRummyPlayer player1) {
 		players = new GinRummyPlayer[] {player0, player1};
 	}
 
@@ -107,8 +122,15 @@ public class OurNNDataCollector {
 
 
 			for (int i = 0; i < 2; i++) {
-				nn_hand_estimators[i] = new OurNNHandEstimator();
-				nn_hand_estimators[i].initialize(hands.get(i), firstFaceUpCard);
+				if (doOurNNHE) {
+					nn_hand_estimators[i] = new OurNNHandEstimator();
+					nn_hand_estimators[i].initialize(hands.get(i), firstFaceUpCard);
+				}
+				if (doToddHE) {
+					todd_hand_estimators[i] = new HandEstimator();
+					todd_hand_estimators[i].init();
+					todd_hand_estimators[i].setKnown(hands.get(i), false);
+				}
 			}
 
 
@@ -156,19 +178,36 @@ public class OurNNDataCollector {
 
 					// REPORT
 					if (faceUpCard != null) {
-						nn_hand_estimators[currentPlayer].reportPlayerDecision(faceUpCard, drawCard, discardCard);
-						nn_hand_estimators[opponent].opponentDrawDiscard(faceUpCard, drawCard, discardCard, drawFaceUp);
+						if (doOurNNHE) {
+							nn_hand_estimators[currentPlayer].reportPlayerDecision(faceUpCard, drawCard, discardCard);
+							nn_hand_estimators[opponent].opponentDrawDiscard(faceUpCard, drawCard, discardCard, drawFaceUp);
+						}
+						if (doToddHE) {
+							todd_hand_estimators[currentPlayer].setKnown(faceUpCard, false);
+							todd_hand_estimators[currentPlayer].setKnown(drawCard, false);
+							todd_hand_estimators[opponent].reportDrawDiscard(faceUpCard, faceUpCard == drawCard, discardCard);
+						}
 					}
 
 					if (playVerbose) {
-						System.out.println("From Player " + currentPlayer + "'s perspective:");
-						nn_hand_estimators[currentPlayer].print();
-						System.out.println("From Player " + opponent + "'s perspective:");
-						nn_hand_estimators[opponent].print();
+						if (doOurNNHE) {
+							System.out.println("Our NN Hand Estimator:");
+							System.out.println("From Player " + currentPlayer + "'s perspective:");
+							nn_hand_estimators[currentPlayer].print();
+							System.out.println("From Player " + opponent + "'s perspective:");
+							nn_hand_estimators[opponent].print();
+						}
+						if (doToddHE) {
+							System.out.println("Todd's Hand Estimator:");
+							System.out.println("From Player " + currentPlayer + "'s perspective:");
+							todd_hand_estimators[currentPlayer].print();
+							System.out.println("From Player " + opponent + "'s perspective:");
+							todd_hand_estimators[opponent].print();
+						}
 					}
 
 
-					if (saveData) {
+					if (saveData && turnsTaken >= minTurnStartCollecting) {
 						try {
 							FileWriter he_pw = new FileWriter(he_file, true);
 							he_pw.append(nn_hand_estimators[0] + "\n");
@@ -189,11 +228,23 @@ public class OurNNDataCollector {
 					}
 
 					if (reportEvaluation) {
-						double[] reported0 = HandEstimationEvaluation.report(OurUtilities.handTo1DArray(hands.get(1)), nn_hand_estimators[0].probDistribution);
-						double[] reported1 = HandEstimationEvaluation.report(OurUtilities.handTo1DArray(hands.get(0)), nn_hand_estimators[1].probDistribution);
-						for (int z = 0; z < 4; z++) {
-							evaluationData.get(0).get(z).add(reported0[z]);
-							evaluationData.get(1).get(z).add(reported1[z]);
+						if (turnsTaken > -1) {
+							if (doOurNNHE) {
+								double[] reported0 = HandEstimationEvaluation.report(OurUtilities.handTo1DArray(hands.get(1)), nn_hand_estimators[0].probDistribution);
+								double[] reported1 = HandEstimationEvaluation.report(OurUtilities.handTo1DArray(hands.get(0)), nn_hand_estimators[1].probDistribution);
+								for (int z = 0; z < 4; z++) {
+									evaluationData.get(0).get(z).add(reported0[z]);
+									evaluationData.get(1).get(z).add(reported1[z]);
+								}
+							}
+							if (doToddHE) {
+								double[] todd_reported0 = HandEstimationEvaluation.report(OurUtilities.handTo1DArray(hands.get(1)), todd_hand_estimators[0].prob);
+								double[] todd_reported1 = HandEstimationEvaluation.report(OurUtilities.handTo1DArray(hands.get(0)), todd_hand_estimators[1].prob);
+								for (int z = 0; z < 4; z++) {
+									todd_evaluationData.get(0).get(z).add(todd_reported0[z]);
+									todd_evaluationData.get(1).get(z).add(todd_reported1[z]);
+								}
+							}
 						}
 					}
 
@@ -367,16 +418,21 @@ public class OurNNDataCollector {
 	 */
 	public static void main(String[] args) {
 
-		OurNNDataCollector.playVerbose = false;
-		OurNNDataCollector.saveData = false;
-		OurNNDataCollector.reportEvaluation = true;
+		CompareHERatings.playVerbose = false;
+		CompareHERatings.saveData = false;
+		CompareHERatings.reportEvaluation = true;
 
-		int numGames = 10;
-		int countStep = 1;
+		CompareHERatings.doOurNNHE = true;
+		CompareHERatings.doToddHE = true;
+
+		minTurnStartCollecting = 0;
+
+		int numGames = 1000;
+		int countStep = 100;
 
 		int numP1Wins = 0;
 
-		OurNNDataCollector game = new OurNNDataCollector(new SimpleGinRummyPlayer(), new SimpleGinRummyPlayer());
+		CompareHERatings game = new CompareHERatings(new SimpleGinRummyPlayer(), new SimpleGinRummyPlayer());
 
 		long startMs = System.currentTimeMillis();
 		for (int i = 0; i < numGames; i++) {
@@ -389,27 +445,58 @@ public class OurNNDataCollector {
 		long totalMs = System.currentTimeMillis() - startMs;
 		System.out.printf("%d games played in %d ms.\n", numGames, totalMs);
 		System.out.printf("Games Won: P0:%d, P1:%d.\n\n", numGames - numP1Wins, numP1Wins);
-		if (OurNNDataCollector.reportEvaluation) {
+		if (CompareHERatings.reportEvaluation) {
 			// do a statistical analysis on all of the data
 			String[] heFeatures = new String[] {"mean_squared_difference", "probabilistic_integrity", "top_n_cards", "minimum_top_largest"};
-			for (int z = 0; z < 4; z++) {
-				System.out.println(heFeatures[z]);
-				for (int p = 0; p < 2; p++) {
-					double avg = 0;
-					for (int y = 0; y < evaluationData.get(p).get(z).size(); y++) {
-						avg += evaluationData.get(p).get(z).get(y);
-					}
-					avg /= evaluationData.get(p).get(z).size();
-					double stdev = 0;
-					for (int y = 0; y < evaluationData.get(p).get(z).size(); y++) {
-						stdev += Math.pow((evaluationData.get(p).get(z).get(y) - avg), 2);
-					}
-					stdev = Math.sqrt(stdev) / (evaluationData.get(p).get(z).size() - 1);
-					System.out.printf("\tPlayer %d: %f +/- %f\n", p, avg, stdev);
-				}
 
+			// OurNNHE
+			if (doOurNNHE) {
+				System.out.println("Our NN Hand Estimation:");
+				for (int z = 0; z < 4; z++) {
+					System.out.println(heFeatures[z]);
+					for (int p = 0; p < 2; p++) {
+						double avg = 0;
+						for (int y = 0; y < evaluationData.get(p).get(z).size(); y++) {
+							avg += evaluationData.get(p).get(z).get(y);
+						}
+						avg /= evaluationData.get(p).get(z).size();
+						double stdev = 0;
+						for (int y = 0; y < evaluationData.get(p).get(z).size(); y++) {
+							stdev += Math.pow((evaluationData.get(p).get(z).get(y) - avg), 2);
+						}
+						stdev = Math.sqrt(stdev / (evaluationData.get(p).get(z).size() - 1));
+						System.out.printf("\tPlayer %d: %f +/- %f\n", p, avg, stdev  / Math.sqrt(evaluationData.get(p).get(z).size()));
+					}
+
+				}
+				System.out.println();
 			}
-			System.out.println();
+
+			// ToddHE
+			if (doToddHE) {
+
+				System.out.println();
+				System.out.println("Todd Hand Estimation:");
+				for (int z = 0; z < 4; z++) {
+					System.out.println(heFeatures[z]);
+					for (int p = 0; p < 2; p++) {
+						double avg = 0;
+						for (int y = 0; y < todd_evaluationData.get(p).get(z).size(); y++) {
+							avg += todd_evaluationData.get(p).get(z).get(y);
+						}
+						avg /= todd_evaluationData.get(p).get(z).size();
+						double stdev = 0;
+						for (int y = 0; y < todd_evaluationData.get(p).get(z).size(); y++) {
+							stdev += Math.pow((todd_evaluationData.get(p).get(z).get(y) - avg), 2);
+						}
+						stdev = Math.sqrt(stdev / (todd_evaluationData.get(p).get(z).size() - 1));
+
+						System.out.printf("\tPlayer %d: %f +/- %f\n", p, avg, stdev / Math.sqrt(todd_evaluationData.get(p).get(z).size()));
+					}
+
+				}
+				System.out.println();
+			}
 		}
 	}
 
