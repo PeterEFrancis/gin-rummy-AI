@@ -303,16 +303,16 @@ public class ShankarArrayDataCollector {
 	public static void main(String[] args) {
 		// Single verbose demonstration game
 
-//		 long start = System.currentTimeMillis();
-//
-//		setPlayVerbose(true);
-//		OurGinRummyGame game = new OurGinRummyGame(new ShankarPlayer(), new SimpleGinRummyPlayer());
-//
-//		game.play();
-//
-//		 System.out.println(System.currentTimeMillis() - start);
-//
-//		 System.out.println("-----------");
+		//  long start = System.currentTimeMillis();
+		//
+		// setPlayVerbose(true);
+		// OurGinRummyGame game = new OurGinRummyGame(new ShankarPlayer(), new SimpleGinRummyPlayer());
+		//
+		// game.play();
+		//
+		//  System.out.println(System.currentTimeMillis() - start);
+		//
+		//  System.out.println("-----------");
 
 		// Multiple non-verbose games
 		 int numGames = 10000;

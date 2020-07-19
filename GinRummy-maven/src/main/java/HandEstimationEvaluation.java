@@ -62,6 +62,20 @@ public class HandEstimationEvaluation {
 		return -1;
 	}
 
+	public static int drift_area(double[] actualHand, double[] handProbEstimation) {
+		// https://www.desmos.com/calculator/2ylhfli8vo
+		int area = 0;
+		int i = 0;
+		for (int n = 1; n <= 10; n++) {
+			// how many of the top i probability cards do we need to take in order to get n cards in actual hand
+			while (top_n_cards(i, actualHand, handProbEstimation) < n) {
+				i++;
+			}
+			area += (10 + 1 - n) * (i - n);
+		}
+		return area;
+	}
+
 	public static void print(double[] probArr) {
 		for (int k = 0; k < 7 * 13 + 3 + 5; k++) {
 			System.out.print("*");
@@ -95,6 +109,8 @@ public class HandEstimationEvaluation {
 		double pi = probabilistic_integrity(handProbEstimation);
 		double tn = top_n_cards(10, actualHand, handProbEstimation);
 		double mtl = minimum_top_largest(actualHand, handProbEstimation);
+		double da = drift_area(actualHand, handProbEstimation);
+
 
 		if (verbose) {
 			System.out.println("~Evaluation of Hand Estimation~\n");
@@ -111,9 +127,10 @@ public class HandEstimationEvaluation {
 			System.out.println("Top 15 Probability Card Matches: " + top_n_cards(15, actualHand, handProbEstimation));
 			System.out.println("Top 20 Probability Card Matches: " + top_n_cards(20, actualHand, handProbEstimation));
 			System.out.println("Minimum Top Largest: " + mtl);
+			System.out.println("Drift Area: " + da);
 		}
 
-		return new double[] {msd, pi, tn, mtl};
+		return new double[] {msd, pi, tn, mtl, da};
 	}
 
 
@@ -123,6 +140,12 @@ public class HandEstimationEvaluation {
 		double[] pred = {0.40916005, 0.40250874, 0.00874296, 0.36802202, 0.02365682, 0.5881919, 0.03828397, 0.0560064, 0.02094573, 0.02421007, 0.01756173, 0.03232729, 0.01160747, 0.05872476, 0.448012, 0.00048691, 0.4608109 , 0.32126898, 0.6437781 , 0.26481766, 0.21892133, 0.00814983, 0.04827061, 0.04452127, 0.05923635, 0.01306537, 0.4359278, 0.45163217, 0.00777471, 0.00112414, 0.34566593, 0.02940187, 0.31676704, 0.31624818, 0.01047912, 0.05472204, 0.05141705, 0.05441523, 0.01030844, 0.4304061 , 0.39367098, 0.36558068, 0.39602366, 0.0013971, 0.8937961, 0.6018296, 0.3676975, 0.01770863, 0.01533322, 0.01683715, 0.03115228, 0.00699045};
 
 		double[] actual = {0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0 ,0 ,0 , 0};
+
+		// double[] pred = {0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.01, 0, 0, 0, 0, 0, 0.95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		// double[] actual = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+
+
 
 		report(actual, pred, true);
 

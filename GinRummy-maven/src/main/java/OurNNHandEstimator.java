@@ -76,7 +76,7 @@ public class OurNNHandEstimator {
 		INDArray fullInput = Nd4j.createFromArray(new double[][] {getMetaArray()});
 
 		// run the keras model
-		INDArray out = CompareHERatings.model.output(fullInput);
+		INDArray out = CompareHERatings.nnhe_model.output(fullInput);
 
 		// set the result
 		probDistribution = out.toDoubleVector();

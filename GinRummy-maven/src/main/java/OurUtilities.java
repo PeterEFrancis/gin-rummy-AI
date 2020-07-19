@@ -786,6 +786,20 @@ public class OurUtilities {
 		return ret;
 	}
 
+	public static int[][] getShankarMatrix(int[][] shankarr) {
+		int[][] ret = new int[17][13];
+		int[] order = {0, 1, 2, 3, 0, 1, 2, 0, 3, 1, 2, 0, 1, 3, 2, 0, 1};
+		for (int i = 0; i < 17; i++) {
+			int[] row;
+			if (i < 4) {
+				row = shankarr[i].clone();
+			} else {
+				row = (int[]) ret[order[i]].clone();
+			}
+			ret[i] = row;
+		}
+		return ret;
+	}
 
 
 
